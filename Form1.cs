@@ -33,6 +33,18 @@ namespace ProjectCreator {
         public frmPrincipal() {
             InitializeComponent();
             CargarConfiguracion();
+
+            btnCrearProyecto.MouseEnter += BtnCrearProyecto_MouseEnter;
+            btnCrearProyecto.MouseLeave += BtnCrearProyecto_MouseLeave;
+        }
+
+
+        private void BtnCrearProyecto_MouseEnter(object? sender, EventArgs e) {
+            btnCrearProyecto.BackColor = Color.FromArgb(56, 142, 60);
+        }
+
+        private void BtnCrearProyecto_MouseLeave(object? sender, EventArgs e) {
+            btnCrearProyecto.BackColor = Color.FromArgb(46, 125, 50);
         }
 
         private void Label1_Click(object sender, EventArgs e) {
@@ -76,6 +88,25 @@ namespace ProjectCreator {
             } else {
                 MessageBox.Show("No se encontró la imagen:\n" + rutaImagen);
             }
+
+            // lblTitulo.Parent = pictureBoxfondo;
+            // lblTitulo.BackColor = Color.Transparent;
+
+            // lblTema.Parent = pictureBoxfondo;   
+            // lblTema.BackColor = Color.Transparent;
+
+            // lblNombre.Parent = pictureBoxfondo;
+            // lblNombre.BackColor = Color.Transparent;
+
+            // lblObjetivo.Parent = pictureBoxfondo;
+            // lblObjetivo.BackColor = Color.Transparent;
+
+            // lblVistaPrevia.Parent = pictureBoxfondo;
+            // lblVistaPrevia.BackColor = Color.Transparent;
+
+            // lblNombreFinal.Parent = pictureBoxfondo;
+            // lblNombreFinal.BackColor = Color.Transparent;
+
         }
 
         private void ActualizarVistaPrevia() {
@@ -213,6 +244,10 @@ namespace ProjectCreator {
         }
 
         private void PictureBox1_Click(object sender, EventArgs e) {
+        }
+
+        private void LblObjetivo_Click(object sender, EventArgs e) {
+
         }
     }
 }

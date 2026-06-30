@@ -45,7 +45,9 @@
             // lblTema
             // 
             lblTema.AutoSize = true;
+            lblTema.BackColor = SystemColors.Control;
             lblTema.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTema.ForeColor = Color.DarkSlateGray;
             lblTema.Location = new Point(208, 85);
             lblTema.Name = "lblTema";
             lblTema.Size = new Size(62, 25);
@@ -66,7 +68,9 @@
             // lblNombre
             // 
             lblNombre.AutoSize = true;
+            lblNombre.BackColor = SystemColors.Control;
             lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblNombre.ForeColor = Color.DarkSlateGray;
             lblNombre.Location = new Point(143, 158);
             lblNombre.Name = "lblNombre";
             lblNombre.Size = new Size(193, 25);
@@ -85,7 +89,9 @@
             // lblVistaPrevia
             // 
             lblVistaPrevia.AutoSize = true;
+            lblVistaPrevia.BackColor = SystemColors.Control;
             lblVistaPrevia.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblVistaPrevia.ForeColor = Color.DarkSlateGray;
             lblVistaPrevia.Location = new Point(181, 319);
             lblVistaPrevia.Name = "lblVistaPrevia";
             lblVistaPrevia.Size = new Size(117, 25);
@@ -96,8 +102,9 @@
             // lblNombreFinal
             // 
             lblNombreFinal.AutoSize = true;
+            lblNombreFinal.BackColor = SystemColors.Control;
             lblNombreFinal.Font = new Font("Consolas", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblNombreFinal.ForeColor = Color.MidnightBlue;
+            lblNombreFinal.ForeColor = Color.SteelBlue;
             lblNombreFinal.Location = new Point(139, 345);
             lblNombreFinal.Name = "lblNombreFinal";
             lblNombreFinal.Size = new Size(208, 23);
@@ -107,21 +114,26 @@
             // 
             // btnCrearProyecto
             // 
-            btnCrearProyecto.BackColor = Color.DodgerBlue;
+            btnCrearProyecto.BackColor = Color.FromArgb(46, 125, 50);
+            btnCrearProyecto.FlatAppearance.BorderSize = 0;
             btnCrearProyecto.FlatStyle = FlatStyle.Flat;
-            btnCrearProyecto.Font = new Font("Constantia", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCrearProyecto.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnCrearProyecto.ForeColor = Color.White;
-            btnCrearProyecto.Location = new Point(154, 376);
+            btnCrearProyecto.Location = new Point(154, 380);
             btnCrearProyecto.Name = "btnCrearProyecto";
-            btnCrearProyecto.Size = new Size(170, 35);
+            btnCrearProyecto.Size = new Size(170, 40);
             btnCrearProyecto.TabIndex = 6;
             btnCrearProyecto.Text = "Crear Proyecto";
             btnCrearProyecto.UseVisualStyleBackColor = false;
             btnCrearProyecto.Click += BtnCrearProyecto_Click;
+            btnCrearProyecto.MouseEnter += BtnCrearProyecto_MouseEnter;
+            btnCrearProyecto.MouseLeave += BtnCrearProyecto_MouseLeave;
             // 
             // lblTitulo
             // 
+            lblTitulo.BackColor = SystemColors.Control;
             lblTitulo.Font = new Font("Cooper Black", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblTitulo.ForeColor = Color.DarkSlateGray;
             lblTitulo.Location = new Point(26, 17);
             lblTitulo.Name = "lblTitulo";
             lblTitulo.Size = new Size(427, 58);
@@ -133,12 +145,15 @@
             // lblObjetivo
             // 
             lblObjetivo.AutoSize = true;
+            lblObjetivo.BackColor = SystemColors.Control;
             lblObjetivo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblObjetivo.ForeColor = Color.DarkSlateGray;
             lblObjetivo.Location = new Point(141, 232);
             lblObjetivo.Name = "lblObjetivo";
             lblObjetivo.Size = new Size(197, 25);
             lblObjetivo.TabIndex = 8;
             lblObjetivo.Text = "Objetivo del ejercicio:";
+            lblObjetivo.Click += LblObjetivo_Click;
             // 
             // txtObjetivo
             // 
@@ -152,8 +167,10 @@
             // 
             // pictureBoxfondo
             // 
-            pictureBoxfondo.BackColor = Color.White;
+            pictureBoxfondo.BackColor = Color.Transparent;
+            pictureBoxfondo.Cursor = Cursors.Hand;
             pictureBoxfondo.Dock = DockStyle.Fill;
+            pictureBoxfondo.Image = Properties.Resources.FondodeProyectoAutocpp;
             pictureBoxfondo.ImageLocation = "";
             pictureBoxfondo.Location = new Point(0, 0);
             pictureBoxfondo.Name = "pictureBoxfondo";
@@ -167,24 +184,22 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.WhiteSmoke;
             ClientSize = new Size(803, 535);
-            Controls.Add(txtObjetivo);
-            Controls.Add(lblObjetivo);
             Controls.Add(lblTitulo);
-            Controls.Add(btnCrearProyecto);
+            Controls.Add(lblObjetivo);
             Controls.Add(lblNombreFinal);
             Controls.Add(lblVistaPrevia);
-            Controls.Add(txtNombreProyecto);
             Controls.Add(lblNombre);
-            Controls.Add(cmbTemas);
             Controls.Add(lblTema);
+            Controls.Add(txtObjetivo);
+            Controls.Add(btnCrearProyecto);
+            Controls.Add(txtNombreProyecto);
+            Controls.Add(cmbTemas);
             Controls.Add(pictureBoxfondo);
             Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
-            MinimizeBox = false;
             Name = "frmPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "ProjectCreator v1.0";

@@ -1,3 +1,7 @@
+using System.Resources;
+
+[assembly: NeutralResourcesLanguage("es-MX")]
+
 namespace ProjectCreator
 {
     internal static class Program
