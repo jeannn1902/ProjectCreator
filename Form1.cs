@@ -193,22 +193,26 @@ namespace ProjectCreator {
 
         private void panelNuevaPractica_Click(object? sender, EventArgs e) {
             SeleccionarPanelMenu(panelNuevaPractica);
+
             panelRecientesVista.Visible = false;
             panelConfiguracionVista.Visible = false;
         }
 
         private void PanelInicio_Click(object? sender, EventArgs e) {
             SeleccionarPanelMenu(panelInicio);
+
+            panelRecientesVista.Visible = false;
+            panelConfiguracionVista.Visible = false;
         }
 
         private void PanelAbrirPractica_Click(object? sender, EventArgs e) {
-            SeleccionarPanelMenu(panelAbrirPractica);
-
             using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
                 carpeta.Description = "Selecciona la carpeta del proyecto";
 
-                if (carpeta.ShowDialog() != DialogResult.OK)
+                if (carpeta.ShowDialog() != DialogResult.OK) {
+                    RestaurarColorPanel(panelAbrirPractica);
                     return;
+                }
 
                 string[] soluciones = Directory.GetFiles(
                     carpeta.SelectedPath,
@@ -216,19 +220,25 @@ namespace ProjectCreator {
                     SearchOption.TopDirectoryOnly);
 
                 if (soluciones.Length == 0) {
-                    MessageBox.Show(
-                        "No se encontró ningún archivo .sln en la carpeta seleccionada.",
-                        "EndForge",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
+                    MessageBox.Show("No se encontró ningún archivo .sln en la carpeta seleccionada.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    RestaurarColorPanel(panelAbrirPractica);
                     return;
                 }
+
+                SeleccionarPanelMenu(panelAbrirPractica);
 
                 Process.Start(new ProcessStartInfo() {
                     FileName = soluciones[0],
                     UseShellExecute = true
                 });
+            }
+        }
+
+        private void RestaurarColorPanel(Panel panel) {
+            if (panel == panelSeleccionado) {
+                panel.BackColor = Color.ForestGreen;
+            } else {
+                panel.BackColor = Color.FromArgb(45, 45, 48);
             }
         }
 
@@ -260,7 +270,8 @@ namespace ProjectCreator {
                 "EndForge 1.0\n\n" +
                 "Desarrollado por:\n" +
                 "Jeancarlo Pérez Pérez\n\n" +
-                "Herramienta para automatizar la creación de proyectos de C++.\n\n" +
+                "Herramienta para automatizar la creación y gestión " +
+                "de prácticas de C++.\n\n" +
                 "© 2026",
                 "Acerca de EndForge",
                 MessageBoxButtons.OK,
@@ -507,7 +518,53 @@ namespace ProjectCreator {
             CargarRecientes();
         }
 
-        private void PanelConfiguracionVista_Paint(object sender, PaintEventArgs e) {
+        private void BtnCambiarRutaPlantilla_Click(object sender, EventArgs e) {
+            using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
+                carpeta.Description = "Selecciona la carpeta base de tus proyectos";
+
+                if (carpeta.ShowDialog() == DialogResult.OK) {
+                    txtRutaBaseConfig.Text = carpeta.SelectedPath;
+                }
+            }
+        }
+
+        private void BtnCambiarRutaBase_Click(object sender, EventArgs e) {
+            using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
+                carpeta.Description = "Selecciona la carpeta de la plantilla";
+
+                if (carpeta.ShowDialog() == DialogResult.OK) {
+                    txtRutaPlantillaConfig.Text = carpeta.SelectedPath;
+                }
+            }
+        }
+
+        private void BtnGuardarConfiguracion_Click(object sender, EventArgs e) {
+            if (!Directory.Exists(txtRutaBaseConfig.Text) || !Directory.Exists(txtRutaPlantillaConfig.Text)) {
+                MessageBox.Show("Una de las rutas seleccionadas no existe.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string rutaConfig = @"C:\Users\jeanc\source\repos\Plantillas\ProjectCreator\config.txt";
+
+            File.WriteAllLines(rutaConfig, new string[] {
+                txtRutaBaseConfig.Text, txtRutaPlantillaConfig.Text
+            });
+
+            rutaBase = txtRutaBaseConfig.Text;
+            rutaPlantilla = txtRutaPlantillaConfig.Text;
+
+            MessageBox.Show("Configuración guardada correctamente.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ListRecientes_SelectedIndexChanged(object sender, EventArgs e) {
+
+        }
+
+        private void LblAyudaRecientes_Click(object sender, EventArgs e) {
+
+        }
+
+        private void ListRecientes_SelectedIndexChanged_1(object sender, EventArgs e) {
 
         }
     }

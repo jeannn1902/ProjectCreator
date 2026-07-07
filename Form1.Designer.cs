@@ -41,8 +41,19 @@
             lblTema = new Label();
             panelPrincipal = new Panel();
             panelRecientesVista = new Panel();
+            lblAyudaRecientes = new Label();
+            lblRecientesSubtitulo = new Label();
             listRecientes = new ListBox();
             lblRecientesTitulo = new Label();
+            panelConfiguracionVista = new Panel();
+            btnGuardarConfiguracion = new Button();
+            btnCambiarRutaPlantilla = new Button();
+            btnCambiarRutaBase = new Button();
+            txtRutaPlantillaConfig = new TextBox();
+            lblRutaPlantilla = new Label();
+            txtRutaBaseConfig = new TextBox();
+            lblRutaBase = new Label();
+            lblConfiguracionTitulo = new Label();
             panelMenu = new Panel();
             panelAcercaDe = new Panel();
             panelIndicadorAD = new Panel();
@@ -71,18 +82,10 @@
             pictureBoxLogo = new PictureBox();
             lblMenuSubtitulo = new Label();
             lblMenuTitulo = new Label();
-            panelConfiguracionVista = new Panel();
-            btnGuardarConfiguracion = new Button();
-            btnCambiarRutaPlantilla = new Button();
-            btnCambiarRutaBase = new Button();
-            txtRutaPlantillaConfig = new TextBox();
-            lblRutaPlantilla = new Label();
-            txtRutaBaseConfig = new TextBox();
-            lblRutaBase = new Label();
-            lblConfiguracionTitulo = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBoxfondo).BeginInit();
             panelPrincipal.SuspendLayout();
             panelRecientesVista.SuspendLayout();
+            panelConfiguracionVista.SuspendLayout();
             panelMenu.SuspendLayout();
             panelAcercaDe.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxAcercaDe).BeginInit();
@@ -97,7 +100,6 @@
             panelInicio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxInicio).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).BeginInit();
-            panelConfiguracionVista.SuspendLayout();
             SuspendLayout();
             // 
             // pictureBoxfondo
@@ -241,8 +243,8 @@
             // panelPrincipal
             // 
             panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
-            panelPrincipal.Controls.Add(panelConfiguracionVista);
             panelPrincipal.Controls.Add(panelRecientesVista);
+            panelPrincipal.Controls.Add(panelConfiguracionVista);
             panelPrincipal.Controls.Add(lblTitulo);
             panelPrincipal.Controls.Add(txtTemas);
             panelPrincipal.Controls.Add(lblObjetivo);
@@ -261,26 +263,52 @@
             // 
             // panelRecientesVista
             // 
+            panelRecientesVista.Controls.Add(lblAyudaRecientes);
+            panelRecientesVista.Controls.Add(lblRecientesSubtitulo);
             panelRecientesVista.Controls.Add(listRecientes);
             panelRecientesVista.Controls.Add(lblRecientesTitulo);
             panelRecientesVista.Location = new Point(0, 0);
             panelRecientesVista.Name = "panelRecientesVista";
             panelRecientesVista.Size = new Size(892, 470);
-            panelRecientesVista.TabIndex = 12;
+            panelRecientesVista.TabIndex = 15;
             panelRecientesVista.Visible = false;
+            // 
+            // lblAyudaRecientes
+            // 
+            lblAyudaRecientes.AutoSize = true;
+            lblAyudaRecientes.Font = new Font("Segoe UI", 9F);
+            lblAyudaRecientes.ForeColor = Color.Gray;
+            lblAyudaRecientes.Location = new Point(311, 240);
+            lblAyudaRecientes.Name = "lblAyudaRecientes";
+            lblAyudaRecientes.Size = new Size(271, 25);
+            lblAyudaRecientes.TabIndex = 14;
+            lblAyudaRecientes.Text = "Doble clic para abrir un proyecto";
+            lblAyudaRecientes.Click += LblAyudaRecientes_Click;
+            // 
+            // lblRecientesSubtitulo
+            // 
+            lblRecientesSubtitulo.AutoSize = true;
+            lblRecientesSubtitulo.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            lblRecientesSubtitulo.ForeColor = Color.Silver;
+            lblRecientesSubtitulo.Location = new Point(337, 82);
+            lblRecientesSubtitulo.Name = "lblRecientesSubtitulo";
+            lblRecientesSubtitulo.Size = new Size(219, 25);
+            lblRecientesSubtitulo.TabIndex = 13;
+            lblRecientesSubtitulo.Text = "Continúa donde lo dejaste";
             // 
             // listRecientes
             // 
             listRecientes.BackColor = Color.FromArgb(45, 45, 48);
             listRecientes.BorderStyle = BorderStyle.None;
-            listRecientes.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            listRecientes.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             listRecientes.ForeColor = Color.White;
-            listRecientes.FormattingEnabled = true;
-            listRecientes.ItemHeight = 25;
-            listRecientes.Location = new Point(116, 171);
+            listRecientes.IntegralHeight = false;
+            listRecientes.ItemHeight = 28;
+            listRecientes.Location = new Point(88, 114);
             listRecientes.Name = "listRecientes";
-            listRecientes.Size = new Size(180, 125);
+            listRecientes.Size = new Size(729, 116);
             listRecientes.TabIndex = 12;
+            listRecientes.SelectedIndexChanged += ListRecientes_SelectedIndexChanged_1;
             listRecientes.DoubleClick += ListRecientes_DoubleClick;
             // 
             // lblRecientesTitulo
@@ -288,11 +316,107 @@
             lblRecientesTitulo.AutoSize = true;
             lblRecientesTitulo.Font = new Font("Cooper Black", 12F);
             lblRecientesTitulo.ForeColor = Color.White;
-            lblRecientesTitulo.Location = new Point(45, 54);
+            lblRecientesTitulo.Location = new Point(321, 54);
             lblRecientesTitulo.Name = "lblRecientesTitulo";
             lblRecientesTitulo.Size = new Size(250, 27);
             lblRecientesTitulo.TabIndex = 11;
             lblRecientesTitulo.Text = "Proyectos recientes";
+            // 
+            // panelConfiguracionVista
+            // 
+            panelConfiguracionVista.Controls.Add(btnGuardarConfiguracion);
+            panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
+            panelConfiguracionVista.Controls.Add(btnCambiarRutaBase);
+            panelConfiguracionVista.Controls.Add(txtRutaPlantillaConfig);
+            panelConfiguracionVista.Controls.Add(lblRutaPlantilla);
+            panelConfiguracionVista.Controls.Add(txtRutaBaseConfig);
+            panelConfiguracionVista.Controls.Add(lblRutaBase);
+            panelConfiguracionVista.Controls.Add(lblConfiguracionTitulo);
+            panelConfiguracionVista.Location = new Point(6, 5);
+            panelConfiguracionVista.Name = "panelConfiguracionVista";
+            panelConfiguracionVista.Size = new Size(892, 470);
+            panelConfiguracionVista.TabIndex = 14;
+            panelConfiguracionVista.Visible = false;
+            // 
+            // btnGuardarConfiguracion
+            // 
+            btnGuardarConfiguracion.AutoSize = true;
+            btnGuardarConfiguracion.Location = new Point(641, 405);
+            btnGuardarConfiguracion.Name = "btnGuardarConfiguracion";
+            btnGuardarConfiguracion.Size = new Size(208, 35);
+            btnGuardarConfiguracion.TabIndex = 7;
+            btnGuardarConfiguracion.Text = "Guardar configuración";
+            btnGuardarConfiguracion.UseVisualStyleBackColor = true;
+            btnGuardarConfiguracion.Click += BtnGuardarConfiguracion_Click;
+            // 
+            // btnCambiarRutaPlantilla
+            // 
+            btnCambiarRutaPlantilla.Location = new Point(655, 117);
+            btnCambiarRutaPlantilla.Name = "btnCambiarRutaPlantilla";
+            btnCambiarRutaPlantilla.Size = new Size(174, 34);
+            btnCambiarRutaPlantilla.TabIndex = 6;
+            btnCambiarRutaPlantilla.Text = "Cambiar";
+            btnCambiarRutaPlantilla.UseVisualStyleBackColor = true;
+            btnCambiarRutaPlantilla.Click += BtnCambiarRutaPlantilla_Click;
+            // 
+            // btnCambiarRutaBase
+            // 
+            btnCambiarRutaBase.Location = new Point(656, 231);
+            btnCambiarRutaBase.Name = "btnCambiarRutaBase";
+            btnCambiarRutaBase.Size = new Size(174, 33);
+            btnCambiarRutaBase.TabIndex = 5;
+            btnCambiarRutaBase.Text = "Cambiar";
+            btnCambiarRutaBase.UseVisualStyleBackColor = true;
+            btnCambiarRutaBase.Click += BtnCambiarRutaBase_Click;
+            // 
+            // txtRutaPlantillaConfig
+            // 
+            txtRutaPlantillaConfig.Location = new Point(72, 232);
+            txtRutaPlantillaConfig.Name = "txtRutaPlantillaConfig";
+            txtRutaPlantillaConfig.ReadOnly = true;
+            txtRutaPlantillaConfig.Size = new Size(526, 31);
+            txtRutaPlantillaConfig.TabIndex = 4;
+            // 
+            // lblRutaPlantilla
+            // 
+            lblRutaPlantilla.AutoSize = true;
+            lblRutaPlantilla.Font = new Font("Segoe UI", 11F, FontStyle.Italic);
+            lblRutaPlantilla.ForeColor = Color.White;
+            lblRutaPlantilla.Location = new Point(236, 199);
+            lblRutaPlantilla.Name = "lblRutaPlantilla";
+            lblRutaPlantilla.Size = new Size(195, 30);
+            lblRutaPlantilla.TabIndex = 3;
+            lblRutaPlantilla.Text = "Ruta de la plantilla";
+            // 
+            // txtRutaBaseConfig
+            // 
+            txtRutaBaseConfig.Location = new Point(72, 118);
+            txtRutaBaseConfig.Name = "txtRutaBaseConfig";
+            txtRutaBaseConfig.ReadOnly = true;
+            txtRutaBaseConfig.Size = new Size(526, 31);
+            txtRutaBaseConfig.TabIndex = 2;
+            // 
+            // lblRutaBase
+            // 
+            lblRutaBase.AutoSize = true;
+            lblRutaBase.Font = new Font("Segoe UI", 11F, FontStyle.Italic, GraphicsUnit.Point, 0);
+            lblRutaBase.ForeColor = Color.White;
+            lblRutaBase.Location = new Point(216, 88);
+            lblRutaBase.Name = "lblRutaBase";
+            lblRutaBase.Size = new Size(234, 30);
+            lblRutaBase.TabIndex = 1;
+            lblRutaBase.Text = "Ruta base de proyectos";
+            // 
+            // lblConfiguracionTitulo
+            // 
+            lblConfiguracionTitulo.AutoSize = true;
+            lblConfiguracionTitulo.Font = new Font("Cooper Black", 12F);
+            lblConfiguracionTitulo.ForeColor = Color.White;
+            lblConfiguracionTitulo.Location = new Point(353, 35);
+            lblConfiguracionTitulo.Name = "lblConfiguracionTitulo";
+            lblConfiguracionTitulo.Size = new Size(187, 27);
+            lblConfiguracionTitulo.TabIndex = 0;
+            lblConfiguracionTitulo.Text = "Configuración";
             // 
             // panelMenu
             // 
@@ -604,104 +728,11 @@
             lblMenuTitulo.BackColor = Color.Transparent;
             lblMenuTitulo.Font = new Font("Segoe UI Semibold", 13F);
             lblMenuTitulo.ForeColor = Color.White;
-            lblMenuTitulo.Location = new Point(17, 94);
+            lblMenuTitulo.Location = new Point(46, 94);
             lblMenuTitulo.Name = "lblMenuTitulo";
             lblMenuTitulo.Size = new Size(128, 36);
             lblMenuTitulo.TabIndex = 0;
             lblMenuTitulo.Text = "EndForge";
-            // 
-            // panelConfiguracionVista
-            // 
-            panelConfiguracionVista.Controls.Add(btnGuardarConfiguracion);
-            panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
-            panelConfiguracionVista.Controls.Add(btnCambiarRutaBase);
-            panelConfiguracionVista.Controls.Add(txtRutaPlantillaConfig);
-            panelConfiguracionVista.Controls.Add(lblRutaPlantilla);
-            panelConfiguracionVista.Controls.Add(txtRutaBaseConfig);
-            panelConfiguracionVista.Controls.Add(lblRutaBase);
-            panelConfiguracionVista.Controls.Add(lblConfiguracionTitulo);
-            panelConfiguracionVista.Location = new Point(0, 0);
-            panelConfiguracionVista.Name = "panelConfiguracionVista";
-            panelConfiguracionVista.Size = new Size(892, 470);
-            panelConfiguracionVista.TabIndex = 14;
-            panelConfiguracionVista.Visible = false;
-            // 
-            // btnGuardarConfiguracion
-            // 
-            btnGuardarConfiguracion.AutoSize = true;
-            btnGuardarConfiguracion.Location = new Point(641, 405);
-            btnGuardarConfiguracion.Name = "btnGuardarConfiguracion";
-            btnGuardarConfiguracion.Size = new Size(208, 35);
-            btnGuardarConfiguracion.TabIndex = 7;
-            btnGuardarConfiguracion.Text = "Guardar configuración";
-            btnGuardarConfiguracion.UseVisualStyleBackColor = true;
-            // 
-            // btnCambiarRutaPlantilla
-            // 
-            btnCambiarRutaPlantilla.Location = new Point(737, 234);
-            btnCambiarRutaPlantilla.Name = "btnCambiarRutaPlantilla";
-            btnCambiarRutaPlantilla.Size = new Size(112, 34);
-            btnCambiarRutaPlantilla.TabIndex = 6;
-            btnCambiarRutaPlantilla.Text = "Cambiar";
-            btnCambiarRutaPlantilla.UseVisualStyleBackColor = true;
-            // 
-            // btnCambiarRutaBase
-            // 
-            btnCambiarRutaBase.Location = new Point(737, 119);
-            btnCambiarRutaBase.Name = "btnCambiarRutaBase";
-            btnCambiarRutaBase.Size = new Size(112, 34);
-            btnCambiarRutaBase.TabIndex = 5;
-            btnCambiarRutaBase.Text = "Cambiar";
-            btnCambiarRutaBase.UseVisualStyleBackColor = true;
-            // 
-            // txtRutaPlantillaConfig
-            // 
-            txtRutaPlantillaConfig.Location = new Point(237, 233);
-            txtRutaPlantillaConfig.Name = "txtRutaPlantillaConfig";
-            txtRutaPlantillaConfig.ReadOnly = true;
-            txtRutaPlantillaConfig.Size = new Size(418, 31);
-            txtRutaPlantillaConfig.TabIndex = 4;
-            // 
-            // lblRutaPlantilla
-            // 
-            lblRutaPlantilla.AutoSize = true;
-            lblRutaPlantilla.Font = new Font("Segoe UI", 11F, FontStyle.Italic);
-            lblRutaPlantilla.ForeColor = Color.White;
-            lblRutaPlantilla.Location = new Point(349, 199);
-            lblRutaPlantilla.Name = "lblRutaPlantilla";
-            lblRutaPlantilla.Size = new Size(195, 30);
-            lblRutaPlantilla.TabIndex = 3;
-            lblRutaPlantilla.Text = "Ruta de la plantilla";
-            // 
-            // txtRutaBaseConfig
-            // 
-            txtRutaBaseConfig.Location = new Point(237, 121);
-            txtRutaBaseConfig.Name = "txtRutaBaseConfig";
-            txtRutaBaseConfig.ReadOnly = true;
-            txtRutaBaseConfig.Size = new Size(418, 31);
-            txtRutaBaseConfig.TabIndex = 2;
-            // 
-            // lblRutaBase
-            // 
-            lblRutaBase.AutoSize = true;
-            lblRutaBase.Font = new Font("Segoe UI", 11F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            lblRutaBase.ForeColor = Color.White;
-            lblRutaBase.Location = new Point(329, 88);
-            lblRutaBase.Name = "lblRutaBase";
-            lblRutaBase.Size = new Size(234, 30);
-            lblRutaBase.TabIndex = 1;
-            lblRutaBase.Text = "Ruta base de proyectos";
-            // 
-            // lblConfiguracionTitulo
-            // 
-            lblConfiguracionTitulo.AutoSize = true;
-            lblConfiguracionTitulo.Font = new Font("Cooper Black", 12F);
-            lblConfiguracionTitulo.ForeColor = Color.White;
-            lblConfiguracionTitulo.Location = new Point(353, 35);
-            lblConfiguracionTitulo.Name = "lblConfiguracionTitulo";
-            lblConfiguracionTitulo.Size = new Size(187, 27);
-            lblConfiguracionTitulo.TabIndex = 0;
-            lblConfiguracionTitulo.Text = "Configuración";
             // 
             // frmPrincipal
             // 
@@ -724,6 +755,8 @@
             panelPrincipal.PerformLayout();
             panelRecientesVista.ResumeLayout(false);
             panelRecientesVista.PerformLayout();
+            panelConfiguracionVista.ResumeLayout(false);
+            panelConfiguracionVista.PerformLayout();
             panelMenu.ResumeLayout(false);
             panelMenu.PerformLayout();
             panelAcercaDe.ResumeLayout(false);
@@ -744,8 +777,6 @@
             panelInicio.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxInicio).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).EndInit();
-            panelConfiguracionVista.ResumeLayout(false);
-            panelConfiguracionVista.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -790,9 +821,6 @@
         private Panel panelIndicadorAD;
         private Label lblAcercaDe;
         private PictureBox pictureBoxAcercaDe;
-        private Label lblRecientesTitulo;
-        private Panel panelRecientesVista;
-        private ListBox listRecientes;
         private Panel panelConfiguracionVista;
         private Button btnGuardarConfiguracion;
         private Button btnCambiarRutaPlantilla;
@@ -802,5 +830,10 @@
         private TextBox txtRutaBaseConfig;
         private Label lblRutaBase;
         private Label lblConfiguracionTitulo;
+        private Panel panelRecientesVista;
+        private Label lblRecientesSubtitulo;
+        private ListBox listRecientes;
+        private Label lblRecientesTitulo;
+        private Label lblAyudaRecientes;
     }
 }
