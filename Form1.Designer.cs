@@ -703,9 +703,10 @@
             // pictureBoxLogo
             // 
             pictureBoxLogo.BackColor = Color.Transparent;
-            pictureBoxLogo.Location = new Point(78, 25);
+            pictureBoxLogo.Image = (Image)resources.GetObject("pictureBoxLogo.Image");
+            pictureBoxLogo.Location = new Point(10, 30);
             pictureBoxLogo.Name = "pictureBoxLogo";
-            pictureBoxLogo.Size = new Size(64, 64);
+            pictureBoxLogo.Size = new Size(200, 70);
             pictureBoxLogo.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBoxLogo.TabIndex = 2;
             pictureBoxLogo.TabStop = false;
@@ -714,11 +715,11 @@
             // 
             lblMenuSubtitulo.AutoSize = true;
             lblMenuSubtitulo.BackColor = Color.Transparent;
-            lblMenuSubtitulo.Font = new Font("Segoe UI", 9F);
+            lblMenuSubtitulo.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblMenuSubtitulo.ForeColor = Color.Silver;
-            lblMenuSubtitulo.Location = new Point(33, 130);
+            lblMenuSubtitulo.Location = new Point(26, 94);
             lblMenuSubtitulo.Name = "lblMenuSubtitulo";
-            lblMenuSubtitulo.Size = new Size(154, 25);
+            lblMenuSubtitulo.Size = new Size(169, 28);
             lblMenuSubtitulo.TabIndex = 1;
             lblMenuSubtitulo.Text = "Centro de Control";
             // 
@@ -728,11 +729,12 @@
             lblMenuTitulo.BackColor = Color.Transparent;
             lblMenuTitulo.Font = new Font("Segoe UI Semibold", 13F);
             lblMenuTitulo.ForeColor = Color.White;
-            lblMenuTitulo.Location = new Point(46, 94);
+            lblMenuTitulo.Location = new Point(46, 129);
             lblMenuTitulo.Name = "lblMenuTitulo";
             lblMenuTitulo.Size = new Size(128, 36);
             lblMenuTitulo.TabIndex = 0;
             lblMenuTitulo.Text = "EndForge";
+            lblMenuTitulo.Visible = false;
             // 
             // frmPrincipal
             // 
