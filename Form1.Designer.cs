@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmPrincipal));
-            pictureBoxfondo = new PictureBox();
             btnCrearProyecto = new Button();
             lblNombreFinal = new Label();
             lblVistaPrevia = new Label();
@@ -86,7 +85,6 @@
             pictureBoxLogo = new PictureBox();
             lblMenuSubtitulo = new Label();
             lblMenuTitulo = new Label();
-            ((System.ComponentModel.ISupportInitialize)pictureBoxfondo).BeginInit();
             panelPrincipal.SuspendLayout();
             panelInicioVista.SuspendLayout();
             panelRecientesVista.SuspendLayout();
@@ -106,22 +104,6 @@
             ((System.ComponentModel.ISupportInitialize)pictureBoxInicio).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).BeginInit();
             SuspendLayout();
-            // 
-            // pictureBoxfondo
-            // 
-            pictureBoxfondo.BackColor = Color.Transparent;
-            pictureBoxfondo.Cursor = Cursors.Hand;
-            pictureBoxfondo.Enabled = false;
-            pictureBoxfondo.Image = Properties.Resources.fondoproyectoEndForge1;
-            pictureBoxfondo.ImageLocation = "";
-            pictureBoxfondo.Location = new Point(0, 0);
-            pictureBoxfondo.Name = "pictureBoxfondo";
-            pictureBoxfondo.Size = new Size(1178, 744);
-            pictureBoxfondo.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBoxfondo.TabIndex = 10;
-            pictureBoxfondo.TabStop = false;
-            pictureBoxfondo.Visible = false;
-            pictureBoxfondo.Click += PictureBox1_Click;
             // 
             // btnCrearProyecto
             // 
@@ -811,7 +793,6 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "EndForge";
             Load += FrmPrincipal_Load;
-            ((System.ComponentModel.ISupportInitialize)pictureBoxfondo).EndInit();
             panelPrincipal.ResumeLayout(false);
             panelPrincipal.PerformLayout();
             panelInicioVista.ResumeLayout(false);
@@ -844,7 +825,6 @@
         }
 
         #endregion
-        private PictureBox pictureBoxfondo;
         private Button btnCrearProyecto;
         private Label lblNombreFinal;
         private Label lblVistaPrevia;

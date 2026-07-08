@@ -329,8 +329,6 @@ namespace ProjectCreator {
 
             btnCrearProyecto.Enabled = false;
 
-            pictureBoxfondo.SendToBack();
-
             // panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
 
             panelInicioVista.Visible = true;
