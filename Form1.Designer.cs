@@ -672,6 +672,7 @@
             // 
             // panelConfiguracionVista
             // 
+            panelConfiguracionVista.BackColor = Color.Transparent;
             panelConfiguracionVista.Controls.Add(btnGuardarConfiguracion);
             panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
             panelConfiguracionVista.Controls.Add(btnCambiarRutaBase);
@@ -689,36 +690,64 @@
             // btnGuardarConfiguracion
             // 
             btnGuardarConfiguracion.AutoSize = true;
-            btnGuardarConfiguracion.Location = new Point(641, 405);
+            btnGuardarConfiguracion.BackColor = Color.FromArgb(111, 45, 189);
+            btnGuardarConfiguracion.Cursor = Cursors.Hand;
+            btnGuardarConfiguracion.FlatAppearance.BorderSize = 0;
+            btnGuardarConfiguracion.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnGuardarConfiguracion.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
+            btnGuardarConfiguracion.FlatStyle = FlatStyle.Flat;
+            btnGuardarConfiguracion.Font = new Font("Segoe UI Semibold", 9F);
+            btnGuardarConfiguracion.ForeColor = Color.White;
+            btnGuardarConfiguracion.Location = new Point(228, 325);
             btnGuardarConfiguracion.Name = "btnGuardarConfiguracion";
-            btnGuardarConfiguracion.Size = new Size(208, 35);
+            btnGuardarConfiguracion.Size = new Size(230, 37);
             btnGuardarConfiguracion.TabIndex = 7;
             btnGuardarConfiguracion.Text = "Guardar configuración";
-            btnGuardarConfiguracion.UseVisualStyleBackColor = true;
+            btnGuardarConfiguracion.UseVisualStyleBackColor = false;
             btnGuardarConfiguracion.Click += BtnGuardarConfiguracion_Click;
             // 
             // btnCambiarRutaPlantilla
             // 
+            btnCambiarRutaPlantilla.BackColor = Color.FromArgb(111, 45, 189);
+            btnCambiarRutaPlantilla.Cursor = Cursors.Hand;
+            btnCambiarRutaPlantilla.FlatAppearance.BorderSize = 0;
+            btnCambiarRutaPlantilla.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnCambiarRutaPlantilla.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
+            btnCambiarRutaPlantilla.FlatStyle = FlatStyle.Flat;
+            btnCambiarRutaPlantilla.Font = new Font("Segoe UI Semibold", 9F);
+            btnCambiarRutaPlantilla.ForeColor = Color.White;
             btnCambiarRutaPlantilla.Location = new Point(655, 117);
             btnCambiarRutaPlantilla.Name = "btnCambiarRutaPlantilla";
-            btnCambiarRutaPlantilla.Size = new Size(174, 34);
+            btnCambiarRutaPlantilla.Size = new Size(175, 34);
             btnCambiarRutaPlantilla.TabIndex = 6;
             btnCambiarRutaPlantilla.Text = "Cambiar";
-            btnCambiarRutaPlantilla.UseVisualStyleBackColor = true;
+            btnCambiarRutaPlantilla.UseVisualStyleBackColor = false;
             btnCambiarRutaPlantilla.Click += BtnCambiarRutaPlantilla_Click;
             // 
             // btnCambiarRutaBase
             // 
+            btnCambiarRutaBase.BackColor = Color.FromArgb(111, 45, 189);
+            btnCambiarRutaBase.Cursor = Cursors.Hand;
+            btnCambiarRutaBase.FlatAppearance.BorderSize = 0;
+            btnCambiarRutaBase.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnCambiarRutaBase.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
+            btnCambiarRutaBase.FlatStyle = FlatStyle.Flat;
+            btnCambiarRutaBase.Font = new Font("Segoe UI Semibold", 9F);
+            btnCambiarRutaBase.ForeColor = Color.White;
             btnCambiarRutaBase.Location = new Point(656, 231);
             btnCambiarRutaBase.Name = "btnCambiarRutaBase";
-            btnCambiarRutaBase.Size = new Size(174, 33);
+            btnCambiarRutaBase.Size = new Size(175, 34);
             btnCambiarRutaBase.TabIndex = 5;
             btnCambiarRutaBase.Text = "Cambiar";
-            btnCambiarRutaBase.UseVisualStyleBackColor = true;
+            btnCambiarRutaBase.UseVisualStyleBackColor = false;
             btnCambiarRutaBase.Click += BtnCambiarRutaBase_Click;
             // 
             // txtRutaPlantillaConfig
             // 
+            txtRutaPlantillaConfig.BackColor = Color.FromArgb(20, 16, 30);
+            txtRutaPlantillaConfig.BorderStyle = BorderStyle.FixedSingle;
+            txtRutaPlantillaConfig.Font = new Font("Segoe UI Light", 9F);
+            txtRutaPlantillaConfig.ForeColor = Color.White;
             txtRutaPlantillaConfig.Location = new Point(72, 232);
             txtRutaPlantillaConfig.Name = "txtRutaPlantillaConfig";
             txtRutaPlantillaConfig.ReadOnly = true;
@@ -728,16 +757,20 @@
             // lblRutaPlantilla
             // 
             lblRutaPlantilla.AutoSize = true;
-            lblRutaPlantilla.Font = new Font("Segoe UI", 11F, FontStyle.Italic);
+            lblRutaPlantilla.Font = new Font("Segoe UI Semibold", 11F);
             lblRutaPlantilla.ForeColor = Color.White;
             lblRutaPlantilla.Location = new Point(236, 199);
             lblRutaPlantilla.Name = "lblRutaPlantilla";
-            lblRutaPlantilla.Size = new Size(195, 30);
+            lblRutaPlantilla.Size = new Size(199, 30);
             lblRutaPlantilla.TabIndex = 3;
             lblRutaPlantilla.Text = "Ruta de la plantilla";
             // 
             // txtRutaBaseConfig
             // 
+            txtRutaBaseConfig.BackColor = Color.FromArgb(20, 16, 30);
+            txtRutaBaseConfig.BorderStyle = BorderStyle.FixedSingle;
+            txtRutaBaseConfig.Font = new Font("Segoe UI Light", 9F);
+            txtRutaBaseConfig.ForeColor = Color.White;
             txtRutaBaseConfig.Location = new Point(72, 118);
             txtRutaBaseConfig.Name = "txtRutaBaseConfig";
             txtRutaBaseConfig.ReadOnly = true;
@@ -747,22 +780,22 @@
             // lblRutaBase
             // 
             lblRutaBase.AutoSize = true;
-            lblRutaBase.Font = new Font("Segoe UI", 11F, FontStyle.Italic, GraphicsUnit.Point, 0);
+            lblRutaBase.Font = new Font("Segoe UI Semibold", 11F);
             lblRutaBase.ForeColor = Color.White;
             lblRutaBase.Location = new Point(216, 88);
             lblRutaBase.Name = "lblRutaBase";
-            lblRutaBase.Size = new Size(234, 30);
+            lblRutaBase.Size = new Size(244, 30);
             lblRutaBase.TabIndex = 1;
             lblRutaBase.Text = "Ruta base de proyectos";
             // 
             // lblConfiguracionTitulo
             // 
             lblConfiguracionTitulo.AutoSize = true;
-            lblConfiguracionTitulo.Font = new Font("Cooper Black", 12F);
+            lblConfiguracionTitulo.Font = new Font("Segoe UI Semibold", 18F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             lblConfiguracionTitulo.ForeColor = Color.White;
-            lblConfiguracionTitulo.Location = new Point(353, 35);
+            lblConfiguracionTitulo.Location = new Point(215, 15);
             lblConfiguracionTitulo.Name = "lblConfiguracionTitulo";
-            lblConfiguracionTitulo.Size = new Size(187, 27);
+            lblConfiguracionTitulo.Size = new Size(248, 48);
             lblConfiguracionTitulo.TabIndex = 0;
             lblConfiguracionTitulo.Text = "Configuración";
             // 
