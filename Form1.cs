@@ -89,14 +89,20 @@ namespace ProjectCreator {
 
         public frmPrincipal() {
             InitializeComponent();
+
+            panelPrincipal.LocationChanged += (s, e) => ReaplicarFondoDinamico();
+            panelPrincipal.SizeChanged += (s, e) => ReaplicarFondoDinamico();
+            fondoEndForge.SizeChanged += (s, e) => ReaplicarFondoDinamico();
+
             CargarConfiguracion();
 
             btnCrearProyecto.MouseEnter += BtnCrearProyecto_MouseEnter;
             btnCrearProyecto.MouseLeave += BtnCrearProyecto_MouseLeave;
 
             // Paneles del menú
-
+            //
             // Inicio
+            //
             panelInicio.MouseEnter += PanelMenu_MouseEnter;
             panelInicio.MouseLeave += PanelMenu_MouseLeave;
             lblInicio.MouseLeave += PanelMenu_MouseLeave;
@@ -104,8 +110,9 @@ namespace ProjectCreator {
             panelInicio.Click += PanelInicio_Click;
             lblInicio.Click += PanelInicio_Click;
             pictureBoxInicio.Click += PanelInicio_Click;
-
+            //
             // Nueva práctica
+            //
             panelNuevaPractica.MouseEnter += PanelMenu_MouseEnter;
             panelNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
             lblNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
@@ -113,8 +120,9 @@ namespace ProjectCreator {
             panelNuevaPractica.Click += panelNuevaPractica_Click;
             lblNuevaPractica.Click += panelNuevaPractica_Click;
             pictureBoxNuevaPractica.Click += panelNuevaPractica_Click;
-
+            //
             // Abrir práctica
+            //
             panelAbrirPractica.MouseEnter += PanelMenu_MouseEnter;
             panelAbrirPractica.MouseLeave += PanelMenu_MouseLeave;
             panelAbrirPractica.Click += PanelAbrirPractica_Click;
@@ -122,8 +130,9 @@ namespace ProjectCreator {
             pictureBoxAbrirPractica.Click += PanelAbrirPractica_Click;
             lblAbrirPractica.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxAbrirPractica.MouseLeave += PanelMenu_MouseLeave;
-
+            //
             // Recientes
+            //
             panelRecientes.MouseEnter += PanelMenu_MouseEnter;
             panelRecientes.MouseLeave += PanelMenu_MouseLeave;
             panelRecientes.Click += PanelRecientes_Click;
@@ -131,8 +140,9 @@ namespace ProjectCreator {
             pictureBoxRecientes.Click += PanelRecientes_Click;
             lblRecientes.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxRecientes.MouseLeave += PanelMenu_MouseLeave;
-
+            //
             // Configuración
+            //
             panelConfiguracion.MouseEnter += PanelMenu_MouseEnter;
             panelConfiguracion.MouseLeave += PanelMenu_MouseLeave;
             panelConfiguracion.Click += PanelConfiguracion_Click;
@@ -140,8 +150,9 @@ namespace ProjectCreator {
             pictureBoxConfiguracion.Click += PanelConfiguracion_Click;
             lblConfiguracion.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxConfiguracion.MouseLeave += PanelMenu_MouseLeave;
-
+            //
             // Acerca de
+            //
             panelAcercaDe.MouseEnter += PanelMenu_MouseEnter;
             panelAcercaDe.MouseLeave += PanelMenu_MouseLeave;
             panelAcercaDe.Click += PanelAcercaDe_Click;
@@ -149,13 +160,84 @@ namespace ProjectCreator {
             pictureBoxAcercaDe.Click += PanelAcercaDe_Click;
             lblAcercaDe.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxAcercaDe.MouseLeave += PanelMenu_MouseLeave;
-
+            //
             // Terminan los paneles del menú
+            //
+            // Tarjetas del Inicio
+            //
+            panelCardNuevaPractica.Click += panelNuevaPractica_Click;
+            panelCardRecientes.Click += PanelRecientes_Click;
+            panelCardConfiguracion.Click += PanelConfiguracion_Click;
 
+            lblCardNuevaPracticaTitulo.Click += panelNuevaPractica_Click;
+            lblCardNuevaPracticaDesc.Click += panelNuevaPractica_Click;
+
+            lblCardRecientesTitulo.Click += PanelRecientes_Click;
+            lblCardRecientesDesc.Click += PanelRecientes_Click;
+
+            lblCardConfiguracionTitulo.Click += PanelConfiguracion_Click;
+            lblCardConfiguracionDesc.Click += PanelConfiguracion_Click;
+            //
+            // Estado inicial
+            //
             panelSeleccionado = panelInicio;
             panelInicio.BackColor = Color.FromArgb(111, 45, 189);
             panelRecientesVista.Visible = false;
             panelConfiguracionVista.Visible = false;
+
+            AplicarFondoDinamicoPanelPrincipal();
+        }
+
+        private void AplicarFondoDinamicoPanelPrincipal() {
+            panelPrincipal.BackgroundImage = CrearRecorteFondoParaPanel(panelPrincipal);
+            panelPrincipal.BackgroundImageLayout = ImageLayout.Stretch;
+
+            panelInicioVista.BackgroundImage = null;
+            panelInicioVista.BackColor = Color.Transparent;
+        }
+
+        private void ReaplicarFondoDinamico() {
+            if (fondoEndForge.Width <= 0 || fondoEndForge.Height <= 0)
+                return;
+
+            if (panelPrincipal.Width <= 0 || panelPrincipal.Height <= 0)
+                return;
+
+            AplicarFondoDinamicoPanelPrincipal();
+        }
+
+        private Image CrearRecorteFondoParaPanel(Control panelDestino) {
+            Image fondoOriginal = fondoEndForge.ImagenFondo ?? Properties.Resources.fondoproyectoEndForge;
+
+            Bitmap fondoEscalado = new Bitmap(fondoEndForge.Width, fondoEndForge.Height);
+
+            using (Graphics g = Graphics.FromImage(fondoEscalado)) {
+                g.DrawImage(fondoOriginal, new Rectangle(0, 0, fondoEndForge.Width, fondoEndForge.Height));
+            }
+
+            Point posicionEnFondo = fondoEndForge.PointToClient(panelDestino.PointToScreen(Point.Empty));
+
+            Rectangle zonaRecorte = new Rectangle(
+                posicionEnFondo.X,
+                posicionEnFondo.Y,
+                panelDestino.Width,
+                panelDestino.Height
+            );
+
+            Bitmap recorte = new Bitmap(panelDestino.Width, panelDestino.Height);
+
+            using (Graphics g = Graphics.FromImage(recorte)) {
+                g.DrawImage(
+                    fondoEscalado,
+                    new Rectangle(0, 0, panelDestino.Width, panelDestino.Height),
+                    zonaRecorte,
+                    GraphicsUnit.Pixel
+                );
+            }
+
+            fondoEscalado.Dispose();
+
+            return recorte;
         }
 
         private void PanelMenu_MouseEnter(object? sender, EventArgs e) {
@@ -289,11 +371,13 @@ namespace ProjectCreator {
         }
 
         private void BtnCrearProyecto_MouseEnter(object? sender, EventArgs e) {
-            btnCrearProyecto.BackColor = Color.FromArgb(56, 142, 60);
+            btnCrearProyecto.BackColor = Color.FromArgb(126, 55, 210);
+            btnCrearProyecto.ForeColor = Color.White;
         }
 
         private void BtnCrearProyecto_MouseLeave(object? sender, EventArgs e) {
-            btnCrearProyecto.BackColor = Color.FromArgb(46, 125, 50);
+            btnCrearProyecto.BackColor = Color.FromArgb(111, 45, 189);
+            btnCrearProyecto.ForeColor = Color.White;
         }
 
         private void Label1_Click(object sender, EventArgs e) {
@@ -339,11 +423,15 @@ namespace ProjectCreator {
 
             panelSeleccionado = panelInicio;
             panelInicio.BackColor = Color.FromArgb(111, 45, 189);
+
+            AplicarFondoDinamicoPanelPrincipal();
         }
 
         private void ActualizarVistaPrevia() {
             if (txtTemas.SelectedItem == null || txtNombreProyecto.Text.Trim() == "") {
                 lblNombreFinal.Text = "Esperando datos...";
+                lblNombreFinal.ForeColor = Color.FromArgb(168, 85, 247);
+                lblNombreFinal.Font = new Font("Segoe UI Light", 11F, FontStyle.Italic);
                 return;
             }
 
@@ -358,6 +446,8 @@ namespace ProjectCreator {
 
             string numeroFormateado = siguienteNumero.ToString("00");
             lblNombreFinal.Text = numeroFormateado + "_" + txtNombreProyecto.Text.Trim();
+            lblNombreFinal.ForeColor = Color.White;
+            lblNombreFinal.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
         }
 
         private void ValidarFormulario() {

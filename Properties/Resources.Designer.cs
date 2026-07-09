@@ -63,6 +63,16 @@ namespace ProjectCreator.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap fondo_endforge_892x470_24bit {
+            get {
+                object obj = ResourceManager.GetObject("fondo_endforge_892x470_24bit", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap fondo_endforge_892x470_optimizado {
             get {
                 object obj = ResourceManager.GetObject("fondo_endforge_892x470_optimizado", resourceCulture);
@@ -73,9 +83,49 @@ namespace ProjectCreator.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap fondo_endforge_892x470_optimizado1 {
+            get {
+                object obj = ResourceManager.GetObject("fondo_endforge_892x470_optimizado1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap fondo_panelPrincipal_alineado_892x470 {
             get {
                 object obj = ResourceManager.GetObject("fondo_panelPrincipal_alineado_892x470", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap fondo_panelPrincipal_alineado_892x4701 {
+            get {
+                object obj = ResourceManager.GetObject("fondo_panelPrincipal_alineado_892x4701", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap fondo_panelPrincipal_alineado_892x4702 {
+            get {
+                object obj = ResourceManager.GetObject("fondo_panelPrincipal_alineado_892x4702", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap fondo_panelPrincipal_alineado_892x4703 {
+            get {
+                object obj = ResourceManager.GetObject("fondo_panelPrincipal_alineado_892x4703", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

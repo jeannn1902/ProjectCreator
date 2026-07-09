@@ -40,6 +40,15 @@
             lblTema = new Label();
             panelPrincipal = new Panel();
             panelInicioVista = new Panel();
+            panelCardConfiguracion = new Panel();
+            lblCardConfiguracionDesc = new Label();
+            lblCardConfiguracionTitulo = new Label();
+            panelCardRecientes = new Panel();
+            lblCardRecientesDesc = new Label();
+            lblCardRecientesTitulo = new Label();
+            panelCardNuevaPractica = new Panel();
+            lblCardNuevaPracticaDesc = new Label();
+            lblCardNuevaPracticaTitulo = new Label();
             lblInicioSubtitulo = new Label();
             lblInicioTitulo = new Label();
             panelRecientesVista = new Panel();
@@ -87,6 +96,9 @@
             lblMenuTitulo = new Label();
             panelPrincipal.SuspendLayout();
             panelInicioVista.SuspendLayout();
+            panelCardConfiguracion.SuspendLayout();
+            panelCardRecientes.SuspendLayout();
+            panelCardNuevaPractica.SuspendLayout();
             panelRecientesVista.SuspendLayout();
             panelConfiguracionVista.SuspendLayout();
             panelMenu.SuspendLayout();
@@ -108,17 +120,18 @@
             // btnCrearProyecto
             // 
             btnCrearProyecto.BackColor = Color.FromArgb(111, 45, 189);
+            btnCrearProyecto.Cursor = Cursors.Hand;
             btnCrearProyecto.FlatAppearance.BorderSize = 0;
             btnCrearProyecto.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
             btnCrearProyecto.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
             btnCrearProyecto.FlatStyle = FlatStyle.Flat;
-            btnCrearProyecto.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCrearProyecto.Font = new Font("Segoe UI Semibold", 10F);
             btnCrearProyecto.ForeColor = Color.White;
-            btnCrearProyecto.Location = new Point(128, 374);
+            btnCrearProyecto.Location = new Point(123, 385);
             btnCrearProyecto.Name = "btnCrearProyecto";
-            btnCrearProyecto.Size = new Size(170, 40);
+            btnCrearProyecto.Size = new Size(180, 42);
             btnCrearProyecto.TabIndex = 6;
-            btnCrearProyecto.Text = "Crear Proyecto";
+            btnCrearProyecto.Text = "Crear práctica";
             btnCrearProyecto.UseVisualStyleBackColor = false;
             btnCrearProyecto.Click += BtnCrearProyecto_Click;
             btnCrearProyecto.MouseEnter += BtnCrearProyecto_MouseEnter;
@@ -127,12 +140,12 @@
             // lblNombreFinal
             // 
             lblNombreFinal.AutoSize = true;
-            lblNombreFinal.BackColor = SystemColors.Control;
-            lblNombreFinal.Font = new Font("Consolas", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblNombreFinal.ForeColor = Color.SteelBlue;
-            lblNombreFinal.Location = new Point(113, 339);
+            lblNombreFinal.BackColor = Color.Transparent;
+            lblNombreFinal.Font = new Font("Segoe UI Light", 11F);
+            lblNombreFinal.ForeColor = Color.FromArgb(168, 85, 247);
+            lblNombreFinal.Location = new Point(125, 339);
             lblNombreFinal.Name = "lblNombreFinal";
-            lblNombreFinal.Size = new Size(208, 23);
+            lblNombreFinal.Size = new Size(182, 30);
             lblNombreFinal.TabIndex = 5;
             lblNombreFinal.Text = "Esperando datos...";
             lblNombreFinal.Click += LblNombreFinal_Click;
@@ -140,19 +153,22 @@
             // lblVistaPrevia
             // 
             lblVistaPrevia.AutoSize = true;
-            lblVistaPrevia.BackColor = SystemColors.Control;
-            lblVistaPrevia.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblVistaPrevia.ForeColor = Color.DarkSlateGray;
-            lblVistaPrevia.Location = new Point(155, 313);
+            lblVistaPrevia.BackColor = Color.Transparent;
+            lblVistaPrevia.Font = new Font("Segoe UI Semibold", 9F);
+            lblVistaPrevia.ForeColor = Color.White;
+            lblVistaPrevia.Location = new Point(160, 313);
             lblVistaPrevia.Name = "lblVistaPrevia";
-            lblVistaPrevia.Size = new Size(117, 25);
+            lblVistaPrevia.Size = new Size(113, 25);
             lblVistaPrevia.TabIndex = 4;
             lblVistaPrevia.Text = "Vista previa:";
             lblVistaPrevia.Click += LblVistaPrevia_Click;
             // 
             // txtObjetivo
             // 
+            txtObjetivo.BackColor = Color.FromArgb(35, 35, 38);
+            txtObjetivo.BorderStyle = BorderStyle.FixedSingle;
             txtObjetivo.Font = new Font("Segoe UI Light", 9F);
+            txtObjetivo.ForeColor = Color.White;
             txtObjetivo.Location = new Point(88, 252);
             txtObjetivo.Multiline = true;
             txtObjetivo.Name = "txtObjetivo";
@@ -164,19 +180,22 @@
             // lblObjetivo
             // 
             lblObjetivo.AutoSize = true;
-            lblObjetivo.BackColor = SystemColors.Control;
-            lblObjetivo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblObjetivo.ForeColor = Color.DarkSlateGray;
+            lblObjetivo.BackColor = Color.Transparent;
+            lblObjetivo.Font = new Font("Segoe UI Semibold", 9F);
+            lblObjetivo.ForeColor = Color.White;
             lblObjetivo.Location = new Point(115, 226);
             lblObjetivo.Name = "lblObjetivo";
-            lblObjetivo.Size = new Size(197, 25);
+            lblObjetivo.Size = new Size(193, 25);
             lblObjetivo.TabIndex = 8;
             lblObjetivo.Text = "Objetivo del ejercicio:";
             lblObjetivo.Click += LblObjetivo_Click;
             // 
             // txtNombreProyecto
             // 
+            txtNombreProyecto.BackColor = Color.FromArgb(35, 35, 38);
+            txtNombreProyecto.BorderStyle = BorderStyle.FixedSingle;
             txtNombreProyecto.Font = new Font("Segoe UI Light", 9F);
+            txtNombreProyecto.ForeColor = Color.White;
             txtNombreProyecto.Location = new Point(88, 179);
             txtNombreProyecto.Name = "txtNombreProyecto";
             txtNombreProyecto.Size = new Size(250, 31);
@@ -186,23 +205,23 @@
             // lblNombre
             // 
             lblNombre.AutoSize = true;
-            lblNombre.BackColor = SystemColors.Control;
-            lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            lblNombre.ForeColor = Color.DarkSlateGray;
+            lblNombre.BackColor = Color.Transparent;
+            lblNombre.Font = new Font("Segoe UI Semibold", 9F);
+            lblNombre.ForeColor = Color.White;
             lblNombre.Location = new Point(117, 152);
             lblNombre.Name = "lblNombre";
-            lblNombre.Size = new Size(193, 25);
+            lblNombre.Size = new Size(190, 25);
             lblNombre.TabIndex = 2;
             lblNombre.Text = "Nombre del ejercicio:";
             // 
             // lblTitulo
             // 
             lblTitulo.BackColor = Color.Transparent;
-            lblTitulo.Font = new Font("Cooper Black", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblTitulo.Font = new Font("Segoe UI Semibold", 15F);
             lblTitulo.ForeColor = Color.White;
-            lblTitulo.Location = new Point(17, 11);
+            lblTitulo.Location = new Point(23, 11);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Size = new Size(393, 58);
+            lblTitulo.Size = new Size(415, 93);
             lblTitulo.TabIndex = 7;
             lblTitulo.Text = "Automatiza la creación de proyectos de C++";
             lblTitulo.TextAlign = ContentAlignment.MiddleCenter;
@@ -210,7 +229,11 @@
             // 
             // txtTemas
             // 
+            txtTemas.BackColor = Color.FromArgb(35, 35, 38);
+            txtTemas.DropDownStyle = ComboBoxStyle.DropDownList;
+            txtTemas.FlatStyle = FlatStyle.Flat;
             txtTemas.Font = new Font("Segoe UI Light", 9F);
+            txtTemas.ForeColor = Color.White;
             txtTemas.FormattingEnabled = true;
             txtTemas.Location = new Point(88, 107);
             txtTemas.Name = "txtTemas";
@@ -221,12 +244,12 @@
             // lblTema
             // 
             lblTema.AutoSize = true;
-            lblTema.BackColor = SystemColors.Control;
-            lblTema.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblTema.ForeColor = Color.DarkSlateGray;
+            lblTema.BackColor = Color.Transparent;
+            lblTema.Font = new Font("Segoe UI Semibold", 9F);
+            lblTema.ForeColor = Color.White;
             lblTema.Location = new Point(182, 79);
             lblTema.Name = "lblTema";
-            lblTema.Size = new Size(62, 25);
+            lblTema.Size = new Size(59, 25);
             lblTema.TabIndex = 0;
             lblTema.Text = "Tema:";
             lblTema.Click += Label1_Click_1;
@@ -234,7 +257,7 @@
             // panelPrincipal
             // 
             panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
-            panelPrincipal.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x470;
+            panelPrincipal.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x4702;
             panelPrincipal.BackgroundImageLayout = ImageLayout.Stretch;
             panelPrincipal.Controls.Add(panelInicioVista);
             panelPrincipal.Controls.Add(panelRecientesVista);
@@ -258,15 +281,121 @@
             // panelInicioVista
             // 
             panelInicioVista.BackColor = Color.FromArgb(45, 45, 48);
-            panelInicioVista.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x470;
-            panelInicioVista.BackgroundImageLayout = ImageLayout.Stretch;
+            panelInicioVista.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x4702;
+            panelInicioVista.Controls.Add(panelCardConfiguracion);
+            panelInicioVista.Controls.Add(panelCardRecientes);
+            panelInicioVista.Controls.Add(panelCardNuevaPractica);
             panelInicioVista.Controls.Add(lblInicioSubtitulo);
             panelInicioVista.Controls.Add(lblInicioTitulo);
             panelInicioVista.Location = new Point(0, 0);
             panelInicioVista.Name = "panelInicioVista";
             panelInicioVista.Size = new Size(892, 470);
             panelInicioVista.TabIndex = 16;
-            panelInicioVista.Visible = false;
+            // 
+            // panelCardConfiguracion
+            // 
+            panelCardConfiguracion.BackColor = Color.FromArgb(28, 22, 40);
+            panelCardConfiguracion.Controls.Add(lblCardConfiguracionDesc);
+            panelCardConfiguracion.Controls.Add(lblCardConfiguracionTitulo);
+            panelCardConfiguracion.Cursor = Cursors.Hand;
+            panelCardConfiguracion.Location = new Point(604, 270);
+            panelCardConfiguracion.Name = "panelCardConfiguracion";
+            panelCardConfiguracion.Size = new Size(265, 80);
+            panelCardConfiguracion.TabIndex = 4;
+            // 
+            // lblCardConfiguracionDesc
+            // 
+            lblCardConfiguracionDesc.BackColor = Color.Transparent;
+            lblCardConfiguracionDesc.Font = new Font("Segoe UI Light", 8.5F);
+            lblCardConfiguracionDesc.ForeColor = Color.Silver;
+            lblCardConfiguracionDesc.Location = new Point(7, 33);
+            lblCardConfiguracionDesc.Name = "lblCardConfiguracionDesc";
+            lblCardConfiguracionDesc.Size = new Size(250, 46);
+            lblCardConfiguracionDesc.TabIndex = 1;
+            lblCardConfiguracionDesc.Text = "Ajusta las rutas donde guardarás tus prácticas y plantillas.";
+            lblCardConfiguracionDesc.TextAlign = ContentAlignment.TopCenter;
+            // 
+            // lblCardConfiguracionTitulo
+            // 
+            lblCardConfiguracionTitulo.AutoSize = true;
+            lblCardConfiguracionTitulo.BackColor = Color.Transparent;
+            lblCardConfiguracionTitulo.Font = new Font("Segoe UI Semibold", 12F);
+            lblCardConfiguracionTitulo.ForeColor = Color.White;
+            lblCardConfiguracionTitulo.Location = new Point(49, 1);
+            lblCardConfiguracionTitulo.Name = "lblCardConfiguracionTitulo";
+            lblCardConfiguracionTitulo.Size = new Size(166, 32);
+            lblCardConfiguracionTitulo.TabIndex = 0;
+            lblCardConfiguracionTitulo.Text = "Configuración";
+            // 
+            // panelCardRecientes
+            // 
+            panelCardRecientes.BackColor = Color.FromArgb(28, 22, 40);
+            panelCardRecientes.Controls.Add(lblCardRecientesDesc);
+            panelCardRecientes.Controls.Add(lblCardRecientesTitulo);
+            panelCardRecientes.Cursor = Cursors.Hand;
+            panelCardRecientes.Location = new Point(314, 270);
+            panelCardRecientes.Name = "panelCardRecientes";
+            panelCardRecientes.Size = new Size(265, 80);
+            panelCardRecientes.TabIndex = 3;
+            // 
+            // lblCardRecientesDesc
+            // 
+            lblCardRecientesDesc.BackColor = Color.Transparent;
+            lblCardRecientesDesc.Font = new Font("Segoe UI Light", 8.5F);
+            lblCardRecientesDesc.ForeColor = Color.Silver;
+            lblCardRecientesDesc.Location = new Point(35, 30);
+            lblCardRecientesDesc.Name = "lblCardRecientesDesc";
+            lblCardRecientesDesc.Size = new Size(190, 49);
+            lblCardRecientesDesc.TabIndex = 1;
+            lblCardRecientesDesc.Text = "Abre tus prácticas más recientes.";
+            lblCardRecientesDesc.TextAlign = ContentAlignment.TopCenter;
+            // 
+            // lblCardRecientesTitulo
+            // 
+            lblCardRecientesTitulo.AutoSize = true;
+            lblCardRecientesTitulo.BackColor = Color.Transparent;
+            lblCardRecientesTitulo.Font = new Font("Segoe UI Semibold", 12F);
+            lblCardRecientesTitulo.ForeColor = Color.White;
+            lblCardRecientesTitulo.Location = new Point(72, 1);
+            lblCardRecientesTitulo.Name = "lblCardRecientesTitulo";
+            lblCardRecientesTitulo.Size = new Size(117, 32);
+            lblCardRecientesTitulo.TabIndex = 0;
+            lblCardRecientesTitulo.Text = "Recientes";
+            // 
+            // panelCardNuevaPractica
+            // 
+            panelCardNuevaPractica.BackColor = Color.FromArgb(28, 22, 40);
+            panelCardNuevaPractica.Controls.Add(lblCardNuevaPracticaDesc);
+            panelCardNuevaPractica.Controls.Add(lblCardNuevaPracticaTitulo);
+            panelCardNuevaPractica.Cursor = Cursors.Hand;
+            panelCardNuevaPractica.Location = new Point(24, 270);
+            panelCardNuevaPractica.Name = "panelCardNuevaPractica";
+            panelCardNuevaPractica.Size = new Size(265, 80);
+            panelCardNuevaPractica.TabIndex = 2;
+            // 
+            // lblCardNuevaPracticaDesc
+            // 
+            lblCardNuevaPracticaDesc.BackColor = Color.Transparent;
+            lblCardNuevaPracticaDesc.Font = new Font("Segoe UI Light", 8.5F);
+            lblCardNuevaPracticaDesc.ForeColor = Color.Silver;
+            lblCardNuevaPracticaDesc.Location = new Point(12, 30);
+            lblCardNuevaPracticaDesc.Name = "lblCardNuevaPracticaDesc";
+            lblCardNuevaPracticaDesc.Size = new Size(241, 49);
+            lblCardNuevaPracticaDesc.TabIndex = 1;
+            lblCardNuevaPracticaDesc.Text = "Crea un proyecto C++ desde tu plantilla.";
+            lblCardNuevaPracticaDesc.TextAlign = ContentAlignment.TopCenter;
+            // 
+            // lblCardNuevaPracticaTitulo
+            // 
+            lblCardNuevaPracticaTitulo.AutoSize = true;
+            lblCardNuevaPracticaTitulo.BackColor = Color.Transparent;
+            lblCardNuevaPracticaTitulo.Font = new Font("Segoe UI Semibold", 12F);
+            lblCardNuevaPracticaTitulo.ForeColor = Color.White;
+            lblCardNuevaPracticaTitulo.Location = new Point(44, 1);
+            lblCardNuevaPracticaTitulo.Name = "lblCardNuevaPracticaTitulo";
+            lblCardNuevaPracticaTitulo.Size = new Size(177, 32);
+            lblCardNuevaPracticaTitulo.TabIndex = 0;
+            lblCardNuevaPracticaTitulo.Text = "Nueva práctica";
             // 
             // lblInicioSubtitulo
             // 
@@ -274,7 +403,7 @@
             lblInicioSubtitulo.BackColor = Color.Transparent;
             lblInicioSubtitulo.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblInicioSubtitulo.ForeColor = Color.Gainsboro;
-            lblInicioSubtitulo.Location = new Point(222, 234);
+            lblInicioSubtitulo.Location = new Point(225, 208);
             lblInicioSubtitulo.Name = "lblInicioSubtitulo";
             lblInicioSubtitulo.Size = new Size(442, 32);
             lblInicioSubtitulo.TabIndex = 1;
@@ -286,7 +415,7 @@
             lblInicioTitulo.BackColor = Color.Transparent;
             lblInicioTitulo.Font = new Font("Segoe UI", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblInicioTitulo.ForeColor = Color.White;
-            lblInicioTitulo.Location = new Point(155, 139);
+            lblInicioTitulo.Location = new Point(172, 139);
             lblInicioTitulo.Name = "lblInicioTitulo";
             lblInicioTitulo.Size = new Size(548, 65);
             lblInicioTitulo.TabIndex = 0;
@@ -490,7 +619,7 @@
             // 
             // panelIndicadorAD
             // 
-            panelIndicadorAD.BackColor = Color.LimeGreen;
+            panelIndicadorAD.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorAD.Location = new Point(0, 0);
             panelIndicadorAD.Name = "panelIndicadorAD";
             panelIndicadorAD.Size = new Size(3, 48);
@@ -534,7 +663,7 @@
             // 
             // panelIndicadorConfigs
             // 
-            panelIndicadorConfigs.BackColor = Color.LimeGreen;
+            panelIndicadorConfigs.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorConfigs.Location = new Point(0, 0);
             panelIndicadorConfigs.Name = "panelIndicadorConfigs";
             panelIndicadorConfigs.Size = new Size(3, 48);
@@ -578,7 +707,7 @@
             // 
             // panelIndicadorRecientes
             // 
-            panelIndicadorRecientes.BackColor = Color.LimeGreen;
+            panelIndicadorRecientes.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorRecientes.Location = new Point(0, 0);
             panelIndicadorRecientes.Name = "panelIndicadorRecientes";
             panelIndicadorRecientes.Size = new Size(3, 48);
@@ -622,7 +751,7 @@
             // 
             // panelIndicadorAP
             // 
-            panelIndicadorAP.BackColor = Color.LimeGreen;
+            panelIndicadorAP.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorAP.Location = new Point(0, 0);
             panelIndicadorAP.Name = "panelIndicadorAP";
             panelIndicadorAP.Size = new Size(3, 48);
@@ -666,7 +795,7 @@
             // 
             // panelIndicadorNP
             // 
-            panelIndicadorNP.BackColor = Color.LimeGreen;
+            panelIndicadorNP.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorNP.Location = new Point(0, 0);
             panelIndicadorNP.Name = "panelIndicadorNP";
             panelIndicadorNP.Size = new Size(3, 48);
@@ -709,7 +838,7 @@
             // 
             // panelIndicadorInicio
             // 
-            panelIndicadorInicio.BackColor = Color.LimeGreen;
+            panelIndicadorInicio.BackColor = Color.FromArgb(168, 85, 247);
             panelIndicadorInicio.Location = new Point(0, 0);
             panelIndicadorInicio.Name = "panelIndicadorInicio";
             panelIndicadorInicio.Size = new Size(4, 48);
@@ -780,7 +909,7 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImageLayout = ImageLayout.Stretch;
+            BackColor = Color.FromArgb(168, 85, 247);
             ClientSize = new Size(1178, 744);
             Controls.Add(panelMenu);
             Controls.Add(panelPrincipal);
@@ -797,6 +926,12 @@
             panelPrincipal.PerformLayout();
             panelInicioVista.ResumeLayout(false);
             panelInicioVista.PerformLayout();
+            panelCardConfiguracion.ResumeLayout(false);
+            panelCardConfiguracion.PerformLayout();
+            panelCardRecientes.ResumeLayout(false);
+            panelCardRecientes.PerformLayout();
+            panelCardNuevaPractica.ResumeLayout(false);
+            panelCardNuevaPractica.PerformLayout();
             panelRecientesVista.ResumeLayout(false);
             panelRecientesVista.PerformLayout();
             panelConfiguracionVista.ResumeLayout(false);
@@ -882,5 +1017,14 @@
         private Panel panelInicioVista;
         private Label lblInicioTitulo;
         private Label lblInicioSubtitulo;
+        private Panel panelCardNuevaPractica;
+        private Label lblCardNuevaPracticaTitulo;
+        private Label lblCardNuevaPracticaDesc;
+        private Panel panelCardRecientes;
+        private Label lblCardRecientesDesc;
+        private Label lblCardRecientesTitulo;
+        private Panel panelCardConfiguracion;
+        private Label lblCardConfiguracionDesc;
+        private Label lblCardConfiguracionTitulo;
     }
 }
