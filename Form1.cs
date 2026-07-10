@@ -1,6 +1,7 @@
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 namespace ProjectCreator {
 
     public partial class frmPrincipal : Form {
@@ -8,6 +9,18 @@ namespace ProjectCreator {
         private string rutaBase = "";
         private string rutaPlantilla = "";
         private string rutaRecientes = "";
+
+        private System.Windows.Forms.Timer timerRecalcularVista = new System.Windows.Forms.Timer();
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private void ActivarBarraTituloOscura() {
+            if (Environment.OSVersion.Version.Major >= 10) {
+                int usarModoOscuro = 1;
+                DwmSetWindowAttribute(this.Handle, 20, ref usarModoOscuro, sizeof(int));
+            }
+        }
 
         private class ProyectoReciente {
             public string Nombre { get; set; } = "";
@@ -161,6 +174,13 @@ namespace ProjectCreator {
         public frmPrincipal() {
             InitializeComponent();
 
+            ActivarBarraTituloOscura();
+
+            timerRecalcularVista.Interval = 150;
+            timerRecalcularVista.Tick += TimerRecalcularVista_Tick;
+
+            this.Resize += FrmPrincipal_Resize;
+
             ActivarDobleBuffer(this);
             ActivarDobleBuffer(panelPrincipal);
             ActivarDobleBuffer(panelInicioVista);
@@ -168,9 +188,9 @@ namespace ProjectCreator {
             ActivarDobleBuffer(panelConfiguracionVista);
             ActivarDobleBuffer(panelListaRecientes);
 
-            panelPrincipal.LocationChanged += (s, e) => ReaplicarFondoDinamico();
-            panelPrincipal.SizeChanged += (s, e) => ReaplicarFondoDinamico();
-            fondoEndForge.SizeChanged += (s, e) => ReaplicarFondoDinamico();
+            // panelPrincipal.LocationChanged += (s, e) => ReaplicarFondoDinamico();
+            // panelPrincipal.SizeChanged += (s, e) => ReaplicarFondoDinamico();
+            // fondoEndForge.SizeChanged += (s, e) => ReaplicarFondoDinamico();
 
             CargarConfiguracion();
 
@@ -269,7 +289,12 @@ namespace ProjectCreator {
             panelRecientesVista.Visible = false;
             panelConfiguracionVista.Visible = false;
 
+            CentrarPanelPrincipal();
             AplicarFondoDinamicoPanelPrincipal();
+
+            panelPrincipal.Invalidate(true);
+            panelInicioVista.Invalidate(true);
+            fondoEndForge.Invalidate(true);
         }
 
         // Activar el doble buffer para evitar parpadeos en los controles
@@ -282,9 +307,19 @@ namespace ProjectCreator {
         private void AplicarFondoDinamicoPanelPrincipal() {
             panelPrincipal.BackgroundImage = CrearRecorteFondoParaPanel(panelPrincipal);
             panelPrincipal.BackgroundImageLayout = ImageLayout.Stretch;
+            panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
 
             panelInicioVista.BackgroundImage = null;
             panelInicioVista.BackColor = Color.Transparent;
+
+            panelRecientesVista.BackgroundImage = null;
+            panelRecientesVista.BackColor = Color.Transparent;
+
+            panelConfiguracionVista.BackgroundImage = null;
+            panelConfiguracionVista.BackColor = Color.Transparent;
+
+            panelListaRecientes.BackgroundImage = null;
+            panelListaRecientes.BackColor = Color.Transparent;
         }
 
         private void ReaplicarFondoDinamico() {
@@ -298,15 +333,15 @@ namespace ProjectCreator {
         }
 
         private Image CrearRecorteFondoParaPanel(Control panelDestino) {
-            Image fondoOriginal = fondoEndForge.ImagenFondo ?? Properties.Resources.fondoproyectoEndForge;
+            Bitmap fondoRenderizado = new Bitmap(fondoEndForge.Width, fondoEndForge.Height);
+            fondoEndForge.DrawToBitmap(
+                fondoRenderizado,
+                new Rectangle(0, 0, fondoEndForge.Width, fondoEndForge.Height)
+            );
 
-            Bitmap fondoEscalado = new Bitmap(fondoEndForge.Width, fondoEndForge.Height);
-
-            using (Graphics g = Graphics.FromImage(fondoEscalado)) {
-                g.DrawImage(fondoOriginal, new Rectangle(0, 0, fondoEndForge.Width, fondoEndForge.Height));
-            }
-
-            Point posicionEnFondo = fondoEndForge.PointToClient(panelDestino.PointToScreen(Point.Empty));
+            Point posicionEnFondo = fondoEndForge.PointToClient(
+                panelDestino.PointToScreen(Point.Empty)
+            );
 
             Rectangle zonaRecorte = new Rectangle(
                 posicionEnFondo.X,
@@ -319,16 +354,49 @@ namespace ProjectCreator {
 
             using (Graphics g = Graphics.FromImage(recorte)) {
                 g.DrawImage(
-                    fondoEscalado,
+                    fondoRenderizado,
                     new Rectangle(0, 0, panelDestino.Width, panelDestino.Height),
                     zonaRecorte,
                     GraphicsUnit.Pixel
                 );
             }
 
-            fondoEscalado.Dispose();
+            fondoRenderizado.Dispose();
 
             return recorte;
+        }
+
+        private void CentrarPanelPrincipal() {
+            int espacioDisponible = this.ClientSize.Width - panelMenu.Width;
+
+            int x = panelMenu.Width + (espacioDisponible - panelPrincipal.Width) / 2;
+            int y = (this.ClientSize.Height - panelPrincipal.Height) / 2;
+
+            panelPrincipal.Location = new Point(x, y);
+        }
+
+        private void FrmPrincipal_Resize(object? sender, EventArgs e) {
+            if (WindowState == FormWindowState.Minimized)
+                return;
+
+            timerRecalcularVista.Stop();
+            timerRecalcularVista.Start();
+        }
+
+        private void TimerRecalcularVista_Tick(object? sender, EventArgs e) {
+            timerRecalcularVista.Stop();
+
+            CentrarPanelPrincipal();
+
+            fondoEndForge.Refresh();
+            fondoEndForge.Update();
+
+            AplicarFondoDinamicoPanelPrincipal();
+
+            panelPrincipal.Refresh();
+            panelPrincipal.Update();
+
+            this.Refresh();
         }
 
         private void PanelMenu_MouseEnter(object? sender, EventArgs e) {

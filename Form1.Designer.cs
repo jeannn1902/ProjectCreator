@@ -269,8 +269,6 @@
             // panelPrincipal
             // 
             panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
-            panelPrincipal.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x4702;
-            panelPrincipal.BackgroundImageLayout = ImageLayout.Stretch;
             panelPrincipal.Controls.Add(panelInicioVista);
             panelPrincipal.Controls.Add(panelRecientesVista);
             panelPrincipal.Controls.Add(panelConfiguracionVista);
@@ -292,8 +290,8 @@
             // 
             // panelInicioVista
             // 
-            panelInicioVista.BackColor = Color.FromArgb(45, 45, 48);
-            panelInicioVista.BackgroundImage = Properties.Resources.fondo_panelPrincipal_alineado_892x4702;
+            panelInicioVista.BackColor = Color.Transparent;
+            panelInicioVista.BackgroundImageLayout = ImageLayout.None;
             panelInicioVista.Controls.Add(panelCardConfiguracion);
             panelInicioVista.Controls.Add(panelCardRecientes);
             panelInicioVista.Controls.Add(panelCardNuevaPractica);
@@ -436,6 +434,7 @@
             // panelRecientesVista
             // 
             panelRecientesVista.BackColor = Color.Transparent;
+            panelRecientesVista.BackgroundImageLayout = ImageLayout.None;
             panelRecientesVista.Controls.Add(panelListaRecientes);
             panelRecientesVista.Controls.Add(lblAyudaRecientes);
             panelRecientesVista.Controls.Add(lblRecientesSubtitulo);
@@ -450,6 +449,7 @@
             // panelListaRecientes
             // 
             panelListaRecientes.BackColor = Color.Transparent;
+            panelListaRecientes.BackgroundImageLayout = ImageLayout.None;
             panelListaRecientes.Controls.Add(lblReciente10);
             panelListaRecientes.Controls.Add(lblReciente9);
             panelListaRecientes.Controls.Add(lblReciente8);
@@ -673,6 +673,7 @@
             // panelConfiguracionVista
             // 
             panelConfiguracionVista.BackColor = Color.Transparent;
+            panelConfiguracionVista.BackgroundImageLayout = ImageLayout.None;
             panelConfiguracionVista.Controls.Add(btnGuardarConfiguracion);
             panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
             panelConfiguracionVista.Controls.Add(btnCambiarRutaBase);
@@ -820,9 +821,10 @@
             panelMenu.Controls.Add(pictureBoxLogo);
             panelMenu.Controls.Add(lblMenuSubtitulo);
             panelMenu.Controls.Add(lblMenuTitulo);
-            panelMenu.Location = new Point(22, 22);
+            panelMenu.Dock = DockStyle.Left;
+            panelMenu.Location = new Point(0, 0);
             panelMenu.Name = "panelMenu";
-            panelMenu.Size = new Size(220, 700);
+            panelMenu.Size = new Size(220, 744);
             panelMenu.TabIndex = 10;
             panelMenu.Paint += PanelMenu_Paint;
             // 
@@ -1136,9 +1138,8 @@
             Controls.Add(panelPrincipal);
             Controls.Add(fondoEndForge);
             Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            MaximizeBox = false;
+            MinimumSize = new Size(1200, 800);
             Name = "frmPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "EndForge";
