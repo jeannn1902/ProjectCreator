@@ -63,6 +63,16 @@ namespace ProjectCreator.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap endforge_icono {
+            get {
+                object obj = ResourceManager.GetObject("endforge_icono", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap fondo_endforge_892x470_24bit {
             get {
                 object obj = ResourceManager.GetObject("fondo_endforge_892x470_24bit", resourceCulture);

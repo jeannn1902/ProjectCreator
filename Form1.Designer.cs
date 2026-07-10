@@ -105,6 +105,12 @@
             pictureBoxLogo = new PictureBox();
             lblMenuSubtitulo = new Label();
             lblMenuTitulo = new Label();
+            panelBarraTitulo = new Panel();
+            lblBarraTitulo = new Label();
+            pictureBoxBarraIcono = new PictureBox();
+            btnMinimizar = new Button();
+            btnMaximizar = new Button();
+            btnCerrar = new Button();
             panelPrincipal.SuspendLayout();
             panelInicioVista.SuspendLayout();
             panelCardConfiguracion.SuspendLayout();
@@ -127,6 +133,8 @@
             panelInicio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxInicio).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).BeginInit();
+            panelBarraTitulo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxBarraIcono).BeginInit();
             SuspendLayout();
             // 
             // btnCrearProyecto
@@ -806,7 +814,7 @@
             fondoEndForge.ImagenFondo = Properties.Resources.fondo_endforge_892x470_optimizado;
             fondoEndForge.Location = new Point(0, 0);
             fondoEndForge.Name = "fondoEndForge";
-            fondoEndForge.Size = new Size(1178, 744);
+            fondoEndForge.Size = new Size(1200, 800);
             fondoEndForge.TabIndex = 0;
             // 
             // panelMenu
@@ -824,7 +832,7 @@
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Location = new Point(0, 0);
             panelMenu.Name = "panelMenu";
-            panelMenu.Size = new Size(220, 744);
+            panelMenu.Size = new Size(220, 800);
             panelMenu.TabIndex = 10;
             panelMenu.Paint += PanelMenu_Paint;
             // 
@@ -1128,17 +1136,111 @@
             lblMenuTitulo.Text = "EndForge";
             lblMenuTitulo.Visible = false;
             // 
+            // panelBarraTitulo
+            // 
+            panelBarraTitulo.BackColor = Color.FromArgb(20, 16, 30);
+            panelBarraTitulo.Controls.Add(btnCerrar);
+            panelBarraTitulo.Controls.Add(btnMaximizar);
+            panelBarraTitulo.Controls.Add(btnMinimizar);
+            panelBarraTitulo.Controls.Add(lblBarraTitulo);
+            panelBarraTitulo.Controls.Add(pictureBoxBarraIcono);
+            panelBarraTitulo.Cursor = Cursors.SizeAll;
+            panelBarraTitulo.Dock = DockStyle.Top;
+            panelBarraTitulo.Location = new Point(220, 0);
+            panelBarraTitulo.Name = "panelBarraTitulo";
+            panelBarraTitulo.Size = new Size(980, 36);
+            panelBarraTitulo.TabIndex = 12;
+            // 
+            // lblBarraTitulo
+            // 
+            lblBarraTitulo.AutoSize = true;
+            lblBarraTitulo.BackColor = Color.Transparent;
+            lblBarraTitulo.Font = new Font("Segoe UI Semibold", 10F);
+            lblBarraTitulo.ForeColor = Color.White;
+            lblBarraTitulo.Location = new Point(42, 5);
+            lblBarraTitulo.Name = "lblBarraTitulo";
+            lblBarraTitulo.Size = new Size(98, 28);
+            lblBarraTitulo.TabIndex = 1;
+            lblBarraTitulo.Text = "EndForge";
+            // 
+            // pictureBoxBarraIcono
+            // 
+            pictureBoxBarraIcono.BackColor = Color.Transparent;
+            pictureBoxBarraIcono.Image = Properties.Resources.endforge_icono;
+            pictureBoxBarraIcono.Location = new Point(10, 6);
+            pictureBoxBarraIcono.Name = "pictureBoxBarraIcono";
+            pictureBoxBarraIcono.Size = new Size(24, 24);
+            pictureBoxBarraIcono.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBoxBarraIcono.TabIndex = 0;
+            pictureBoxBarraIcono.TabStop = false;
+            // 
+            // btnMinimizar
+            // 
+            btnMinimizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnMinimizar.Cursor = Cursors.Hand;
+            btnMinimizar.FlatAppearance.BorderSize = 0;
+            btnMinimizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnMinimizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(74, 35, 110);
+            btnMinimizar.FlatStyle = FlatStyle.Flat;
+            btnMinimizar.Font = new Font("Segoe UI Semibold", 10F);
+            btnMinimizar.ForeColor = Color.White;
+            btnMinimizar.Location = new Point(521, 6);
+            btnMinimizar.Name = "btnMinimizar";
+            btnMinimizar.Size = new Size(42, 36);
+            btnMinimizar.TabIndex = 2;
+            btnMinimizar.Text = "—";
+            btnMinimizar.UseVisualStyleBackColor = true;
+            // 
+            // btnMaximizar
+            // 
+            btnMaximizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnMaximizar.Cursor = Cursors.Hand;
+            btnMaximizar.FlatAppearance.BorderSize = 0;
+            btnMaximizar.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnMaximizar.FlatAppearance.MouseOverBackColor = Color.FromArgb(74, 35, 110);
+            btnMaximizar.FlatStyle = FlatStyle.Flat;
+            btnMaximizar.Font = new Font("Segoe UI Semibold", 10F);
+            btnMaximizar.ForeColor = Color.White;
+            btnMaximizar.Location = new Point(645, 8);
+            btnMaximizar.Name = "btnMaximizar";
+            btnMaximizar.Size = new Size(42, 36);
+            btnMaximizar.TabIndex = 3;
+            btnMaximizar.Text = "🗖";
+            btnMaximizar.UseVisualStyleBackColor = true;
+            // 
+            // btnCerrar
+            // 
+            btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCerrar.Cursor = Cursors.Hand;
+            btnCerrar.FlatAppearance.BorderSize = 0;
+            btnCerrar.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnCerrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(74, 35, 110);
+            btnCerrar.FlatStyle = FlatStyle.Flat;
+            btnCerrar.Font = new Font("Segoe UI Semibold", 10F);
+            btnCerrar.ForeColor = Color.White;
+            btnCerrar.Location = new Point(933, 3);
+            btnCerrar.Name = "btnCerrar";
+            btnCerrar.Size = new Size(42, 36);
+            btnCerrar.TabIndex = 4;
+            btnCerrar.Text = "X";
+            btnCerrar.UseVisualStyleBackColor = true;
+            // 
             // frmPrincipal
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(168, 85, 247);
-            ClientSize = new Size(1178, 744);
+            ClientSize = new Size(1200, 800);
+            ControlBox = false;
+            Controls.Add(panelBarraTitulo);
             Controls.Add(panelMenu);
             Controls.Add(panelPrincipal);
             Controls.Add(fondoEndForge);
             Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
+            MinimizeBox = false;
             MinimumSize = new Size(1200, 800);
             Name = "frmPrincipal";
             StartPosition = FormStartPosition.CenterScreen;
@@ -1179,6 +1281,9 @@
             panelInicio.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxInicio).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBoxLogo).EndInit();
+            panelBarraTitulo.ResumeLayout(false);
+            panelBarraTitulo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxBarraIcono).EndInit();
             ResumeLayout(false);
         }
 
@@ -1260,5 +1365,11 @@
         private Label lblReciente4;
         private Label lblReciente3;
         private Label lblReciente2;
+        private Panel panelBarraTitulo;
+        private PictureBox pictureBoxBarraIcono;
+        private Label lblBarraTitulo;
+        private Button btnMinimizar;
+        private Button btnCerrar;
+        private Button btnMaximizar;
     }
 }

@@ -1,4 +1,4 @@
-using System.Windows.Forms;
+Ôªøusing System.Windows.Forms;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,6 +14,12 @@ namespace ProjectCreator {
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
         private void ActivarBarraTituloOscura() {
             if (Environment.OSVersion.Version.Major >= 10) {
@@ -31,13 +37,13 @@ namespace ProjectCreator {
             }
         }
 
-        // Cargar la configuraciÛn desde el archivo config.txt
+        // Cargar la configuraci√≥n desde el archivo config.txt
         private void CargarConfiguracion() {
             string rutaConfig = @"C:\Users\jeanc\source\repos\Plantillas\ProjectCreator\config.txt";
             rutaRecientes = Path.Combine(Path.GetDirectoryName(rutaConfig)!, "recientes.txt");
 
             if (!File.Exists(rutaConfig)) {
-                MessageBox.Show("No se encontrÛ el archivo config.txt");
+                MessageBox.Show("No se encontr√≥ el archivo config.txt");
                 Application.Exit();
                 return;
             }
@@ -45,7 +51,7 @@ namespace ProjectCreator {
             string[] lineas = File.ReadAllLines(rutaConfig);
 
             if (lineas.Length < 2) {
-                MessageBox.Show("El archivo config.txt est· incompleto.");
+                MessageBox.Show("El archivo config.txt est√° incompleto.");
                 Application.Exit();
                 return;
             }
@@ -109,7 +115,7 @@ namespace ProjectCreator {
 
             if (!Directory.Exists(proyecto.Ruta)) {
                 MessageBox.Show(
-                    "La carpeta de esta pr·ctica ya no existe.",
+                    "La carpeta de esta pr√°ctica ya no existe.",
                     "EndForge",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
@@ -121,7 +127,7 @@ namespace ProjectCreator {
 
             if (soluciones.Length == 0) {
                 MessageBox.Show(
-                    "No se encontrÛ ning˙n archivo .sln en esta pr·ctica.",
+                    "No se encontr√≥ ning√∫n archivo .sln en esta pr√°ctica.",
                     "EndForge",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
@@ -174,6 +180,23 @@ namespace ProjectCreator {
         public frmPrincipal() {
             InitializeComponent();
 
+            PosicionarBotonesBarraTitulo();
+            panelBarraTitulo.SizeChanged += (s, e) => PosicionarBotonesBarraTitulo();
+
+            btnMinimizar.Click += BtnMinimizar_Click;
+            btnMaximizar.Click += BtnMaximizar_Click;
+            btnCerrar.Click += BtnCerrar_Click;
+
+            btnCerrar.MouseEnter += BtnCerrar_MouseEnter;
+            btnCerrar.MouseLeave += BtnCerrar_MouseLeave;
+
+            btnMinimizar.MouseLeave += BtnVentana_MouseLeave;
+            btnMaximizar.MouseLeave += BtnVentana_MouseLeave;
+
+            panelBarraTitulo.MouseDown += PanelBarraTitulo_MouseDown;
+            lblBarraTitulo.MouseDown += PanelBarraTitulo_MouseDown;
+            pictureBoxBarraIcono.MouseDown += PanelBarraTitulo_MouseDown;
+
             ActivarBarraTituloOscura();
 
             timerRecalcularVista.Interval = 150;
@@ -197,7 +220,7 @@ namespace ProjectCreator {
             btnCrearProyecto.MouseEnter += BtnCrearProyecto_MouseEnter;
             btnCrearProyecto.MouseLeave += BtnCrearProyecto_MouseLeave;
 
-            // Paneles del men˙
+            // Paneles del men√∫
             //
             // Inicio
             //
@@ -209,7 +232,7 @@ namespace ProjectCreator {
             lblInicio.Click += PanelInicio_Click;
             pictureBoxInicio.Click += PanelInicio_Click;
             //
-            // Nueva pr·ctica
+            // Nueva pr√°ctica
             //
             panelNuevaPractica.MouseEnter += PanelMenu_MouseEnter;
             panelNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
@@ -219,7 +242,7 @@ namespace ProjectCreator {
             lblNuevaPractica.Click += panelNuevaPractica_Click;
             pictureBoxNuevaPractica.Click += panelNuevaPractica_Click;
             //
-            // Abrir pr·ctica
+            // Abrir pr√°ctica
             //
             panelAbrirPractica.MouseEnter += PanelMenu_MouseEnter;
             panelAbrirPractica.MouseLeave += PanelMenu_MouseLeave;
@@ -239,7 +262,7 @@ namespace ProjectCreator {
             lblRecientes.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxRecientes.MouseLeave += PanelMenu_MouseLeave;
             //
-            // ConfiguraciÛn
+            // Configuraci√≥n
             //
             panelConfiguracion.MouseEnter += PanelMenu_MouseEnter;
             panelConfiguracion.MouseLeave += PanelMenu_MouseLeave;
@@ -259,7 +282,7 @@ namespace ProjectCreator {
             lblAcercaDe.MouseLeave += PanelMenu_MouseLeave;
             pictureBoxAcercaDe.MouseLeave += PanelMenu_MouseLeave;
             //
-            // Terminan los paneles del men˙
+            // Terminan los paneles del men√∫
             //
             // Tarjetas del Inicio
             //
@@ -330,6 +353,56 @@ namespace ProjectCreator {
                 return;
 
             AplicarFondoDinamicoPanelPrincipal();
+        }
+
+        private void PosicionarBotonesBarraTitulo() {
+            btnCerrar.Location = new Point(panelBarraTitulo.Width - btnCerrar.Width, 0);
+            btnMaximizar.Location = new Point(btnCerrar.Left - btnMaximizar.Width, 0);
+            btnMinimizar.Location = new Point(btnMaximizar.Left - btnMinimizar.Width, 0);
+        }
+
+        private void BtnMinimizar_Click(object? sender, EventArgs e) {
+            WindowState = FormWindowState.Minimized;
+        }
+
+        private void BtnMaximizar_Click(object? sender, EventArgs e) {
+            if (WindowState == FormWindowState.Maximized) {
+                WindowState = FormWindowState.Normal;
+                btnMaximizar.Text = "‚ñ°";
+            } else {
+                WindowState = FormWindowState.Maximized;
+                btnMaximizar.Text = "‚ùê";
+            }
+        }
+
+        private void BtnCerrar_Click(object? sender, EventArgs e) {
+            Close();
+        }
+
+        private void BtnCerrar_MouseEnter(object? sender, EventArgs e) {
+            btnCerrar.BackColor = Color.FromArgb(190, 40, 40);
+            btnCerrar.ForeColor = Color.White;
+        }
+
+        private void BtnCerrar_MouseLeave(object? sender, EventArgs e) {
+            btnCerrar.BackColor = Color.FromArgb(20, 16, 30);
+            btnCerrar.ForeColor = Color.White;
+        }
+
+        private void BtnVentana_MouseLeave(object? sender, EventArgs e) {
+            Button? boton = sender as Button;
+
+            if (boton != null) {
+                boton.BackColor = Color.FromArgb(20, 16, 30);
+                boton.ForeColor = Color.White;
+            }
+        }
+
+        private void PanelBarraTitulo_MouseDown(object? sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Left) {
+                ReleaseCapture();
+                SendMessage(this.Handle, 0x112, 0xf012, 0);
+            }
         }
 
         private Image CrearRecorteFondoParaPanel(Control panelDestino) {
@@ -467,7 +540,7 @@ namespace ProjectCreator {
                     SearchOption.TopDirectoryOnly);
 
                 if (soluciones.Length == 0) {
-                    MessageBox.Show("No se encontrÛ ning˙n archivo .sln en la carpeta seleccionada.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("No se encontr√≥ ning√∫n archivo .sln en la carpeta seleccionada.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     RestaurarColorPanel(panelAbrirPractica);
                     return;
                 }
@@ -520,10 +593,10 @@ namespace ProjectCreator {
             MessageBox.Show(
                 "EndForge 1.0\n\n" +
                 "Desarrollado por:\n" +
-                "Jeancarlo PÈrez PÈrez\n\n" +
-                "Herramienta para automatizar la creaciÛn y gestiÛn " +
-                "de pr·cticas de C++.\n\n" +
-                "© 2026",
+                "Jeancarlo P√©rez P√©rez\n\n" +
+                "Herramienta para automatizar la creaci√≥n y gesti√≥n " +
+                "de pr√°cticas de C++.\n\n" +
+                "¬© 2026",
                 "Acerca de EndForge",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
@@ -631,7 +704,7 @@ namespace ProjectCreator {
             char[] caracteresInvalidos = Path.GetInvalidFileNameChars();
 
             if (nombreUsuario.IndexOfAny(caracteresInvalidos) >= 0) {
-                MessageBox.Show("El nombre contiene caracteres no v·lidos.");
+                MessageBox.Show("El nombre contiene caracteres no v√°lidos.");
                 return;
             }
 
@@ -686,11 +759,11 @@ namespace ProjectCreator {
             ## Objetivo
             {txtObjetivo.Text.Trim()}
 
-            ## Fecha de creaciÛn
+            ## Fecha de creaci√≥n
             {DateTime.Now:dd/MM/yyyy}
 
-            ## DescripciÛn
-            Ejercicio creado autom·ticamente mediante EndForge.";
+            ## Descripci√≥n
+            Ejercicio creado autom√°ticamente mediante EndForge.";
 
             string rutaReadme = Path.Combine(rutaProyecto, "README.md");
 
@@ -698,7 +771,7 @@ namespace ProjectCreator {
             string rutaSolucion = Path.Combine(rutaProyecto, nombreProyecto + ".sln");
 
             if (!File.Exists(rutaSolucion)) {
-                MessageBox.Show("No se encontrÛ la soluciÛn:\n" + rutaSolucion);
+                MessageBox.Show("No se encontr√≥ la soluci√≥n:\n" + rutaSolucion);
                 return;
             }
 
@@ -713,7 +786,7 @@ namespace ProjectCreator {
             txtObjetivo.Clear();
 
             MessageBox.Show(
-                "El proyecto se creÛ correctamente.\n\n°Visual Studio se abrir· autom·ticamente!",
+                "El proyecto se cre√≥ correctamente.\n\n¬°Visual Studio se abrir√° autom√°ticamente!",
                 "EndForge",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
@@ -759,7 +832,7 @@ namespace ProjectCreator {
 
             if (rutaSolucion == null) {
                 MessageBox.Show(
-                    "No se encontrÛ la soluciÛn del proyecto.",
+                    "No se encontr√≥ la soluci√≥n del proyecto.",
                     "EndForge",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -811,7 +884,7 @@ namespace ProjectCreator {
             rutaBase = txtRutaBaseConfig.Text;
             rutaPlantilla = txtRutaPlantillaConfig.Text;
 
-            MessageBox.Show("ConfiguraciÛn guardada correctamente.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Configuraci√≥n guardada correctamente.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void ListRecientes_SelectedIndexChanged(object sender, EventArgs e) {

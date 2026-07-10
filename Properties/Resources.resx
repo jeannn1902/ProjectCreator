@@ -136,6 +136,9 @@
   <data name="FondodeProyectoAutocpp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Recursos\FondodeProyectoAutocpp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="fondo_panelPrincipal_alineado_892x4703" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Recursos\fondo_panelPrincipal_alineado_892x470.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="fondo_endforge_892x470_optimizado1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Recursos\fondo_endforge_892x470_optimizado.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -145,7 +148,7 @@
   <data name="fondo_endforge_892x470_24bit" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Recursos\fondo_endforge_892x470_24bit.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="fondo_panelPrincipal_alineado_892x4703" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Recursos\fondo_panelPrincipal_alineado_892x470.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="endforge_icono" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Recursos\endforge_icono.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
