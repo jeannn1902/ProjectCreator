@@ -31,7 +31,7 @@ public class ProyectoService {
     }
 
     // =============================
-    // Actualización de archivos internos
+    // Actualización del contenido del proyecto
     // =============================
     public void ActualizarReferencias(string rutaProyecto, string nombreProyecto) {
         // Reemplazar "00_Plantilla" en el contenido de los archivos
@@ -50,7 +50,7 @@ public class ProyectoService {
     }
 
     // =============================
-    // Copia de la plantilla
+    // Copia y preparación de la plantilla
     // =============================
     public void CopiarPlantilla(string rutaPlantilla, string rutaProyecto) {
         // TODO: Sustituir por un sistema de copia inteligente.

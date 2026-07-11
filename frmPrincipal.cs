@@ -1,12 +1,14 @@
 ﻿using EndForge.Services;
 using System.Diagnostics;
 using System.Linq;
+using EndForge.Models;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 namespace EndForge {
 
     public partial class frmPrincipal : Form {
         private readonly ProyectoService proyectoService = new();
+        private readonly RecientesService recientesService = new();
         private Panel panelSeleccionado;
         private string rutaBase = "";
         private string rutaPlantilla = "";
@@ -27,15 +29,6 @@ namespace EndForge {
             if (Environment.OSVersion.Version.Major >= 10) {
                 int usarModoOscuro = 1;
                 DwmSetWindowAttribute(this.Handle, 20, ref usarModoOscuro, sizeof(int));
-            }
-        }
-
-        private class ProyectoReciente {
-            public string Nombre { get; set; } = "";
-            public string Ruta { get; set; } = "";
-
-            public override string ToString() {
-                return Nombre;
             }
         }
 
@@ -104,23 +97,7 @@ namespace EndForge {
         }
 
         private void GuardarProyectoReciente(string rutaProyecto) {
-            List<string> recientes = new List<string>();
 
-            if (File.Exists(rutaRecientes)) {
-                recientes = File.ReadAllLines(rutaRecientes).ToList();
-            }
-
-            string nombreProyecto = Path.GetFileName(rutaProyecto);
-            string registro = nombreProyecto + "|" + rutaProyecto;
-
-            recientes.RemoveAll(x => x.EndsWith("|" + rutaProyecto));
-            recientes.Insert(0, registro);
-
-            if (recientes.Count > 10) {
-                recientes = recientes.Take(10).ToList();
-            }
-
-            File.WriteAllLines(rutaRecientes, recientes);
         }
 
         private List<Label> ObtenerLabelsRecientes() {
@@ -820,8 +797,8 @@ namespace EndForge {
             try {
                 proyectoService.CrearProyecto(rutaPlantilla,rutaProyecto,nombreProyecto,temaSeleccionado,txtObjetivo.Text.Trim());
 
-                GuardarProyectoReciente(rutaProyecto);
-                
+                recientesService.GuardarProyectoReciente(rutaRecientes,rutaProyecto);
+
                 txtNombreProyecto.Clear();
                 txtObjetivo.Clear();
 
