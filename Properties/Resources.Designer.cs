@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ProjectCreator.Properties {
+namespace EndForge.Properties {
     using System;
     
     

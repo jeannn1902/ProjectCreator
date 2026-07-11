@@ -1,10 +1,12 @@
-﻿using System.Windows.Forms;
+﻿using EndForge.Services;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-namespace ProjectCreator {
+using System.Windows.Forms;
+namespace EndForge {
 
     public partial class frmPrincipal : Form {
+        private readonly ProyectoService proyectoService = new();
         private Panel panelSeleccionado;
         private string rutaBase = "";
         private string rutaPlantilla = "";
@@ -37,14 +39,51 @@ namespace ProjectCreator {
             }
         }
 
+        private int ObtenerSiguienteNumero(string rutaTema) {
+
+            if (!Directory.Exists(rutaTema))
+                return 1;
+
+            string[] carpetas = Directory.GetDirectories(rutaTema);
+
+            int mayorNumero = 0;
+
+            foreach (string carpeta in carpetas) {
+
+                string nombreCarpeta = Path.GetFileName(carpeta);
+
+                string[] partes = nombreCarpeta.Split('_');
+
+                if (partes.Length == 0)
+                    continue;
+
+                if (int.TryParse(partes[0], out int numero)) {
+
+                    if (numero > mayorNumero)
+                        mayorNumero = numero;
+                }
+            }
+
+            return mayorNumero + 1;
+        }
+
         // Cargar la configuración desde el archivo config.txt
         private void CargarConfiguracion() {
-            string rutaConfig = @"C:\Users\jeanc\source\repos\Plantillas\ProjectCreator\config.txt";
+            string carpetaDatos = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EndForge"
+            );
+            string rutaConfig = Path.Combine(carpetaDatos, "config.txt");
+
+            if (!Directory.Exists(carpetaDatos)) {
+                Directory.CreateDirectory(carpetaDatos);
+            }
+
             rutaRecientes = Path.Combine(Path.GetDirectoryName(rutaConfig)!, "recientes.txt");
 
             if (!File.Exists(rutaConfig)) {
-                MessageBox.Show("No se encontró el archivo config.txt");
-                Application.Exit();
+                rutaBase = "";
+                rutaPlantilla = "";
                 return;
             }
 
@@ -180,6 +219,9 @@ namespace ProjectCreator {
         public frmPrincipal() {
             InitializeComponent();
 
+            btnCerrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(190, 40, 40);
+            btnCerrar.FlatAppearance.MouseDownBackColor = Color.FromArgb(140, 25, 25);
+
             PosicionarBotonesBarraTitulo();
             panelBarraTitulo.SizeChanged += (s, e) => PosicionarBotonesBarraTitulo();
             //
@@ -188,6 +230,9 @@ namespace ProjectCreator {
             btnMinimizar.Click += BtnMinimizar_Click;
             btnMaximizar.Click += BtnMaximizar_Click;
             btnCerrar.Click += BtnCerrar_Click;
+            //
+            btnCerrar.MouseEnter += BtnCerrar_MouseEnter;
+            btnCerrar.MouseLeave += BtnCerrar_MouseLeave;
             //
             btnCerrar.MouseEnter += BtnCerrar_MouseEnter;
             btnCerrar.MouseLeave += BtnCerrar_MouseLeave;
@@ -384,6 +429,14 @@ namespace ProjectCreator {
             btnMinimizar.Location = new Point(btnMaximizar.Left - btnMinimizar.Width, 0);
         }
 
+        private void ActualizarBotonMaximizar() {
+            if (WindowState == FormWindowState.Maximized) {
+                btnMaximizar.Text = "❐";
+            } else {
+                btnMaximizar.Text = "□";
+            }
+        }
+
         private void BtnMinimizar_Click(object? sender, EventArgs e) {
             WindowState = FormWindowState.Minimized;
         }
@@ -391,11 +444,11 @@ namespace ProjectCreator {
         private void BtnMaximizar_Click(object? sender, EventArgs e) {
             if (WindowState == FormWindowState.Maximized) {
                 WindowState = FormWindowState.Normal;
-                btnMaximizar.Text = "□";
             } else {
                 WindowState = FormWindowState.Maximized;
-                btnMaximizar.Text = "❐";
             }
+
+            ActualizarBotonMaximizar();
         }
 
         private void BtnCerrar_Click(object? sender, EventArgs e) {
@@ -474,6 +527,8 @@ namespace ProjectCreator {
         private void FrmPrincipal_Resize(object? sender, EventArgs e) {
             if (WindowState == FormWindowState.Minimized)
                 return;
+
+            ActualizarBotonMaximizar();
 
             timerRecalcularVista.Stop();
             timerRecalcularVista.Start();
@@ -696,6 +751,18 @@ namespace ProjectCreator {
             panelInicio.BackColor = Color.FromArgb(111, 45, 189);
 
             AplicarFondoDinamicoPanelPrincipal();
+
+            if (string.IsNullOrWhiteSpace(rutaBase) || string.IsNullOrWhiteSpace(rutaPlantilla)) {
+                PanelConfiguracion_Click(panelConfiguracion, EventArgs.Empty);
+
+                MessageBox.Show(
+                    "¡Bienvenido a EndForge!\n\n" +
+                    "Antes de comenzar, configura la carpeta de tus prácticas y la plantilla oficial.",
+                    "Configuración inicial",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
         }
 
         private void ActualizarVistaPrevia() {
@@ -708,12 +775,8 @@ namespace ProjectCreator {
 
             string temaSeleccionado = txtTemas.Text;
             string rutaTema = Path.Combine(rutaBase, temaSeleccionado);
-            int siguienteNumero = 1;
 
-            if (Directory.Exists(rutaTema)) {
-                string[] carpetas = Directory.GetDirectories(rutaTema);
-                siguienteNumero = carpetas.Length + 1;
-            }
+            int siguienteNumero = ObtenerSiguienteNumero(rutaTema);
 
             string numeroFormateado = siguienteNumero.ToString("00");
             lblNombreFinal.Text = numeroFormateado + "_" + txtNombreProyecto.Text.Trim();
@@ -734,15 +797,15 @@ namespace ProjectCreator {
             string temaSeleccionado = txtTemas.Text;
             string nombreProyecto = lblNombreFinal.Text;
             string nombreUsuario = txtNombreProyecto.Text.Trim();
+            temaSeleccionado = temaSeleccionado.Trim();
+            nombreProyecto = nombreProyecto.Trim();
 
-            if (nombreUsuario == "") {
+            if (string.IsNullOrWhiteSpace(nombreUsuario)) {
                 MessageBox.Show("Escribe un nombre para el proyecto.");
                 return;
             }
 
-            char[] caracteresInvalidos = Path.GetInvalidFileNameChars();
-
-            if (nombreUsuario.IndexOfAny(caracteresInvalidos) >= 0) {
+            if (nombreUsuario.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
                 MessageBox.Show("El nombre contiene caracteres no válidos.");
                 return;
             }
@@ -754,82 +817,32 @@ namespace ProjectCreator {
                 return;
             }
 
-            Directory.CreateDirectory(rutaProyecto);
+            try {
+                proyectoService.CrearProyecto(rutaPlantilla,rutaProyecto,nombreProyecto,temaSeleccionado,txtObjetivo.Text.Trim());
 
-            // Copiar archivos de la plantilla al nuevo proyecto
-            foreach (string archivo in Directory.GetFiles(rutaPlantilla)) {
-                string nombreArchivo = Path.GetFileName(archivo);
-                string destino = Path.Combine(rutaProyecto, nombreArchivo);
-                File.Copy(archivo, destino);
-            }
+                GuardarProyectoReciente(rutaProyecto);
+                
+                txtNombreProyecto.Clear();
+                txtObjetivo.Clear();
 
-            // Renombrar archivos que contienen "00_Plantilla" en su nombre
-            foreach (string archivo in Directory.GetFiles(rutaProyecto)) {
-                string nombreArchivo = Path.GetFileName(archivo);
+                MessageBox.Show(
+                    "El proyecto se creó correctamente.\n\n¡Visual Studio se abrirá automáticamente!",
+                    "EndForge",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
-                if (nombreArchivo.Contains("00_Plantilla")) {
-                    string nuevoNombre = nombreArchivo.Replace("00_Plantilla", nombreProyecto);
-                    string nuevaRuta = Path.Combine(rutaProyecto, nuevoNombre);
-                    File.Move(archivo, nuevaRuta);
+            } catch (Exception ex) {
+                if (Directory.Exists(rutaProyecto)) {
+                    Directory.Delete(rutaProyecto, true);
                 }
+
+                MessageBox.Show(
+                    "Ocurrió un error al crear la práctica.\n\n" + ex.Message,
+                    "EndForge",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
-
-
-            // Reemplazar "00_Plantilla" en el contenido de los archivos
-            foreach (string archivo in Directory.GetFiles(rutaProyecto)) {
-                string extension = Path.GetExtension(archivo);
-
-                if (extension == ".sln" || extension == ".vcxproj" || extension == ".filters" ||
-                    extension == ".cpp" || extension == ".user") {
-
-                    string contenido = File.ReadAllText(archivo);
-                    contenido = contenido.Replace("00_Plantilla", nombreProyecto);
-                    File.WriteAllText(archivo, contenido);
-                }
-            }
-
-            //Crear el archivo README.md
-            string contenidoReadme =
-            $@"# {nombreProyecto}
-
-            ## Tema
-            {temaSeleccionado}
-
-            ## Objetivo
-            {txtObjetivo.Text.Trim()}
-
-            ## Fecha de creación
-            {DateTime.Now:dd/MM/yyyy}
-
-            ## Descripción
-            Ejercicio creado automáticamente mediante EndForge.";
-
-            string rutaReadme = Path.Combine(rutaProyecto, "README.md");
-
-            File.WriteAllText(rutaReadme, contenidoReadme);
-            string rutaSolucion = Path.Combine(rutaProyecto, nombreProyecto + ".sln");
-
-            if (!File.Exists(rutaSolucion)) {
-                MessageBox.Show("No se encontró la solución:\n" + rutaSolucion);
-                return;
-            }
-
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo() {
-                FileName = rutaSolucion,
-                UseShellExecute = true
-            });
-
-            GuardarProyectoReciente(rutaProyecto);
-
-            txtNombreProyecto.Clear();
-            txtObjetivo.Clear();
-
-            MessageBox.Show(
-                "El proyecto se creó correctamente.\n\n¡Visual Studio se abrirá automáticamente!",
-                "EndForge",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
         }
 
         private void LblNombreFinal_Click(object sender, EventArgs e) {
@@ -908,22 +921,77 @@ namespace ProjectCreator {
             }
         }
 
-        private void BtnGuardarConfiguracion_Click(object sender, EventArgs e) {
+        private void BtnGuardarConfiguracion_Click(object sender, EventArgs e) {    
             if (!Directory.Exists(txtRutaBaseConfig.Text) || !Directory.Exists(txtRutaPlantillaConfig.Text)) {
                 MessageBox.Show("Una de las rutas seleccionadas no existe.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string rutaConfig = @"C:\Users\jeanc\source\repos\Plantillas\ProjectCreator\config.txt";
+            string[] soluciones = Directory.GetFiles(txtRutaPlantillaConfig.Text,
+                "*.sln",
+                SearchOption.TopDirectoryOnly
+                );
+
+            if (soluciones.Length == 0) {
+                MessageBox.Show(
+                    "La carpeta seleccionada no contiene una plantilla válida de EndForge.",
+                    "EndForge",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            string[] proyectos = Directory.GetFiles(txtRutaPlantillaConfig.Text,
+                "*.vcxproj",
+                SearchOption.AllDirectories
+                );
+
+            if (proyectos.Length == 0) {
+                MessageBox.Show(
+                    "La plantilla no contiene ningún proyecto de Visual Studio (.vcxproj).",
+                    "EndForge",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            string[] cpp = Directory.GetFiles(txtRutaPlantillaConfig.Text,
+                "*.cpp",
+                SearchOption.AllDirectories
+                );
+
+            if (cpp.Length == 0) {
+                MessageBox.Show(
+                    "La plantilla no contiene archivos C++ (.cpp).",
+                    "EndForge",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            string carpetaDatos = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "EndForge"
+            );
+
+            string rutaConfig = Path.Combine(carpetaDatos, "config.txt");
 
             File.WriteAllLines(rutaConfig, new string[] {
                 txtRutaBaseConfig.Text, txtRutaPlantillaConfig.Text
             });
 
-            rutaBase = txtRutaBaseConfig.Text;
-            rutaPlantilla = txtRutaPlantillaConfig.Text;
+            CargarConfiguracion();
 
-            MessageBox.Show("Configuración guardada correctamente.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Configuración guardada correctamente.",
+                "EndForge",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            PanelInicio_Click(panelInicio, EventArgs.Empty);
+            CargarRecientes();
         }
 
         private void ListRecientes_SelectedIndexChanged(object sender, EventArgs e) {

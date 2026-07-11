@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace ProjectCreator {
+namespace EndForge {
     public class FondoEndForge : Control {
 
         private Image? imagenFondo;

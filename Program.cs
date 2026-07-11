@@ -2,7 +2,7 @@ using System.Resources;
 
 [assembly: NeutralResourcesLanguage("es-MX")]
 
-namespace ProjectCreator
+namespace EndForge
 {
     internal static class Program
     {

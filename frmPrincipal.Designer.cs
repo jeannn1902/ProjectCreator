@@ -1,4 +1,4 @@
-﻿namespace ProjectCreator
+﻿namespace EndForge
 {
     partial class frmPrincipal
     {
@@ -1156,8 +1156,8 @@
             btnCerrar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnCerrar.Cursor = Cursors.Hand;
             btnCerrar.FlatAppearance.BorderSize = 0;
-            btnCerrar.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
-            btnCerrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(74, 35, 110);
+            btnCerrar.FlatAppearance.MouseDownBackColor = Color.FromArgb(140, 25, 25);
+            btnCerrar.FlatAppearance.MouseOverBackColor = Color.FromArgb(190, 40, 40);
             btnCerrar.FlatStyle = FlatStyle.Flat;
             btnCerrar.Font = new Font("Segoe UI Semibold", 10F);
             btnCerrar.ForeColor = Color.White;
