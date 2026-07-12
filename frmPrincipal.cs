@@ -727,16 +727,7 @@ namespace EndForge {
         }
 
         private void FrmPrincipal_Load(object sender, EventArgs e) {
-            txtTemas.Items.Add("01_Variables");
-            txtTemas.Items.Add("02_Condicionales");
-            txtTemas.Items.Add("03_Ciclos");
-            txtTemas.Items.Add("04_Funciones");
-            txtTemas.Items.Add("05_Strings");
-            txtTemas.Items.Add("06_Arrays");
-            txtTemas.Items.Add("07_Structs");
-            txtTemas.Items.Add("08_Vectores");
-            txtTemas.Items.Add("09_Archivos");
-            txtTemas.Items.Add("10_POO");
+            CargarTemas();
 
             txtTemas.SelectedIndex = 0;
 
@@ -768,6 +759,27 @@ namespace EndForge {
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
+            }
+        }
+
+        private void CargarTemas() {
+            txtTemas.Items.Clear();
+
+            if (!Directory.Exists(rutaBase))
+                return;
+
+            string[] carpetas = Directory.GetDirectories(rutaBase);
+
+            foreach (string carpeta in carpetas) {
+                string nombreCarpeta = Path.GetFileName(carpeta);
+
+                if (nombreCarpeta.StartsWith("."))
+                    continue;
+                txtTemas.Items.Add(nombreCarpeta);
+            }
+
+            if (txtTemas.Items.Count > 0) {
+                txtTemas.SelectedIndex = 0;
             }
         }
 
