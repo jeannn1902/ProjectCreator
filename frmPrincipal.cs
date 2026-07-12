@@ -737,7 +737,9 @@ namespace EndForge {
         private void FrmPrincipal_Load(object sender, EventArgs e) {
             CargarTemas();
 
-            txtTemas.SelectedIndex = 0;
+            if (txtTemas.Items.Count > 0) {
+                txtTemas.SelectedIndex = 0;
+            }
 
             btnCrearProyecto.Enabled = false;
 
@@ -768,6 +770,9 @@ namespace EndForge {
                     MessageBoxIcon.Information
                 );
             }
+
+            txtBuscarReciente.Text = "Buscar práctica...";
+            txtBuscarReciente.ForeColor = Color.Gray;
         }
 
         private void CargarTemas() {
@@ -967,8 +972,11 @@ namespace EndForge {
         }
 
         private void BtnGuardarConfiguracion_Click(object sender, EventArgs e) {
+            lblEstadoConfiguracion.Visible = false;
             if (!Directory.Exists(txtRutaBaseConfig.Text) || !Directory.Exists(txtRutaPlantillaConfig.Text)) {
-                MessageBox.Show("Una de las rutas seleccionadas no existe.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                lblEstadoConfiguracion.Text = "❌ Una de las rutas seleccionadas no existe.";
+                lblEstadoConfiguracion.ForeColor = Color.IndianRed;
+                lblEstadoConfiguracion.Visible = true;
                 return;
             }
 
@@ -978,12 +986,9 @@ namespace EndForge {
                 );
 
             if (soluciones.Length == 0) {
-                MessageBox.Show(
-                    "La carpeta seleccionada no contiene una plantilla válida de EndForge.",
-                    "EndForge",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                lblEstadoConfiguracion.Text = "❌ Plantilla de EndForge no válida.";
+                lblEstadoConfiguracion.ForeColor = Color.LightCoral;
+                lblEstadoConfiguracion.Visible = true;
                 return;
             }
 
@@ -993,12 +998,9 @@ namespace EndForge {
                 );
 
             if (proyectos.Length == 0) {
-                MessageBox.Show(
-                    "La plantilla no contiene ningún proyecto de Visual Studio (.vcxproj).",
-                    "EndForge",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                lblEstadoConfiguracion.Text = "❌ No se encontró un proyecto C++.";
+                lblEstadoConfiguracion.ForeColor = Color.LightCoral;
+                lblEstadoConfiguracion.Visible = true;
                 return;
             }
 
@@ -1008,12 +1010,9 @@ namespace EndForge {
                 );
 
             if (cpp.Length == 0) {
-                MessageBox.Show(
-                    "La plantilla no contiene archivos C++ (.cpp).",
-                    "EndForge",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                lblEstadoConfiguracion.Text = "❌ No se encontraron archivos C++.";
+                lblEstadoConfiguracion.ForeColor = Color.LightCoral;
+                lblEstadoConfiguracion.Visible = true;
                 return;
             }
 
@@ -1030,12 +1029,11 @@ namespace EndForge {
 
             CargarConfiguracion();
 
-            MessageBox.Show("Configuración guardada correctamente.",
-                "EndForge",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            lblEstadoConfiguracion.Text = "✅ Cambios guardados.";
+            lblEstadoConfiguracion.ForeColor = Color.LightGreen;
+            lblEstadoConfiguracion.Visible = true;
 
-            PanelInicio_Click(panelInicio, EventArgs.Empty);
+            // PanelInicio_Click(panelInicio, EventArgs.Empty);
             CargarRecientes();
         }
 
@@ -1148,6 +1146,18 @@ namespace EndForge {
             }
         }
 
+        private void TxtBuscarReciente_Enter(object sender, EventArgs e) {
+            if (txtBuscarReciente.Text == "Buscar práctica...") {
+                txtBuscarReciente.Text = "";
+                txtBuscarReciente.ForeColor = Color.White;
+            }
+        }
 
+        private void TxtBuscarReciente_Leave(object sender, EventArgs e) {
+            if (string.IsNullOrWhiteSpace(txtBuscarReciente.Text)) {
+                txtBuscarReciente.Text = "Buscar práctica...";
+                txtBuscarReciente.ForeColor = Color.Gray;
+            }
+        }
     }
 }
