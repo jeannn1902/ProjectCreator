@@ -68,10 +68,7 @@ namespace EndForge {
 
         // Cargar la configuración desde el archivo config.txt
         private void CargarConfiguracion() {
-            string carpetaDatos = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "EndForge"
-            );
+            string carpetaDatos = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EndForge");
             string rutaConfig = Path.Combine(carpetaDatos, "config.txt");
 
             if (!Directory.Exists(carpetaDatos)) {
@@ -102,6 +99,15 @@ namespace EndForge {
             }
 
             ValidarFormulario();
+
+            if (!string.IsNullOrWhiteSpace(rutaBase) && !string.IsNullOrWhiteSpace(rutaPlantilla)) {
+                lblEstadoConfiguracion.Text = "✅ Configuración lista.";
+                lblEstadoConfiguracion.ForeColor = Color.LightGreen;
+                lblEstadoConfiguracion.Visible = true;
+            } else {
+                lblEstadoConfiguracion.Visible = false;
+            }
+
         }
 
         private void GuardarProyectoReciente(string rutaProyecto) {

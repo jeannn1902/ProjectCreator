@@ -167,15 +167,15 @@
             // 
             // lblNombreFinal
             // 
-            lblNombreFinal.AutoSize = true;
             lblNombreFinal.BackColor = Color.Transparent;
             lblNombreFinal.Font = new Font("Segoe UI Light", 11F);
             lblNombreFinal.ForeColor = Color.FromArgb(168, 85, 247);
-            lblNombreFinal.Location = new Point(140, 339);
+            lblNombreFinal.Location = new Point(35, 339);
             lblNombreFinal.Name = "lblNombreFinal";
-            lblNombreFinal.Size = new Size(182, 30);
+            lblNombreFinal.Size = new Size(350, 30);
             lblNombreFinal.TabIndex = 5;
             lblNombreFinal.Text = "Esperando datos...";
+            lblNombreFinal.TextAlign = ContentAlignment.MiddleCenter;
             lblNombreFinal.Click += LblNombreFinal_Click;
             // 
             // lblVistaPrevia
@@ -225,6 +225,7 @@
             txtNombreProyecto.Font = new Font("Segoe UI Light", 9F);
             txtNombreProyecto.ForeColor = Color.White;
             txtNombreProyecto.Location = new Point(88, 179);
+            txtNombreProyecto.MaxLength = 35;
             txtNombreProyecto.Name = "txtNombreProyecto";
             txtNombreProyecto.Size = new Size(250, 31);
             txtNombreProyecto.TabIndex = 3;
