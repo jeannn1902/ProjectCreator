@@ -114,6 +114,7 @@
             btnMinimizar = new Button();
             lblBarraTitulo = new Label();
             pictureBoxBarraIcono = new PictureBox();
+            txtBuscarReciente = new TextBox();
             panelPrincipal.SuspendLayout();
             panelInicioVista.SuspendLayout();
             panelCardContinuar.SuspendLayout();
@@ -495,6 +496,7 @@
             // 
             panelRecientesVista.BackColor = Color.Transparent;
             panelRecientesVista.BackgroundImageLayout = ImageLayout.None;
+            panelRecientesVista.Controls.Add(txtBuscarReciente);
             panelRecientesVista.Controls.Add(panelListaRecientes);
             panelRecientesVista.Controls.Add(lblAyudaRecientes);
             panelRecientesVista.Controls.Add(lblRecientesSubtitulo);
@@ -1277,6 +1279,15 @@
             pictureBoxBarraIcono.TabIndex = 0;
             pictureBoxBarraIcono.TabStop = false;
             // 
+            // txtBuscarReciente
+            // 
+            txtBuscarReciente.Location = new Point(100, 220);
+            txtBuscarReciente.Name = "txtBuscarReciente";
+            txtBuscarReciente.Size = new Size(150, 31);
+            txtBuscarReciente.TabIndex = 16;
+            txtBuscarReciente.Text = "Buscar práctica...";
+            txtBuscarReciente.TextChanged += TxtBuscarReciente_TextChanged;
+            // 
             // frmPrincipal
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -1428,5 +1439,6 @@
         private Panel panelCardContinuar;
         private Label lblCardContinuarTitulo;
         private Label lblCardContinuarDesc;
+        private TextBox txtBuscarReciente;
     }
 }

@@ -60,6 +60,12 @@ namespace EndForge {
             return mayorNumero + 1;
         }
 
+        private void MostrarVistaPreviaVacia() {
+            lblNombreFinal.Text = "Esperando datos...";
+            lblNombreFinal.ForeColor = Color.FromArgb(168, 85, 247);
+            lblNombreFinal.Font = new Font("Segoe UI Light", 11F, FontStyle.Italic);
+        }
+
         // Cargar la configuración desde el archivo config.txt
         private void CargarConfiguracion() {
             string carpetaDatos = Path.Combine(
@@ -94,6 +100,8 @@ namespace EndForge {
             if (!File.Exists(rutaRecientes)) {
                 File.Create(rutaRecientes).Close();
             }
+
+            ValidarFormulario();
         }
 
         private void GuardarProyectoReciente(string rutaProyecto) {
@@ -768,7 +776,7 @@ namespace EndForge {
             if (!Directory.Exists(rutaBase))
                 return;
 
-            string[] carpetas = Directory.GetDirectories(rutaBase);
+            string[] carpetas = Directory.GetDirectories(rutaBase).OrderBy(c => c).ToArray();
 
             foreach (string carpeta in carpetas) {
                 string nombreCarpeta = Path.GetFileName(carpeta);
@@ -784,6 +792,7 @@ namespace EndForge {
                 if (!int.TryParse(partes[0], out _))
                     continue;
                 txtTemas.Items.Add(nombreCarpeta);
+                ActualizarVistaPrevia();
             }
 
             if (txtTemas.Items.Count > 0) {
@@ -793,9 +802,7 @@ namespace EndForge {
 
         private void ActualizarVistaPrevia() {
             if (txtTemas.SelectedItem == null || txtNombreProyecto.Text.Trim() == "") {
-                lblNombreFinal.Text = "Esperando datos...";
-                lblNombreFinal.ForeColor = Color.FromArgb(168, 85, 247);
-                lblNombreFinal.Font = new Font("Segoe UI Light", 11F, FontStyle.Italic);
+                MostrarVistaPreviaVacia();
                 return;
             }
 
@@ -811,8 +818,12 @@ namespace EndForge {
         }
 
         private void ValidarFormulario() {
-            btnCrearProyecto.Enabled = txtNombreProyecto.Text.Trim() != "" &&
-            txtObjetivo.Text.Trim() != "";
+            btnCrearProyecto.Enabled =
+                txtTemas.SelectedItem != null &&
+                !string.IsNullOrWhiteSpace(txtNombreProyecto.Text) &&
+                !string.IsNullOrWhiteSpace(txtObjetivo.Text) &&
+                !string.IsNullOrWhiteSpace(rutaBase) &&
+                !string.IsNullOrWhiteSpace(rutaPlantilla);
         }
 
         private void CmbTemas_SelectedIndexChanged(object sender, EventArgs e) {
@@ -828,11 +839,13 @@ namespace EndForge {
 
             if (string.IsNullOrWhiteSpace(nombreUsuario)) {
                 MessageBox.Show("Escribe un nombre para el proyecto.");
+                txtNombreProyecto.Focus();
                 return;
             }
 
             if (nombreUsuario.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
                 MessageBox.Show("El nombre contiene caracteres no válidos.");
+                txtNombreProyecto.Focus();
                 return;
             }
 
@@ -840,6 +853,7 @@ namespace EndForge {
 
             if (Directory.Exists(rutaProyecto)) {
                 MessageBox.Show("El proyecto ya existe.");
+                txtNombreProyecto.Focus();
                 return;
             }
 
@@ -851,6 +865,10 @@ namespace EndForge {
 
                 txtNombreProyecto.Clear();
                 txtObjetivo.Clear();
+                txtNombreProyecto.Focus();
+
+                ActualizarVistaPrevia();
+                ValidarFormulario();
 
                 MessageBox.Show(
                     "El proyecto se creó correctamente.\n\n¡Visual Studio se abrirá automáticamente!",
@@ -1091,5 +1109,45 @@ namespace EndForge {
         private void panelCardContinuar_Click(object sender, EventArgs e) {
 
         }
+
+        private void TxtBuscarReciente_TextChanged(object sender, EventArgs e) {
+            string filtro = txtBuscarReciente.Text.Trim().ToLower();
+
+            listRecientes.Items.Clear();
+            LimpiarLabelsRecientes();
+
+            if (!File.Exists(rutaRecientes))
+                return;
+
+            string[] recientes = File.ReadAllLines(rutaRecientes);
+            List<Label> labelsRecientes = ObtenerLabelsRecientes();
+            int indice = 0;
+
+            foreach (string reciente in recientes) {
+                string[] datos = reciente.Split('|');
+
+                if (datos.Length < 2)
+                    continue;
+
+                if (!datos[0].ToLower().Contains(filtro))
+                    continue;
+
+                ProyectoReciente proyecto = new ProyectoReciente {
+                    Nombre = datos[0],
+                    Ruta = datos[1]
+                };
+
+                listRecientes.Items.Add(proyecto);
+
+                if (indice < labelsRecientes.Count) {
+                    labelsRecientes[indice].Text = proyecto.Nombre;
+                    labelsRecientes[indice].Tag = proyecto;
+                    labelsRecientes[indice].Visible = true;
+                    indice++;
+                }
+            }
+        }
+
+
     }
 }
