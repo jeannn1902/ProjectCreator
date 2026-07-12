@@ -176,7 +176,9 @@ namespace EndForge {
                     lblCardRecientesDesc.Text = datos[0];
                     lblCardRecientesDesc.Tag = datos[1];
 
-                    lblCardContinuarDesc.Text = datos[0];
+                    string tema = Path.GetFileName(Path.GetDirectoryName(datos[1])!);
+
+                    lblCardContinuarDesc.Text = tema;
                     lblCardContinuarDesc.Tag = datos[1];
                 }
             } else {
