@@ -953,20 +953,26 @@ namespace EndForge {
 
         private void BtnCambiarRutaPlantilla_Click(object sender, EventArgs e) {
             using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
-                carpeta.Description = "Selecciona la carpeta base de tus proyectos";
+                carpeta.Description = "Selecciona la carpeta de la plantilla";
 
                 if (carpeta.ShowDialog() == DialogResult.OK) {
-                    txtRutaBaseConfig.Text = carpeta.SelectedPath;
+                    txtRutaPlantillaConfig.Text = carpeta.SelectedPath;
+
+                    btnGuardarConfiguracion.Enabled = true;
+                    lblEstadoConfiguracion.Visible = false;
                 }
             }
         }
 
         private void BtnCambiarRutaBase_Click(object sender, EventArgs e) {
             using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
-                carpeta.Description = "Selecciona la carpeta de la plantilla";
+                carpeta.Description = "Selecciona la carpeta base de tus proyectos";
 
                 if (carpeta.ShowDialog() == DialogResult.OK) {
-                    txtRutaPlantillaConfig.Text = carpeta.SelectedPath;
+                    txtRutaBaseConfig.Text = carpeta.SelectedPath;
+
+                    btnGuardarConfiguracion.Enabled = true;
+                    lblEstadoConfiguracion.Visible = false;
                 }
             }
         }
@@ -1033,6 +1039,8 @@ namespace EndForge {
             lblEstadoConfiguracion.ForeColor = Color.LightGreen;
             lblEstadoConfiguracion.Visible = true;
 
+            btnGuardarConfiguracion.Enabled = false;
+
             // PanelInicio_Click(panelInicio, EventArgs.Empty);
             CargarRecientes();
         }
@@ -1095,8 +1103,6 @@ namespace EndForge {
 
         private void PanelCardContinuar_Click(object sender, EventArgs e) {
             string? rutaProyecto = lblCardContinuarDesc.Tag?.ToString();
-
-            MessageBox.Show(rutaProyecto ?? "NULL");
 
             proyectoService.AbrirProyecto(
                 rutaProyecto!,

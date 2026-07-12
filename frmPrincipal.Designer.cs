@@ -75,8 +75,8 @@
             panelConfiguracionVista = new Panel();
             lblEstadoConfiguracion = new Label();
             btnGuardarConfiguracion = new Button();
-            btnCambiarRutaPlantilla = new Button();
             btnCambiarRutaBase = new Button();
+            btnCambiarRutaPlantilla = new Button();
             txtRutaPlantillaConfig = new TextBox();
             lblRutaPlantilla = new Label();
             txtRutaBaseConfig = new TextBox();
@@ -532,6 +532,9 @@
             txtBuscarReciente.Size = new Size(705, 24);
             txtBuscarReciente.TabIndex = 16;
             txtBuscarReciente.Text = "Buscar práctica...";
+            txtBuscarReciente.TextChanged += TxtBuscarReciente_TextChanged;
+            txtBuscarReciente.Enter += TxtBuscarReciente_Enter;
+            txtBuscarReciente.Leave += TxtBuscarReciente_Leave;
             // 
             // panelListaRecientes
             // 
@@ -763,8 +766,8 @@
             panelConfiguracionVista.BackgroundImageLayout = ImageLayout.None;
             panelConfiguracionVista.Controls.Add(lblEstadoConfiguracion);
             panelConfiguracionVista.Controls.Add(btnGuardarConfiguracion);
-            panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
             panelConfiguracionVista.Controls.Add(btnCambiarRutaBase);
+            panelConfiguracionVista.Controls.Add(btnCambiarRutaPlantilla);
             panelConfiguracionVista.Controls.Add(txtRutaPlantillaConfig);
             panelConfiguracionVista.Controls.Add(lblRutaPlantilla);
             panelConfiguracionVista.Controls.Add(txtRutaBaseConfig);
@@ -792,6 +795,7 @@
             btnGuardarConfiguracion.AutoSize = true;
             btnGuardarConfiguracion.BackColor = Color.FromArgb(111, 45, 189);
             btnGuardarConfiguracion.Cursor = Cursors.Hand;
+            btnGuardarConfiguracion.Enabled = false;
             btnGuardarConfiguracion.FlatAppearance.BorderSize = 0;
             btnGuardarConfiguracion.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
             btnGuardarConfiguracion.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
@@ -806,24 +810,6 @@
             btnGuardarConfiguracion.UseVisualStyleBackColor = false;
             btnGuardarConfiguracion.Click += BtnGuardarConfiguracion_Click;
             // 
-            // btnCambiarRutaPlantilla
-            // 
-            btnCambiarRutaPlantilla.BackColor = Color.FromArgb(111, 45, 189);
-            btnCambiarRutaPlantilla.Cursor = Cursors.Hand;
-            btnCambiarRutaPlantilla.FlatAppearance.BorderSize = 0;
-            btnCambiarRutaPlantilla.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
-            btnCambiarRutaPlantilla.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
-            btnCambiarRutaPlantilla.FlatStyle = FlatStyle.Flat;
-            btnCambiarRutaPlantilla.Font = new Font("Segoe UI Semibold", 9F);
-            btnCambiarRutaPlantilla.ForeColor = Color.White;
-            btnCambiarRutaPlantilla.Location = new Point(655, 117);
-            btnCambiarRutaPlantilla.Name = "btnCambiarRutaPlantilla";
-            btnCambiarRutaPlantilla.Size = new Size(175, 34);
-            btnCambiarRutaPlantilla.TabIndex = 6;
-            btnCambiarRutaPlantilla.Text = "Examinar...";
-            btnCambiarRutaPlantilla.UseVisualStyleBackColor = false;
-            btnCambiarRutaPlantilla.Click += BtnCambiarRutaPlantilla_Click;
-            // 
             // btnCambiarRutaBase
             // 
             btnCambiarRutaBase.BackColor = Color.FromArgb(111, 45, 189);
@@ -834,13 +820,31 @@
             btnCambiarRutaBase.FlatStyle = FlatStyle.Flat;
             btnCambiarRutaBase.Font = new Font("Segoe UI Semibold", 9F);
             btnCambiarRutaBase.ForeColor = Color.White;
-            btnCambiarRutaBase.Location = new Point(656, 231);
+            btnCambiarRutaBase.Location = new Point(655, 117);
             btnCambiarRutaBase.Name = "btnCambiarRutaBase";
             btnCambiarRutaBase.Size = new Size(175, 34);
-            btnCambiarRutaBase.TabIndex = 5;
+            btnCambiarRutaBase.TabIndex = 6;
             btnCambiarRutaBase.Text = "Examinar...";
             btnCambiarRutaBase.UseVisualStyleBackColor = false;
             btnCambiarRutaBase.Click += BtnCambiarRutaBase_Click;
+            // 
+            // btnCambiarRutaPlantilla
+            // 
+            btnCambiarRutaPlantilla.BackColor = Color.FromArgb(111, 45, 189);
+            btnCambiarRutaPlantilla.Cursor = Cursors.Hand;
+            btnCambiarRutaPlantilla.FlatAppearance.BorderSize = 0;
+            btnCambiarRutaPlantilla.FlatAppearance.MouseDownBackColor = Color.FromArgb(88, 35, 155);
+            btnCambiarRutaPlantilla.FlatAppearance.MouseOverBackColor = Color.FromArgb(126, 55, 210);
+            btnCambiarRutaPlantilla.FlatStyle = FlatStyle.Flat;
+            btnCambiarRutaPlantilla.Font = new Font("Segoe UI Semibold", 9F);
+            btnCambiarRutaPlantilla.ForeColor = Color.White;
+            btnCambiarRutaPlantilla.Location = new Point(656, 231);
+            btnCambiarRutaPlantilla.Name = "btnCambiarRutaPlantilla";
+            btnCambiarRutaPlantilla.Size = new Size(175, 34);
+            btnCambiarRutaPlantilla.TabIndex = 5;
+            btnCambiarRutaPlantilla.Text = "Examinar...";
+            btnCambiarRutaPlantilla.UseVisualStyleBackColor = false;
+            btnCambiarRutaPlantilla.Click += BtnCambiarRutaPlantilla_Click;
             // 
             // txtRutaPlantillaConfig
             // 
@@ -1425,8 +1429,8 @@
         private PictureBox pictureBoxAcercaDe;
         private Panel panelConfiguracionVista;
         private Button btnGuardarConfiguracion;
-        private Button btnCambiarRutaPlantilla;
         private Button btnCambiarRutaBase;
+        private Button btnCambiarRutaPlantilla;
         private TextBox txtRutaPlantillaConfig;
         private Label lblRutaPlantilla;
         private TextBox txtRutaBaseConfig;
