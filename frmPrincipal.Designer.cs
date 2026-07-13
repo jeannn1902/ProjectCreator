@@ -322,7 +322,7 @@
             // 
             // panelCardContinuar
             // 
-            panelCardContinuar.BackColor = Color.FromArgb(28, 22, 40);
+            panelCardContinuar.BackColor = Color.FromArgb(28, 22, 41);
             panelCardContinuar.Controls.Add(lblCardContinuarDesc);
             panelCardContinuar.Controls.Add(lblCardContinuarTitulo);
             panelCardContinuar.Cursor = Cursors.Hand;
