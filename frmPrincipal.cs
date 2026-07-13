@@ -1060,7 +1060,7 @@ namespace EndForge {
         private void LblCardRecientesDesc_Click(object sender, EventArgs e) {
             string? rutaProyecto = lblCardRecientesDesc.Tag as string;
 
-            if (!string.IsNullOrWhiteSpace(rutaProyecto) && Directory.Exists(rutaProyecto)) {
+            if (!string.IsNullOrWhiteSpace(rutaProyecto)) {
                 IntentarAbrirPractica(rutaProyecto);
             }
         }
