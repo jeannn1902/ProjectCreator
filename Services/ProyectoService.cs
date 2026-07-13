@@ -199,7 +199,7 @@ public class ProyectoService {
             }
 
             carpetaTemporalCreada = false;
-        } catch {
+        } catch (Exception) {
             if (carpetaTemporalCreada && Directory.Exists(rutaTemporal)) {
                 try {
                     Directory.Delete(rutaTemporal, true);
