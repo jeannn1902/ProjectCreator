@@ -1,0 +1,159 @@
+using EndForge.Models;
+
+namespace EndForge;
+
+public partial class frmPrincipal {
+    private void PanelMenu_MouseEnter(object? sender, EventArgs e) {
+        Panel? panel = sender as Panel;
+
+        if (panel != null) {
+            if (panel != panelSeleccionado) {
+                panel.BackColor = Color.FromArgb(74, 35, 110);
+            }
+        }
+    }
+
+    private void Card_MouseEnter(object sender, EventArgs e) {
+    }
+
+    private void Card_MouseLeave(object sender, EventArgs e) {
+    }
+
+    private void PanelMenu_MouseLeave(object? sender, EventArgs e) {
+        Panel? panel = sender as Panel ?? (sender as Control)?.Parent as Panel;
+
+        if (panel != null) {
+            if (!panel.ClientRectangle.Contains(panel.PointToClient(Cursor.Position))) {
+                if (panel != panelSeleccionado) {
+                    panel.BackColor = Color.FromArgb(45, 45, 48);
+                }
+            }
+        }
+    }
+
+    private void SeleccionarPanelMenu(Panel panel) {
+        if (panelSeleccionado == panel) {
+            return;
+        }
+
+        panelSeleccionado.BackColor = Color.FromArgb(45, 45, 48);
+        panel.BackColor = Color.FromArgb(111, 45, 189);
+
+        panelSeleccionado = panel;
+    }
+
+    private void panelNuevaPractica_Click(object? sender, EventArgs e) {
+        SeleccionarPanelMenu(panelNuevaPractica);
+
+        panelInicioVista.Visible = false;
+        panelRecientesVista.Visible = false;
+        panelConfiguracionVista.Visible = false;
+        fondoEndForge.SendToBack();
+    }
+
+    private void PanelInicio_Click(object? sender, EventArgs e) {
+        SeleccionarPanelMenu(panelInicio);
+
+        panelInicioVista.Visible = true;
+        panelRecientesVista.Visible = false;
+        panelConfiguracionVista.Visible = false;
+
+        panelInicioVista.BringToFront();
+    }
+
+    private void CardInicio_MouseEnter(object? sender, EventArgs e) {
+        Panel? panel = sender as Panel ?? (sender as Control)?.Parent as Panel;
+
+        if (panel != null) {
+            panel.BackColor = Color.FromArgb(35, 28, 48);
+        }
+    }
+
+    private void CardInicio_MouseLeave(object? sender, EventArgs e) {
+        Panel? panel = sender as Panel ?? (sender as Control)?.Parent as Panel;
+
+        if (panel != null) {
+            panel.BackColor = Color.FromArgb(20, 16, 30);
+        }
+    }
+
+    private void PanelAbrirPractica_Click(object? sender, EventArgs e) {
+        using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
+            carpeta.Description = "Selecciona la carpeta del proyecto";
+
+            if (carpeta.ShowDialog() != DialogResult.OK) {
+                RestaurarColorPanel(panelAbrirPractica);
+                return;
+            }
+
+            ResultadoAperturaPractica resultado = aperturaPracticasService.AbrirPractica(
+                carpeta.SelectedPath,
+                () => SeleccionarPanelMenu(panelAbrirPractica)
+            );
+
+            if (resultado.Estado == EstadoAperturaPractica.SolucionInexistente) {
+                MessageBox.Show("No se encontró ningún archivo .sln en la carpeta seleccionada.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                RestaurarColorPanel(panelAbrirPractica);
+                return;
+            }
+
+            if (resultado.Estado == EstadoAperturaPractica.CarpetaInexistente) {
+                MessageBox.Show("La carpeta de esta práctica ya no existe.", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                RestaurarColorPanel(panelAbrirPractica);
+                return;
+            }
+
+            if (resultado.Estado == EstadoAperturaPractica.ErrorApertura) {
+                MessageBox.Show("No se pudo abrir la práctica.\n\n" + resultado.Error!.Message, "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+    }
+
+    private void RestaurarColorPanel(Panel panel) {
+        if (panel == panelSeleccionado) {
+            panel.BackColor = Color.ForestGreen;
+        } else {
+            panel.BackColor = Color.FromArgb(45, 45, 48);
+        }
+    }
+
+    private void PanelRecientes_Click(object? sender, EventArgs e) {
+        SeleccionarPanelMenu(panelRecientes);
+
+        panelInicioVista.Visible = false;
+        panelRecientesVista.Visible = true;
+        panelConfiguracionVista.Visible = false;
+
+        panelRecientesVista.BringToFront();
+
+        CargarRecientes();
+    }
+
+    private void PanelConfiguracion_Click(object? sender, EventArgs e) {
+        SeleccionarPanelMenu(panelConfiguracion);
+
+        panelInicioVista.Visible = false;
+        panelRecientesVista.Visible = false;
+        panelConfiguracionVista.Visible = true;
+
+        panelConfiguracionVista.BringToFront();
+
+        txtRutaBaseConfig.Text = rutaBase;
+        txtRutaPlantillaConfig.Text = rutaPlantilla;
+    }
+
+    private void PanelAcercaDe_Click(object? sender, EventArgs e) {
+        SeleccionarPanelMenu(panelAcercaDe);
+
+        MessageBox.Show(
+            "EndForge 1.0\n\n" +
+            "Desarrollado por:\n" +
+            "Jeancarlo Pérez Pérez\n\n" +
+            "Herramienta para automatizar la creación y gestión " +
+            "de prácticas de C++.\n\n" +
+            "© 2026",
+            "Acerca de EndForge",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+}
