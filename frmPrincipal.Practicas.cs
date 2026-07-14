@@ -117,23 +117,23 @@ public partial class frmPrincipal {
 
     private void BtnCrearProyecto_Click(object sender, EventArgs e) {
         string temaSeleccionado = txtTemas.Text;
-        string nombreProyecto = lblNombreFinal.Text;
-        string nombreUsuario = txtNombreProyecto.Text.Trim();
         temaSeleccionado = temaSeleccionado.Trim();
-        nombreProyecto = nombreProyecto.Trim();
 
-        if (string.IsNullOrWhiteSpace(nombreUsuario)) {
-            MessageBox.Show("Escribe un nombre para el proyecto.");
+        ResultadoValidacionNombrePractica validacionNombre = nombrePracticaService.Validar(txtNombreProyecto.Text);
+
+        if (!validacionNombre.EsValido) {
+            MessageBox.Show(validacionNombre.MensajeError);
             txtNombreProyecto.Focus();
             return;
         }
 
-        if (nombreUsuario.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
-            MessageBox.Show("El nombre contiene caracteres no válidos.");
-            txtNombreProyecto.Focus();
-            return;
-        }
+        ResultadoVistaPreviaPractica vistaPrevia = vistaPreviaPracticaService.Calcular(
+            rutaBase,
+            temaSeleccionado,
+            validacionNombre.NombreNormalizado
+        );
 
+        string nombreProyecto = vistaPrevia.NombreFinal.Trim();
         string rutaProyecto = Path.Combine(rutaBase, temaSeleccionado, nombreProyecto);
 
         SolicitudCreacionPractica solicitud = new SolicitudCreacionPractica {

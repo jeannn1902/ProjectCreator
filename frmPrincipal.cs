@@ -6,6 +6,7 @@ public partial class frmPrincipal : Form {
     private readonly ProyectoService proyectoService = new();
     private readonly ConfiguracionService configuracionService = new();
     private readonly TemasService temasService = new();
+    private readonly NombrePracticaService nombrePracticaService = new();
     private readonly AperturaPracticasService aperturaPracticasService = new();
     private readonly RecientesService recientesService;
     private readonly CreacionPracticasOrquestador creacionPracticasOrquestador;

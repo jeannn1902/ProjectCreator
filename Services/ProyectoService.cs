@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Security;
+using System.Text;
+using System.Xml.Linq;
 namespace EndForge.Services;
 
 public class ProyectoService {
@@ -49,14 +52,60 @@ public class ProyectoService {
 
             string extension = Path.GetExtension(archivo);
 
-            if (extension == ".sln" || extension == ".vcxproj" || extension == ".filters" ||
-                extension == ".cpp" || extension == ".user") {
+            bool esXml = extension.Equals(".vcxproj", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".filters", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".user", StringComparison.OrdinalIgnoreCase);
 
-                string contenido = File.ReadAllText(archivo);
-                contenido = contenido.Replace("00_Plantilla", nombreProyecto);
-                File.WriteAllText(archivo, contenido);
+            bool requiereActualizacion = esXml ||
+                extension.Equals(".sln", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".cpp", StringComparison.OrdinalIgnoreCase);
+
+            if (!requiereActualizacion) {
+                continue;
             }
+
+            (string contenido, Encoding codificacion) = LeerContenido(archivo);
+            string nombreSeguro = esXml ? SecurityElement.Escape(nombreProyecto) : nombreProyecto;
+            string contenidoActualizado = contenido.Replace("00_Plantilla", nombreSeguro, StringComparison.Ordinal);
+
+            if (esXml) {
+                XDocument.Parse(contenidoActualizado, LoadOptions.PreserveWhitespace);
+            }
+
+            File.WriteAllText(archivo, contenidoActualizado, codificacion);
         }
+    }
+
+    private static (string Contenido, Encoding Codificacion) LeerContenido(string rutaArchivo) {
+        byte[] datos = File.ReadAllBytes(rutaArchivo);
+        (Encoding codificacion, int longitudPreambulo) = DetectarCodificacion(datos);
+        string contenido = codificacion.GetString(datos, longitudPreambulo, datos.Length - longitudPreambulo);
+
+        return (contenido, codificacion);
+    }
+
+    private static (Encoding Codificacion, int LongitudPreambulo) DetectarCodificacion(byte[] datos) {
+        if (datos.Length >= 4 && datos[0] == 0x00 && datos[1] == 0x00 && datos[2] == 0xFE && datos[3] == 0xFF) {
+            return (new UTF32Encoding(true, true, true), 4);
+        }
+
+        if (datos.Length >= 4 && datos[0] == 0xFF && datos[1] == 0xFE && datos[2] == 0x00 && datos[3] == 0x00) {
+            return (new UTF32Encoding(false, true, true), 4);
+        }
+
+        if (datos.Length >= 3 && datos[0] == 0xEF && datos[1] == 0xBB && datos[2] == 0xBF) {
+            return (new UTF8Encoding(true, true), 3);
+        }
+
+        if (datos.Length >= 2 && datos[0] == 0xFE && datos[1] == 0xFF) {
+            return (new UnicodeEncoding(true, true, true), 2);
+        }
+
+        if (datos.Length >= 2 && datos[0] == 0xFF && datos[1] == 0xFE) {
+            return (new UnicodeEncoding(false, true, true), 2);
+        }
+
+        return (new UTF8Encoding(false, true), 0);
     }
 
     // =============================
