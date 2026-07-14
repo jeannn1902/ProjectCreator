@@ -553,7 +553,7 @@
             panelListaRecientes.Controls.Add(lblReciente1);
             panelListaRecientes.Location = new Point(80, 78);
             panelListaRecientes.Name = "panelListaRecientes";
-            panelListaRecientes.Size = new Size(729, 342);
+            panelListaRecientes.Size = new Size(729, 368);
             panelListaRecientes.TabIndex = 15;
             // 
             // lblReciente10
