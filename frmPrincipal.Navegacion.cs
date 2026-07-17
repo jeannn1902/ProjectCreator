@@ -4,7 +4,7 @@ namespace EndForge;
 
 public partial class frmPrincipal {
     private void PanelMenu_MouseEnter(object? sender, EventArgs e) {
-        Panel? panel = sender as Panel;
+        Panel? panel = sender as Panel ?? (sender as Control)?.Parent as Panel;
 
         if (panel != null) {
             if (panel != panelSeleccionado) {
@@ -43,24 +43,28 @@ public partial class frmPrincipal {
     }
 
     private void panelNuevaPractica_Click(object? sender, EventArgs e) {
+        MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelNuevaPractica);
 
         panelInicioVista.Visible = false;
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = true;
+        OcultarVistasCurso();
 
         panelVistaNuevaPractica.BringToFront();
         fondoEndForge.SendToBack();
     }
 
     private void PanelInicio_Click(object? sender, EventArgs e) {
+        MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelInicio);
 
         panelInicioVista.Visible = true;
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistasCurso();
 
         panelInicioVista.BringToFront();
     }
@@ -82,6 +86,14 @@ public partial class frmPrincipal {
     }
 
     private void PanelAbrirPractica_Click(object? sender, EventArgs e) {
+        Panel panelAnterior = panelSeleccionado;
+
+        if (modoCursoInmersivo) {
+            MostrarCursoPrincipal();
+        } else {
+            MostrarNavegacionPrincipal();
+        }
+
         using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
             carpeta.Description = "Selecciona la carpeta del proyecto";
 
@@ -98,6 +110,10 @@ public partial class frmPrincipal {
             if (!aperturaExitosa) {
                 RestaurarColorPanel(panelAbrirPractica);
             }
+
+            if (panelAnterior == panelCurso) {
+                SeleccionarPanelMenu(panelCurso);
+            }
         }
     }
 
@@ -110,12 +126,14 @@ public partial class frmPrincipal {
     }
 
     private void PanelRecientes_Click(object? sender, EventArgs e) {
+        MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelRecientes);
 
         panelInicioVista.Visible = false;
         panelRecientesVista.Visible = true;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistasCurso();
 
         panelRecientesVista.BringToFront();
 
@@ -123,17 +141,27 @@ public partial class frmPrincipal {
     }
 
     private void PanelConfiguracion_Click(object? sender, EventArgs e) {
+        MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelConfiguracion);
 
         panelInicioVista.Visible = false;
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = true;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistasCurso();
 
         panelConfiguracionVista.BringToFront();
     }
 
     private void PanelAcercaDe_Click(object? sender, EventArgs e) {
+        Panel panelAnterior = panelSeleccionado;
+
+        if (modoCursoInmersivo) {
+            MostrarCursoPrincipal();
+        } else {
+            MostrarNavegacionPrincipal();
+        }
+
         SeleccionarPanelMenu(panelAcercaDe);
         panelVistaNuevaPractica.Visible = false;
 
@@ -147,5 +175,9 @@ public partial class frmPrincipal {
             "Acerca de EndForge",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
+
+        if (panelAnterior == panelCurso) {
+            SeleccionarPanelMenu(panelCurso);
+        }
     }
 }

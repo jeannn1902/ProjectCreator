@@ -59,6 +59,12 @@
         <Compile Update="frmPrincipal.Configuracion.cs">
             <SubType>Code</SubType>
         </Compile>
+        <Compile Update="frmPrincipal.Curso.cs">
+            <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="frmPrincipal.Bienvenida.cs">
+            <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
 </Project>

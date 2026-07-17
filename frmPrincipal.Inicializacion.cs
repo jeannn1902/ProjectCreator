@@ -59,6 +59,26 @@ public partial class frmPrincipal {
     }
 
     private void ConfigurarVentana() {
+        panelPrincipal.BackgroundImage = null;
+        panelPrincipal.BackColor = Color.Transparent;
+        panelInicioVista.BackgroundImage = null;
+        panelInicioVista.BackColor = Color.Transparent;
+        panelRecientesVista.BackgroundImage = null;
+        panelRecientesVista.BackColor = Color.Transparent;
+        panelConfiguracionVista.BackgroundImage = null;
+        panelConfiguracionVista.BackColor = Color.Transparent;
+        panelCursoVista.BackgroundImage = null;
+        panelCursoVista.BackColor = Color.Transparent;
+        panelPracticasTemaVista.BackgroundImage = null;
+        panelPracticasTemaVista.BackColor = Color.Transparent;
+        panelDetallePracticaVista.BackgroundImage = null;
+        panelDetallePracticaVista.BackColor = Color.Transparent;
+        panelListaRecientes.BackgroundImage = null;
+        panelListaRecientes.BackColor = Color.Transparent;
+
+        fondoEndForge.Controls.Add(panelPrincipal);
+        panelPrincipal.BringToFront();
+
         timerRecalcularVista.Interval = 150;
         timerRecalcularVista.Tick += TimerRecalcularVista_Tick;
 
@@ -70,6 +90,12 @@ public partial class frmPrincipal {
         ActivarDobleBuffer(panelRecientesVista);
         ActivarDobleBuffer(panelConfiguracionVista);
         ActivarDobleBuffer(panelListaRecientes);
+        ActivarDobleBuffer(panelVistaNuevaPractica);
+        ActivarDobleBuffer(panelNuevaPracticaTarjeta);
+        ActivarDobleBuffer(panelVistaPreviaNuevaPractica);
+        ActivarDobleBuffer(panelCursoVista);
+        ActivarDobleBuffer(panelPracticasTemaVista);
+        ActivarDobleBuffer(panelDetallePracticaVista);
     }
 
     private void ConfigurarNavegacion() {
@@ -143,9 +169,10 @@ public partial class frmPrincipal {
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistasCurso();
 
         CentrarPanelPrincipal();
-        AplicarFondoDinamicoPanelPrincipal();
+        InvalidarFondoContinuo();
 
         panelPrincipal.Invalidate(true);
         panelInicioVista.Invalidate(true);
