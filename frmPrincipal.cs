@@ -25,13 +25,15 @@ public partial class frmPrincipal : Form {
         creacionPracticasOrquestador = new CreacionPracticasOrquestador(proyectoService, recientesService, aperturaPracticasService);
 
         InitializeComponent();
+        InicializarCurso();
 
         ConfigurarBarraTitulo();
         ConfigurarTarjetasInicio();
-        ActivarBarraTituloOscura();
         ConfigurarVentana();
+        ActivarBarraTituloOscura();
         ConfigurarNavegacion();
         ConfigurarRecientes();
         ConfigurarEstadoInicial();
+        InicializarBienvenida();
     }
 }

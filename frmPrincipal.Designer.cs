@@ -846,10 +846,11 @@
             // 
             // lblEstadoConfiguracion
             // 
+            lblEstadoConfiguracion.AutoSize = false;
             lblEstadoConfiguracion.ForeColor = Color.LawnGreen;
             lblEstadoConfiguracion.Location = new Point(72, 370);
             lblEstadoConfiguracion.Name = "lblEstadoConfiguracion";
-            lblEstadoConfiguracion.Size = new Size(758, 75);
+            lblEstadoConfiguracion.Size = new Size(526, 75);
             lblEstadoConfiguracion.TabIndex = 9;
             lblEstadoConfiguracion.Text = "Configuración válida";
             lblEstadoConfiguracion.TextAlign = ContentAlignment.MiddleCenter;

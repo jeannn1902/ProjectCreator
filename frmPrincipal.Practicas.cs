@@ -153,40 +153,20 @@ public partial class frmPrincipal {
 
     private void FrmPrincipal_Load(object sender, EventArgs e) {
         btnCrearProyecto.Enabled = false;
-        ResultadoCargaConfiguracion cargaConfiguracion = CargarConfiguracion();
-        CargarTemas();
-        CargarRecientes();
-
-        // panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
 
         panelInicioVista.Visible = true;
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistasCurso();
 
         panelInicioVista.BringToFront();
 
         panelSeleccionado = panelInicio;
         panelInicio.BackColor = Color.FromArgb(111, 45, 189);
 
-        AplicarFondoDinamicoPanelPrincipal();
-
-        if (string.IsNullOrWhiteSpace(rutaBase) || string.IsNullOrWhiteSpace(rutaPlantilla)) {
-            PanelConfiguracion_Click(panelConfiguracion, EventArgs.Empty);
-
-            if (cargaConfiguracion.Estado == EstadoCargaConfiguracion.NoDisponible) {
-                MessageBox.Show(
-                    "¡Bienvenido a EndForge!\n\n" +
-                    "Antes de comenzar, configura la carpeta de tus prácticas y la plantilla oficial.",
-                    "Configuración inicial",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
-            }
-        }
-
-        txtBuscarReciente.Text = "Buscar práctica...";
-        txtBuscarReciente.ForeColor = Color.Gray;
+        InvalidarFondoContinuo();
+        MostrarPantallaBienvenida();
     }
 
     private void CargarTemas() {
@@ -234,16 +214,22 @@ public partial class frmPrincipal {
         ActualizarVistaPrevia();
     }
 
-    private void BtnCrearProyecto_Click(object sender, EventArgs e) {
-        string temaSeleccionado = txtTemas.Text;
+    private ResultadoCreacionPractica? EjecutarCreacionPractica(
+        string temaSeleccionado,
+        string nombreIntroducido,
+        string objetivo,
+        Action accionAlPrepararApertura,
+        out string rutaProyecto
+    ) {
+        rutaProyecto = string.Empty;
         temaSeleccionado = temaSeleccionado.Trim();
 
-        ResultadoValidacionNombrePractica validacionNombre = nombrePracticaService.Validar(txtNombreProyecto.Text);
+        ResultadoValidacionNombrePractica validacionNombre = nombrePracticaService.Validar(nombreIntroducido);
 
         if (!validacionNombre.EsValido) {
             MessageBox.Show(validacionNombre.MensajeError);
             txtNombreProyecto.Focus();
-            return;
+            return null;
         }
 
         ResultadoValidacionConfiguracion validacionConfiguracion =
@@ -256,7 +242,16 @@ public partial class frmPrincipal {
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
-            return;
+            return null;
+        }
+
+        if (!temasService.ExisteTema(rutaBase, temaSeleccionado)) {
+            MessageBox.Show(
+                "El tema seleccionado ya no está disponible en la ruta base configurada.",
+                "EndForge",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return null;
         }
 
         ResultadoVistaPreviaPractica vistaPrevia = vistaPreviaPracticaService.Calcular(
@@ -266,21 +261,21 @@ public partial class frmPrincipal {
         );
 
         string nombreProyecto = vistaPrevia.NombreFinal.Trim();
-        string rutaProyecto = Path.Combine(rutaBase, temaSeleccionado, nombreProyecto);
+        rutaProyecto = Path.Combine(rutaBase, temaSeleccionado, nombreProyecto);
 
         SolicitudCreacionPractica solicitud = new SolicitudCreacionPractica {
             RutaPlantilla = rutaPlantilla,
             RutaProyecto = rutaProyecto,
             NombreProyecto = nombreProyecto,
             Tema = temaSeleccionado,
-            Objetivo = txtObjetivo.Text.Trim(),
+            Objetivo = objetivo.Trim(),
             RutaRelativaSolucionEsperada = seleccionSolucionesService.TransformarRutaRelativa(
                 validacionConfiguracion.RutaRelativaSolucion,
                 nombreProyecto
             )
         };
 
-        ResultadoCreacionPractica resultado = creacionPracticasOrquestador.CrearPractica(
+        return creacionPracticasOrquestador.CrearPractica(
             solicitud,
             resultadoRecientes => {
                 if (resultadoRecientes.EsExitosa) {
@@ -292,6 +287,15 @@ public partial class frmPrincipal {
                     "La práctica se creó y abrió correctamente"
                 );
             },
+            accionAlPrepararApertura
+        );
+    }
+
+    private void BtnCrearProyecto_Click(object sender, EventArgs e) {
+        ResultadoCreacionPractica? resultado = EjecutarCreacionPractica(
+            txtTemas.Text,
+            txtNombreProyecto.Text,
+            txtObjetivo.Text,
             () => {
                 txtNombreProyecto.Clear();
                 txtObjetivo.Clear();
@@ -299,26 +303,55 @@ public partial class frmPrincipal {
 
                 ActualizarVistaPrevia();
                 ValidarFormulario();
-            }
+            },
+            out _
         );
 
+        if (resultado is null) {
+            return;
+        }
+
+        MostrarResultadoCreacionPractica(resultado, enfocarNombreProyecto: true);
+    }
+
+    private bool MostrarResultadoCreacionPractica(
+        ResultadoCreacionPractica resultado,
+        bool enfocarNombreProyecto
+    ) {
         if (resultado.Estado == EstadoCreacionPractica.DestinoExistente) {
             MessageBox.Show("La práctica ya existe.");
-            txtNombreProyecto.Focus();
-            return;
+
+            if (enfocarNombreProyecto) {
+                txtNombreProyecto.Focus();
+            }
+
+            return false;
         }
 
         if (resultado.Estado == EstadoCreacionPractica.ErrorCreacion) {
-            MessageBox.Show("Ocurrió un error al crear la práctica.\n\n" + resultado.Error!.Message, "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
+            MessageBox.Show(
+                "Ocurrió un error al crear la práctica.\n\n" + resultado.Error!.Message,
+                "EndForge",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return false;
         }
 
         if (resultado.Estado == EstadoCreacionPractica.ErrorApertura) {
-            MessageBox.Show("La práctica se creó correctamente, pero no pudo abrirse Visual Studio.\n\n" + resultado.Error!.Message, "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
+            MessageBox.Show(
+                "La práctica se creó correctamente, pero no pudo abrirse Visual Studio.\n\n" + resultado.Error!.Message,
+                "EndForge",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return false;
         }
 
-        MessageBox.Show("El proyecto se creó correctamente.\n\n¡Visual Studio se abrirá automáticamente!", "EndForge", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(
+            "El proyecto se creó correctamente.\n\n¡Visual Studio se abrirá automáticamente!",
+            "EndForge",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+        return true;
     }
 
     private void LblNombreFinal_Click(object sender, EventArgs e) {

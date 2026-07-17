@@ -4,6 +4,7 @@ namespace EndForge;
 
 public partial class frmPrincipal {
     private System.Windows.Forms.Timer timerRecalcularVista = new System.Windows.Forms.Timer();
+    private bool recalculandoVista;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -27,35 +28,12 @@ public partial class frmPrincipal {
             ?.SetValue(control, true, null);
     }
 
-    private void AplicarFondoDinamicoPanelPrincipal() {
-        Image? fondoAnterior = panelPrincipal.BackgroundImage;
-        panelPrincipal.BackgroundImage = CrearRecorteFondoParaPanel(panelPrincipal);
-        fondoAnterior?.Dispose();
-        
-        panelPrincipal.BackgroundImageLayout = ImageLayout.Stretch;
-        panelPrincipal.BackColor = Color.FromArgb(45, 45, 48);
-
-        panelInicioVista.BackgroundImage = null;
-        panelInicioVista.BackColor = Color.Transparent;
-
-        panelRecientesVista.BackgroundImage = null;
-        panelRecientesVista.BackColor = Color.Transparent;
-
-        panelConfiguracionVista.BackgroundImage = null;
-        panelConfiguracionVista.BackColor = Color.Transparent;
-
-        panelListaRecientes.BackgroundImage = null;
-        panelListaRecientes.BackColor = Color.Transparent;
-    }
-
-    private void ReaplicarFondoDinamico() {
-        if (fondoEndForge.Width <= 0 || fondoEndForge.Height <= 0)
+    private void InvalidarFondoContinuo() {
+        if (IsDisposed || !IsHandleCreated) {
             return;
+        }
 
-        if (panelPrincipal.Width <= 0 || panelPrincipal.Height <= 0)
-            return;
-
-        AplicarFondoDinamicoPanelPrincipal();
+        fondoEndForge.Invalidate(true);
     }
 
     private void PosicionarBotonesBarraTitulo() {
@@ -84,6 +62,7 @@ public partial class frmPrincipal {
         }
 
         ActualizarBotonMaximizar();
+        ActiveControl = null;
     }
 
     private void BtnCerrar_Click(object? sender, EventArgs e) {
@@ -116,72 +95,79 @@ public partial class frmPrincipal {
         }
     }
 
-    private Image CrearRecorteFondoParaPanel(Control panelDestino) {
-        Bitmap fondoRenderizado = new Bitmap(fondoEndForge.Width, fondoEndForge.Height);
-        fondoEndForge.DrawToBitmap(
-            fondoRenderizado,
-            new Rectangle(0, 0, fondoEndForge.Width, fondoEndForge.Height)
-        );
+    private void CentrarPanelPrincipal() {
+        if (modoCursoInmersivo) {
+            int limiteSuperior = panelBarraTitulo.Bottom;
+            int anchoDisponible = Math.Max(1, ClientSize.Width - 48);
+            int altoDisponible = Math.Max(1, ClientSize.Height - limiteSuperior - 48);
+            int expansionHorizontal = Math.Max(140, tamanoPanelPrincipalNormal.Width * 18 / 100);
+            int expansionVertical = Math.Max(120, tamanoPanelPrincipalNormal.Height * 32 / 100);
+            int ancho = Math.Min(
+                anchoDisponible,
+                tamanoPanelPrincipalNormal.Width + expansionHorizontal);
+            int alto = Math.Min(
+                altoDisponible,
+                tamanoPanelPrincipalNormal.Height + expansionVertical);
 
-        Point posicionEnFondo = fondoEndForge.PointToClient(
-            panelDestino.PointToScreen(Point.Empty)
-        );
-
-        Rectangle zonaRecorte = new Rectangle(
-            posicionEnFondo.X,
-            posicionEnFondo.Y,
-            panelDestino.Width,
-            panelDestino.Height
-        );
-
-        Bitmap recorte = new Bitmap(panelDestino.Width, panelDestino.Height);
-
-        using (Graphics g = Graphics.FromImage(recorte)) {
-            g.DrawImage(
-                fondoRenderizado,
-                new Rectangle(0, 0, panelDestino.Width, panelDestino.Height),
-                zonaRecorte,
-                GraphicsUnit.Pixel
-            );
+            panelPrincipal.Size = new Size(Math.Max(1, ancho), Math.Max(1, alto));
+            panelPrincipal.Location = new Point(
+                Math.Max(0, (ClientSize.Width - panelPrincipal.Width) / 2),
+                Math.Max(
+                    limiteSuperior,
+                    limiteSuperior + (ClientSize.Height - limiteSuperior - panelPrincipal.Height) / 2));
+            return;
         }
 
-        fondoRenderizado.Dispose();
+        if (!tamanoPanelPrincipalNormal.IsEmpty) {
+            panelPrincipal.Size = tamanoPanelPrincipalNormal;
+        }
 
-        return recorte;
-    }
+        int anchoMenu = panelMenu.Visible ? panelMenu.Width : 0;
+        int espacioDisponible = ClientSize.Width - anchoMenu;
 
-    private void CentrarPanelPrincipal() {
-        int espacioDisponible = ClientSize.Width - panelMenu.Width;
-
-        int x = panelMenu.Width + (espacioDisponible - panelPrincipal.Width) / 2;
+        int x = anchoMenu + (espacioDisponible - panelPrincipal.Width) / 2;
         int y = (ClientSize.Height - panelPrincipal.Height) / 2;
 
         panelPrincipal.Location = new Point(x, y);
     }
 
     private void FrmPrincipal_Resize(object? sender, EventArgs e) {
-        if (WindowState == FormWindowState.Minimized)
+        timerRecalcularVista.Stop();
+
+        if (WindowState == FormWindowState.Minimized) {
             return;
+        }
 
         ActualizarBotonMaximizar();
-
-        timerRecalcularVista.Stop();
         timerRecalcularVista.Start();
     }
 
     private void TimerRecalcularVista_Tick(object? sender, EventArgs e) {
         timerRecalcularVista.Stop();
 
-        CentrarPanelPrincipal();
+        if (recalculandoVista || WindowState == FormWindowState.Minimized) {
+            return;
+        }
 
-        fondoEndForge.Refresh();
-        fondoEndForge.Update();
+        recalculandoVista = true;
+        SuspendLayout();
+        fondoEndForge.SuspendLayout();
+        panelPrincipal.SuspendLayout();
 
-        AplicarFondoDinamicoPanelPrincipal();
+        try {
+            CentrarPanelPrincipal();
+            ActualizarDisenoCursoTrasRedimensionar();
 
-        panelPrincipal.Refresh();
-        panelPrincipal.Update();
+            if (panelPantallaBienvenida.Visible) {
+                CentrarContenidoBienvenida();
+            }
+        } finally {
+            panelPrincipal.ResumeLayout(performLayout: true);
+            fondoEndForge.ResumeLayout(performLayout: true);
+            ResumeLayout(performLayout: true);
+            recalculandoVista = false;
+        }
 
-        Refresh();
+        Invalidate(true);
     }
 }
