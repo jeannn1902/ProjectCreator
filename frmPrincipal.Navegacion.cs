@@ -3,6 +3,117 @@ using EndForge.Models;
 namespace EndForge;
 
 public partial class frmPrincipal {
+    private bool eventosVistasRutaAprendizajeConfigurados;
+    private bool rutaAprendizajeInmersivaActiva;
+    private bool gradoSeleccionadoEnSesion;
+
+    private void ConfigurarEventosVistasRutaAprendizaje() {
+        if (eventosVistasRutaAprendizajeConfigurados || !cursoInicializado) {
+            return;
+        }
+
+        panelGradosVista.VisibleChanged += PanelGradosVista_VisibleChanged;
+        panelCursoVista.VisibleChanged += PanelDetalleGradoVista_VisibleChanged;
+#if DEBUG
+        panelGradosVista.Paint += PanelRutaAprendizaje_ContarPaint;
+#endif
+        eventosVistasRutaAprendizajeConfigurados = true;
+    }
+
+    private void PanelGradosVista_VisibleChanged(object? sender, EventArgs e) {
+        if (!panelGradosVista.Visible) {
+            return;
+        }
+
+        if (rutaAprendizajeInmersivaActiva &&
+            modoCursoInmersivo &&
+            !panelMenu.Visible) {
+            return;
+        }
+
+        AplicarGeometriaRutaAprendizajeInmersiva();
+    }
+
+    private void PanelDetalleGradoVista_VisibleChanged(object? sender, EventArgs e) {
+        if (!panelCursoVista.Visible) {
+            return;
+        }
+
+        gradoSeleccionadoEnSesion = true;
+        RestaurarNavegacionDetalleGrado();
+    }
+
+    private void MostrarRutaAprendizajeInmersiva(bool reconstruirContenido) {
+        if (!cursoPreparado) {
+            return;
+        }
+
+        ConfigurarEventosVistasRutaAprendizaje();
+        OcultarVistasPrincipalesFueraDelCurso();
+        SeleccionarPanelMenu(panelCurso);
+        AplicarGeometriaRutaAprendizajeInmersiva();
+        MostrarSubvistaCurso(panelGradosVista, VistaRutaAprendizaje.Grados);
+
+        if (reconstruirContenido) {
+            ReconstruirVistaGrados(volverAlInicio: false);
+        }
+    }
+
+    private void AplicarGeometriaRutaAprendizajeInmersiva() {
+        timerRecalcularVista.Stop();
+        rutaAprendizajeInmersivaActiva = true;
+        modoCursoInmersivo = true;
+        distribucionPanelPrincipal = DistribucionPanelPrincipal.Curso;
+        panelMenu.Visible = false;
+        panelPrincipal.Visible = true;
+        RecalcularDistribucionActual();
+        panelBarraTitulo.BringToFront();
+
+        if (!transicionandoDesdeBienvenida) {
+            InvalidarFondoContinuo();
+        }
+    }
+
+    private void RestaurarNavegacionDetalleGrado() {
+        bool requiereRecalculo =
+            rutaAprendizajeInmersivaActiva ||
+            modoCursoInmersivo ||
+            !panelMenu.Visible;
+
+        rutaAprendizajeInmersivaActiva = false;
+        modoCursoInmersivo = false;
+        distribucionPanelPrincipal = DistribucionPanelPrincipal.Curso;
+        panelMenu.Visible = true;
+        panelPrincipal.Visible = true;
+        SeleccionarPanelMenu(panelCurso);
+
+        if (requiereRecalculo) {
+            RecalcularDistribucionActual();
+        }
+
+        panelMenu.BringToFront();
+        panelBarraTitulo.BringToFront();
+    }
+
+    private void PrepararNavegacionPrincipalDesdeRuta() {
+        rutaAprendizajeInmersivaActiva = false;
+    }
+
+    private void OcultarVistasPrincipalesFueraDelCurso() {
+        panelInicioVista.Visible = false;
+        panelRecientesVista.Visible = false;
+        panelConfiguracionVista.Visible = false;
+        panelVistaNuevaPractica.Visible = false;
+    }
+
+#if DEBUG
+    private void PanelRutaAprendizaje_ContarPaint(object? sender, PaintEventArgs e) {
+        if (transicionandoDesdeBienvenida) {
+            paintsInicioDuranteTransicion++;
+        }
+    }
+#endif
+
     private void PanelMenu_MouseEnter(object? sender, EventArgs e) {
         Panel? panel = sender as Panel ?? (sender as Control)?.Parent as Panel;
 
@@ -43,6 +154,7 @@ public partial class frmPrincipal {
     }
 
     private void panelNuevaPractica_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         MostrarNavegacionPrincipal(DistribucionPanelPrincipal.NuevaPractica);
         SeleccionarPanelMenu(panelNuevaPractica);
 
@@ -57,6 +169,7 @@ public partial class frmPrincipal {
     }
 
     private void PanelInicio_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelInicio);
 
@@ -86,6 +199,7 @@ public partial class frmPrincipal {
     }
 
     private void PanelAbrirPractica_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         Panel panelAnterior = panelSeleccionado;
 
         if (modoCursoInmersivo) {
@@ -126,6 +240,7 @@ public partial class frmPrincipal {
     }
 
     private void PanelRecientes_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelRecientes);
 
@@ -141,6 +256,7 @@ public partial class frmPrincipal {
     }
 
     private void PanelConfiguracion_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         MostrarNavegacionPrincipal();
         SeleccionarPanelMenu(panelConfiguracion);
 
@@ -151,9 +267,11 @@ public partial class frmPrincipal {
         OcultarVistasCurso();
 
         panelConfiguracionVista.BringToFront();
+        MostrarAvisoPreferenciasSiCorresponde();
     }
 
     private void PanelAcercaDe_Click(object? sender, EventArgs e) {
+        PrepararNavegacionPrincipalDesdeRuta();
         Panel panelAnterior = panelSeleccionado;
 
         if (modoCursoInmersivo) {

@@ -6,6 +6,7 @@ public partial class frmPrincipal : Form {
     private readonly SeleccionSolucionesService seleccionSolucionesService = new();
     private readonly ProyectoService proyectoService;
     private readonly ConfiguracionService configuracionService;
+    private readonly PreferenciasService preferenciasService = new();
     private readonly TemasService temasService = new();
     private readonly NombrePracticaService nombrePracticaService = new();
     private readonly AperturaPracticasService aperturaPracticasService;
@@ -25,6 +26,7 @@ public partial class frmPrincipal : Form {
         creacionPracticasOrquestador = new CreacionPracticasOrquestador(proyectoService, recientesService, aperturaPracticasService);
 
         InitializeComponent();
+        InicializarPreferenciasAprendizaje();
         InicializarEstructuraCurso();
 
         ConfigurarBarraTitulo();

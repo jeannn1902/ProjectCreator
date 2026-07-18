@@ -112,10 +112,75 @@ public partial class frmPrincipal {
     }
 
     private void CentrarPanelPrincipal() {
+        if (rutaAprendizajeInmersivaActiva) {
+            Rectangle area = ClientRectangle;
+            int margen = EscalarDiseno(24);
+            int limiteSuperior = Math.Max(area.Top, panelBarraTitulo.Bottom);
+            int ancho = Math.Max(1, area.Width - margen * 2);
+            int alto = Math.Max(
+                1,
+                area.Bottom - limiteSuperior - margen * 2);
+
+            panelPrincipal.SetBounds(
+                area.Left + margen,
+                limiteSuperior + margen,
+                ancho,
+                alto);
+            return;
+        }
+
+        if (evaluacionInmersivaAmpliaActiva) {
+            int limiteSuperior = Math.Max(ClientRectangle.Top, panelBarraTitulo.Bottom);
+            panelPrincipal.SetBounds(
+                ClientRectangle.Left,
+                limiteSuperior,
+                Math.Max(1, ClientRectangle.Width),
+                Math.Max(1, ClientRectangle.Bottom - limiteSuperior));
+            return;
+        }
+
         if (modoCursoInmersivo) {
-            int limiteSuperior = panelBarraTitulo.Bottom;
-            int anchoDisponible = Math.Max(1, ClientSize.Width - 48);
-            int altoDisponible = Math.Max(1, ClientSize.Height - limiteSuperior - 48);
+            Rectangle area = ClientRectangle;
+            int limiteSuperior = Math.Max(area.Top, panelBarraTitulo.Bottom);
+            int margen = EscalarDiseno(24);
+            int anchoDisponible = Math.Max(1, area.Width - margen * 2);
+            int altoDisponible = Math.Max(
+                1,
+                area.Bottom - limiteSuperior - margen * 2);
+            bool usarDistribucionAmplia =
+                anchoDisponible >= EscalarDiseno(1200);
+
+            if (usarDistribucionAmplia) {
+                int margenInferior = EscalarDiseno(18);
+                int altoAmplio = Math.Max(
+                    1,
+                    area.Bottom - limiteSuperior - margen - margenInferior);
+                int anchoMinimo = Math.Min(
+                    anchoDisponible,
+                    EscalarDiseno(820));
+                int anchoMaximo = Math.Min(
+                    anchoDisponible,
+                    EscalarDiseno(1050));
+                int anchoReservandoPersonaje = Math.Max(
+                    1,
+                    (int)Math.Round(anchoDisponible * 0.72D));
+                int anchoAmplio = Math.Clamp(
+                    anchoReservandoPersonaje,
+                    anchoMinimo,
+                    Math.Max(anchoMinimo, anchoMaximo));
+
+                panelPrincipal.SetBounds(
+                    area.Left + margen,
+                    limiteSuperior + margen,
+                    anchoAmplio,
+                    altoAmplio);
+                return;
+            }
+
+            anchoDisponible = Math.Max(1, ClientSize.Width - 48);
+            altoDisponible = Math.Max(
+                1,
+                ClientSize.Height - limiteSuperior - 48);
             int expansionHorizontal = Math.Max(140, tamanoPanelPrincipalNormal.Width * 18 / 100);
             int expansionVertical = Math.Max(120, tamanoPanelPrincipalNormal.Height * 32 / 100);
             int ancho = Math.Min(
@@ -126,10 +191,10 @@ public partial class frmPrincipal {
                 tamanoPanelPrincipalNormal.Height + expansionVertical);
 
             panelPrincipal.SetBounds(
-                Math.Max(0, (ClientSize.Width - ancho) / 2),
+                Math.Max(area.Left, area.Left + (area.Width - ancho) / 2),
                 Math.Max(
                     limiteSuperior,
-                    limiteSuperior + (ClientSize.Height - limiteSuperior - alto) / 2),
+                    limiteSuperior + (area.Bottom - limiteSuperior - alto) / 2),
                 Math.Max(1, ancho),
                 Math.Max(1, alto));
             return;
@@ -206,11 +271,7 @@ public partial class frmPrincipal {
             return;
         }
 
-        foreach (Control vista in new[] {
-            panelCursoVista,
-            panelPracticasTemaVista,
-            panelDetallePracticaVista
-        }) {
+        foreach (Control vista in ObtenerVistasRutaAprendizaje()) {
             vista.SetBounds(
                 limites.Left,
                 limites.Top,
