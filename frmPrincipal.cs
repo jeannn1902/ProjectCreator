@@ -28,6 +28,7 @@ public partial class frmPrincipal : Form {
         InitializeComponent();
         InicializarPreferenciasAprendizaje();
         InicializarEstructuraCurso();
+        InicializarEstructuraEstadisticas();
 
         ConfigurarBarraTitulo();
         ConfigurarTarjetasInicio();

@@ -375,16 +375,22 @@ public partial class frmPrincipal {
                     fondoProgreso.Height)
             };
             fondoProgreso.Controls.Add(rellenoProgreso);
+            int altoBoton = EscalarDiseno(36);
+            int yBoton = CalcularTopBotonTarjetaGrado(
+                tarjeta,
+                fondoProgreso,
+                altoBoton,
+                apilarAccion);
             boton = CrearBotonCurso(
                 grado.Estado == EstadoGradoCurso.EnProgreso
                     ? "Continuar grado"
                     : "Ver grado",
                 apilarAccion
-                    ? new Point(margen, EscalarDiseno(235))
+                    ? new Point(margen, yBoton)
                     : new Point(
                         Math.Max(margen, ancho - margen - anchoBoton),
-                        EscalarDiseno(169)),
-                new Size(anchoBoton, EscalarDiseno(36)),
+                        yBoton),
+                new Size(anchoBoton, altoBoton),
                 ColorMoradoCurso);
             boton.TabStop = false;
             boton.AccessibleDescription = $"Abre {grado.Titulo}.";
@@ -485,15 +491,37 @@ public partial class frmPrincipal {
             0,
             (int)Math.Round(anchoMetricas * presentacion.Porcentaje / 100D),
             presentacion.FondoProgreso.Height);
+        int altoBoton = EscalarDiseno(36);
+        int yBoton = CalcularTopBotonTarjetaGrado(
+            tarjeta,
+            presentacion.FondoProgreso,
+            altoBoton,
+            apilarAccion);
         presentacion.Boton.SetBounds(
             apilarAccion
                 ? margen
                 : Math.Max(margen, ancho - margen - anchoBoton),
-            apilarAccion
-                ? EscalarDiseno(235)
-                : EscalarDiseno(169),
+            yBoton,
             anchoBoton,
-            EscalarDiseno(36));
+            altoBoton);
+    }
+
+    private int CalcularTopBotonTarjetaGrado(
+        Panel tarjeta,
+        Panel fondoProgreso,
+        int altoBoton,
+        bool apilarAccion) {
+        int topDeseado = apilarAccion
+            ? fondoProgreso.Bottom + EscalarDiseno(15)
+            : fondoProgreso.Top +
+                (int)Math.Round((fondoProgreso.Height - altoBoton) / 2D) -
+                EscalarDiseno(6);
+        int margenInferiorSeguro = EscalarDiseno(10);
+        int topMaximo = Math.Max(
+            0,
+            tarjeta.ClientSize.Height - margenInferiorSeguro - altoBoton);
+
+        return Math.Clamp(topDeseado, 0, topMaximo);
     }
 
     private static string ObtenerTextoEstadoGrado(EstadoGradoCurso estado) {

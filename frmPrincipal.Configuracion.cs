@@ -112,6 +112,8 @@ public partial class frmPrincipal {
         lblEstadoConfiguracion.Visible = false;
         string nuevaRutaBase = txtRutaBaseConfig.Text.Trim();
         string nuevaRutaPlantilla = txtRutaPlantillaConfig.Text.Trim();
+        bool hayCambiosRutas = HayCambiosRutasConfiguracion();
+        bool hayCambiosPreferencias = HayCambiosPreferenciasAprendizaje();
         EstadoValidacionConfiguracion validacion = configuracionService.ValidarConfiguracion(
             nuevaRutaBase,
             nuevaRutaPlantilla
@@ -126,36 +128,44 @@ public partial class frmPrincipal {
             return;
         }
 
-        try {
-            configuracionService.GuardarConfiguracion(nuevaRutaBase, nuevaRutaPlantilla);
-        } catch (UnauthorizedAccessException) {
-            MostrarErrorGuardadoConfiguracion(
-                "❌ No se pudieron guardar los cambios porque no hay permisos para acceder a config.txt. La configuración anterior se conservó."
-            );
-            return;
-        } catch (SecurityException) {
-            MostrarErrorGuardadoConfiguracion(
-                "❌ No se pudieron guardar los cambios porque no hay permisos para acceder a config.txt. La configuración anterior se conservó."
-            );
-            return;
-        } catch (IOException) {
-            MostrarErrorGuardadoConfiguracion(
-                "❌ No se pudieron guardar los cambios. Verifica que config.txt no esté bloqueado o en uso por otra aplicación. La configuración anterior se conservó."
-            );
-            return;
-        } catch (Exception ex) {
-            MostrarErrorGuardadoConfiguracion(
-                "❌ No se pudieron guardar los cambios. La configuración anterior se conservó.\n" + ex.Message
-            );
+        if (hayCambiosRutas) {
+            try {
+                configuracionService.GuardarConfiguracion(nuevaRutaBase, nuevaRutaPlantilla);
+            } catch (UnauthorizedAccessException) {
+                MostrarErrorGuardadoConfiguracion(
+                    "❌ No se pudieron guardar los cambios porque no hay permisos para acceder a config.txt. La configuración anterior se conservó."
+                );
+                return;
+            } catch (SecurityException) {
+                MostrarErrorGuardadoConfiguracion(
+                    "❌ No se pudieron guardar los cambios porque no hay permisos para acceder a config.txt. La configuración anterior se conservó."
+                );
+                return;
+            } catch (IOException) {
+                MostrarErrorGuardadoConfiguracion(
+                    "❌ No se pudieron guardar los cambios. Verifica que config.txt no esté bloqueado o en uso por otra aplicación. La configuración anterior se conservó."
+                );
+                return;
+            } catch (Exception ex) {
+                MostrarErrorGuardadoConfiguracion(
+                    "❌ No se pudieron guardar los cambios. La configuración anterior se conservó.\n" + ex.Message
+                );
+                return;
+            }
+
+            rutaBase = nuevaRutaBase;
+            rutaPlantilla = nuevaRutaPlantilla;
+            EstablecerRutasConfiguracionEnVista(rutaBase, rutaPlantilla);
+            CargarTemas();
+            ValidarFormulario();
+        }
+
+        if (hayCambiosPreferencias && !GuardarPreferenciasAprendizajePendientes()) {
+            ActualizarEstadoCambiosConfiguracion();
             return;
         }
 
-        rutaBase = nuevaRutaBase;
-        rutaPlantilla = nuevaRutaPlantilla;
-        EstablecerRutasConfiguracionEnVista(rutaBase, rutaPlantilla);
-
-        CargarTemas();
-        ValidarFormulario();
+        ActualizarEstadoCambiosConfiguracion();
 
         lblEstadoConfiguracion.Text = "✅ Cambios guardados.";
         lblEstadoConfiguracion.ForeColor = Color.LightGreen;
@@ -168,6 +178,7 @@ public partial class frmPrincipal {
             return;
         }
 
+        RestaurarPreferenciasAprendizajeEnVista();
         EstablecerRutasConfiguracionEnVista(rutaBase, rutaPlantilla);
         lblEstadoConfiguracion.Text = "Cambios descartados.";
         lblEstadoConfiguracion.ForeColor = Color.Gainsboro;
@@ -190,8 +201,8 @@ public partial class frmPrincipal {
     private bool ActualizarEstadoCambiosConfiguracion() {
         bool hayCambios = HayCambiosConfiguracion();
 
-        btnGuardarConfiguracion.Enabled = true;
-        btnRestaurarConfiguracion.Enabled = true;
+        btnGuardarConfiguracion.Enabled = hayCambios;
+        btnRestaurarConfiguracion.Enabled = hayCambios;
 
         if (hayCambios) {
             btnGuardarConfiguracion.BackColor = Color.FromArgb(111, 45, 189);
@@ -226,6 +237,11 @@ public partial class frmPrincipal {
     }
 
     private bool HayCambiosConfiguracion() {
+        return HayCambiosRutasConfiguracion() ||
+            HayCambiosPreferenciasAprendizaje();
+    }
+
+    private bool HayCambiosRutasConfiguracion() {
         return !RutasEquivalentes(txtRutaBaseConfig.Text, rutaBase) ||
             !RutasEquivalentes(txtRutaPlantillaConfig.Text, rutaPlantilla);
     }

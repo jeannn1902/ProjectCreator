@@ -92,6 +92,8 @@ public partial class frmPrincipal {
             actualizandoPreferenciasAprendizaje = false;
         }
 
+        ActualizarEstadoCambiosConfiguracion();
+
         if (mostrarAviso) {
             MostrarAvisoPreferenciasSiCorresponde();
         }
@@ -118,23 +120,33 @@ public partial class frmPrincipal {
             return;
         }
 
-        bool valorAnterior = preferenciasAplicacion.MostrarTiemposOrientativos;
+        bool hayCambios = ActualizarEstadoCambiosConfiguracion();
+
+        if (hayCambios) {
+            lblEstadoConfiguracion.Visible = false;
+        }
+    }
+
+    private bool HayCambiosPreferenciasAprendizaje() {
+        return chkMostrarTiemposOrientativos.Checked !=
+            preferenciasAplicacion.MostrarTiemposOrientativos;
+    }
+
+    private bool GuardarPreferenciasAprendizajePendientes() {
+        if (!HayCambiosPreferenciasAprendizaje()) {
+            return true;
+        }
+
+        bool mostrarTiemposOrientativos =
+            chkMostrarTiemposOrientativos.Checked;
         PreferenciasAplicacion nuevasPreferencias = new() {
-            Version = 1,
-            MostrarTiemposOrientativos = chkMostrarTiemposOrientativos.Checked
+            Version = preferenciasAplicacion.Version,
+            MostrarTiemposOrientativos = mostrarTiemposOrientativos
         };
         ResultadoEscrituraPreferencias resultado =
             preferenciasService.Guardar(nuevasPreferencias);
 
         if (!resultado.EsExitosa) {
-            actualizandoPreferenciasAprendizaje = true;
-
-            try {
-                chkMostrarTiemposOrientativos.Checked = valorAnterior;
-            } finally {
-                actualizandoPreferenciasAprendizaje = false;
-            }
-
             lblEstadoConfiguracion.Text = resultado.Estado switch {
                 EstadoEscrituraPreferencias.ContenidoInvalido =>
                     "No se guardó la preferencia porque preferencias.json está dañado. El archivo anterior se conservó.",
@@ -147,15 +159,37 @@ public partial class frmPrincipal {
             };
             lblEstadoConfiguracion.ForeColor = Color.LightCoral;
             lblEstadoConfiguracion.Visible = true;
-            return;
+            return false;
         }
 
-        preferenciasAplicacion = nuevasPreferencias;
+        ResultadoCargaPreferencias preferenciasPersistidas =
+            preferenciasService.Cargar();
+
+        if (preferenciasPersistidas.Estado != EstadoCargaPreferencias.Exitosa ||
+            preferenciasPersistidas.Preferencias.MostrarTiemposOrientativos !=
+                mostrarTiemposOrientativos) {
+            lblEstadoConfiguracion.Text =
+                "No se pudo confirmar la preferencia guardada. Vuelve a intentarlo.";
+            lblEstadoConfiguracion.ForeColor = Color.LightCoral;
+            lblEstadoConfiguracion.Visible = true;
+            return false;
+        }
+
+        preferenciasAplicacion = preferenciasPersistidas.Preferencias;
         mensajeCargaPreferencias = string.Empty;
-        lblEstadoConfiguracion.Text = "Preferencia de aprendizaje guardada.";
-        lblEstadoConfiguracion.ForeColor = Color.LightGreen;
-        lblEstadoConfiguracion.Visible = true;
         ActualizarPresentacionTiemposOrientativos();
+        return true;
+    }
+
+    private void RestaurarPreferenciasAprendizajeEnVista() {
+        actualizandoPreferenciasAprendizaje = true;
+
+        try {
+            chkMostrarTiemposOrientativos.Checked =
+                preferenciasAplicacion.MostrarTiemposOrientativos;
+        } finally {
+            actualizandoPreferenciasAprendizaje = false;
+        }
     }
 
     private void ActualizarPresentacionTiemposOrientativos() {

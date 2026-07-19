@@ -93,7 +93,9 @@ public partial class frmPrincipal {
     private void ConfigurarNavegacion() {
         panelInicio.MouseEnter += PanelMenu_MouseEnter;
         panelInicio.MouseLeave += PanelMenu_MouseLeave;
+        lblInicio.MouseEnter += PanelMenu_MouseEnter;
         lblInicio.MouseLeave += PanelMenu_MouseLeave;
+        pictureBoxInicio.MouseEnter += PanelMenu_MouseEnter;
         pictureBoxInicio.MouseLeave += PanelMenu_MouseLeave;
         panelInicio.Click += PanelInicio_Click;
         lblInicio.Click += PanelInicio_Click;
@@ -101,7 +103,9 @@ public partial class frmPrincipal {
 
         panelNuevaPractica.MouseEnter += PanelMenu_MouseEnter;
         panelNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
+        lblNuevaPractica.MouseEnter += PanelMenu_MouseEnter;
         lblNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
+        pictureBoxNuevaPractica.MouseEnter += PanelMenu_MouseEnter;
         pictureBoxNuevaPractica.MouseLeave += PanelMenu_MouseLeave;
         panelNuevaPractica.Click += panelNuevaPractica_Click;
         lblNuevaPractica.Click += panelNuevaPractica_Click;
@@ -109,6 +113,8 @@ public partial class frmPrincipal {
 
         panelAbrirPractica.MouseEnter += PanelMenu_MouseEnter;
         panelAbrirPractica.MouseLeave += PanelMenu_MouseLeave;
+        lblAbrirPractica.MouseEnter += PanelMenu_MouseEnter;
+        pictureBoxAbrirPractica.MouseEnter += PanelMenu_MouseEnter;
         panelAbrirPractica.Click += PanelAbrirPractica_Click;
         lblAbrirPractica.Click += PanelAbrirPractica_Click;
         pictureBoxAbrirPractica.Click += PanelAbrirPractica_Click;
@@ -117,6 +123,8 @@ public partial class frmPrincipal {
 
         panelRecientes.MouseEnter += PanelMenu_MouseEnter;
         panelRecientes.MouseLeave += PanelMenu_MouseLeave;
+        lblRecientes.MouseEnter += PanelMenu_MouseEnter;
+        pictureBoxRecientes.MouseEnter += PanelMenu_MouseEnter;
         panelRecientes.Click += PanelRecientes_Click;
         lblRecientes.Click += PanelRecientes_Click;
         pictureBoxRecientes.Click += PanelRecientes_Click;
@@ -125,6 +133,8 @@ public partial class frmPrincipal {
 
         panelConfiguracion.MouseEnter += PanelMenu_MouseEnter;
         panelConfiguracion.MouseLeave += PanelMenu_MouseLeave;
+        lblConfiguracion.MouseEnter += PanelMenu_MouseEnter;
+        pictureBoxConfiguracion.MouseEnter += PanelMenu_MouseEnter;
         panelConfiguracion.Click += PanelConfiguracion_Click;
         lblConfiguracion.Click += PanelConfiguracion_Click;
         pictureBoxConfiguracion.Click += PanelConfiguracion_Click;
@@ -133,6 +143,8 @@ public partial class frmPrincipal {
 
         panelAcercaDe.MouseEnter += PanelMenu_MouseEnter;
         panelAcercaDe.MouseLeave += PanelMenu_MouseLeave;
+        lblAcercaDe.MouseEnter += PanelMenu_MouseEnter;
+        pictureBoxAcercaDe.MouseEnter += PanelMenu_MouseEnter;
         panelAcercaDe.Click += PanelAcercaDe_Click;
         lblAcercaDe.Click += PanelAcercaDe_Click;
         pictureBoxAcercaDe.Click += PanelAcercaDe_Click;

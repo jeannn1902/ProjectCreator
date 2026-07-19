@@ -200,6 +200,7 @@ public partial class frmPrincipal {
     private bool cursoInicializado;
     private bool preparandoCurso;
     private bool cursoPreparado;
+    private bool entradaCursoPendiente;
     private bool navegacionCursoEnCurso;
     private bool transicionVisualCursoActiva;
     private bool retirandoCubiertaTransicionCurso;
@@ -771,21 +772,38 @@ public partial class frmPrincipal {
     }
 
     private async void PanelCurso_Click(object? sender, EventArgs e) {
-        await PrepararCursoParaInteraccionAsync();
-
-        if (!cursoPreparado || IsDisposed || Disposing) {
+        if (entradaCursoPendiente ||
+            navegacionCursoEnCurso ||
+            transicionVisualCursoActiva) {
             return;
         }
 
-        SeleccionarPanelMenu(panelCurso);
-        OcultarVistasPrincipalesFueraDelCurso();
+        Panel panelSeleccionadoAlSolicitar = panelSeleccionado;
+        long secuenciaTransicionAlSolicitar = secuenciaTransicionVisualCurso;
+        entradaCursoPendiente = true;
 
-        if (gradoSeleccionadoEnSesion) {
-            MostrarCursoPrincipal();
-            return;
+        try {
+            await PrepararCursoParaInteraccionAsync();
+
+            if (!cursoPreparado || IsDisposed || Disposing ||
+                navegacionCursoEnCurso || transicionVisualCursoActiva ||
+                !ReferenceEquals(panelSeleccionado, panelSeleccionadoAlSolicitar) ||
+                secuenciaTransicionVisualCurso != secuenciaTransicionAlSolicitar) {
+                return;
+            }
+
+            SeleccionarPanelMenu(panelCurso);
+            OcultarVistasPrincipalesFueraDelCurso();
+
+            if (gradoSeleccionadoEnSesion) {
+                MostrarCursoPrincipal();
+                return;
+            }
+
+            MostrarRutaAprendizajeInmersiva(reconstruirContenido: true);
+        } finally {
+            entradaCursoPendiente = false;
         }
-
-        MostrarRutaAprendizajeInmersiva(reconstruirContenido: true);
     }
 
     private void MostrarCursoPrincipal() {
@@ -1720,14 +1738,23 @@ public partial class frmPrincipal {
         int altoLista = Math.Max(1, altoBloque - altoTitulo - separacionTitulo);
         int xTemas = xBloque + anchoPerfil + separacionColumnas;
 
-        panelPerfilCurso.SetBounds(xBloque, yBloque, anchoPerfil, altoBloque);
-        lblTituloTemasCurso.SetBounds(xTemas, yBloque, anchoTemas, altoTitulo);
+        panelPerfilCurso.SetBounds(
+            xBloque,
+            yBloque,
+            anchoPerfil,
+            altoBloque);
+        AjustarContenidoPerfilCursoAlEspacioDisponible();
+
+        lblTituloTemasCurso.SetBounds(
+            xTemas,
+            yBloque,
+            anchoTemas,
+            altoTitulo);
         desplazamientoTemasCurso.SetBounds(
             xTemas,
             yBloque + altoTitulo + separacionTitulo,
             anchoTemas,
             altoLista);
-        AjustarContenidoPerfilCurso();
     }
 
     private void RecalcularVistaPrincipalCursoCompacta(int anchoVista, int altoVista) {
@@ -1871,15 +1898,46 @@ public partial class frmPrincipal {
         desplazamientoCursoPrincipal.ActualizarContenido(volverAlInicio);
     }
 
-    private int AjustarContenidoPerfilCurso() {
+    private int AjustarContenidoPerfilCursoAlEspacioDisponible() {
+        int altoNatural = AjustarContenidoPerfilCurso(
+            compactarVerticalmente: false);
+
+        if (cursoModoCompacto) {
+            panelPerfilCurso.Height = altoNatural;
+            return altoNatural;
+        }
+
+        if (altoNatural <= panelPerfilCurso.ClientSize.Height) {
+            return altoNatural;
+        }
+
+        return AjustarContenidoPerfilCurso(
+            compactarVerticalmente: true);
+    }
+
+    private int AjustarContenidoPerfilCurso(
+        bool compactarVerticalmente = false) {
         int anchoPerfil = Math.Max(1, panelPerfilCurso.ClientSize.Width);
         int margenHorizontal = Math.Min(EscalarDiseno(26), Math.Max(EscalarDiseno(16), anchoPerfil / 13));
         int anchoContenido = Math.Max(1, anchoPerfil - margenHorizontal * 2);
-        int y = EscalarDiseno(16);
+        int y = EscalarDiseno(compactarVerticalmente ? 13 : 16);
+        int espacioTrasTitulo = EscalarDiseno(compactarVerticalmente ? 1 : 2);
+        int espacioTrasNivel = EscalarDiseno(compactarVerticalmente ? 4 : 6);
+        int espacioTrasProgreso = EscalarDiseno(compactarVerticalmente ? 4 : 7);
+        int espacioTrasBarra = EscalarDiseno(compactarVerticalmente ? 6 : 11);
+        int espacioTrasContenido = EscalarDiseno(compactarVerticalmente ? 5 : 9);
+        int espacioTrasResumen = EscalarDiseno(compactarVerticalmente ? 6 : 11);
+        int espacioTrasSiguientePaso = EscalarDiseno(compactarVerticalmente ? 2 : 4);
+        int espacioTrasUltimaPractica = EscalarDiseno(compactarVerticalmente ? 3 : 6);
+        int espacioTrasContinuar = EscalarDiseno(compactarVerticalmente ? 6 : 10);
+        int espacioTrasTituloRecomendacion = EscalarDiseno(compactarVerticalmente ? 2 : 4);
+        int espacioTrasRecomendacion = EscalarDiseno(compactarVerticalmente ? 3 : 6);
+        int espacioTrasVerPractica = EscalarDiseno(compactarVerticalmente ? 3 : 5);
+        int margenInferior = EscalarDiseno(compactarVerticalmente ? 11 : 16);
 
         int altoTitulo = CalcularAltoTextoCurso(lblTituloPerfilCurso, anchoContenido, 34);
         lblTituloPerfilCurso.SetBounds(margenHorizontal, y, anchoContenido, altoTitulo);
-        y = lblTituloPerfilCurso.Bottom + EscalarDiseno(2);
+        y = lblTituloPerfilCurso.Bottom + espacioTrasTitulo;
 
         int altoNombre = CalcularAltoTextoCurso(lblNombrePerfilCurso, anchoContenido, 24);
         lblNombrePerfilCurso.SetBounds(margenHorizontal, y, anchoContenido, altoNombre);
@@ -1887,16 +1945,16 @@ public partial class frmPrincipal {
 
         int altoNivel = CalcularAltoTextoCurso(lblNivelPerfilCurso, anchoContenido, 22);
         lblNivelPerfilCurso.SetBounds(margenHorizontal, y, anchoContenido, altoNivel);
-        y = lblNivelPerfilCurso.Bottom + EscalarDiseno(6);
+        y = lblNivelPerfilCurso.Bottom + espacioTrasNivel;
 
         int altoProgreso = CalcularAltoTextoCurso(lblProgresoGeneralCurso, anchoContenido, 42);
         lblProgresoGeneralCurso.SetBounds(margenHorizontal, y, anchoContenido, altoProgreso);
-        y = lblProgresoGeneralCurso.Bottom + EscalarDiseno(7);
+        y = lblProgresoGeneralCurso.Bottom + espacioTrasProgreso;
 
         int altoBarra = EscalarDiseno(9);
         panelFondoProgresoCurso.SetBounds(margenHorizontal, y, anchoContenido, altoBarra);
         panelRellenoProgresoCurso.Height = altoBarra;
-        y = panelFondoProgresoCurso.Bottom + EscalarDiseno(11);
+        y = panelFondoProgresoCurso.Bottom + espacioTrasBarra;
 
         int altoContenidoGrado = CalcularAltoTextoCurso(
             lblContenidoGradoCurso,
@@ -1907,7 +1965,7 @@ public partial class frmPrincipal {
             y,
             anchoContenido,
             altoContenidoGrado);
-        y = lblContenidoGradoCurso.Bottom + EscalarDiseno(9);
+        y = lblContenidoGradoCurso.Bottom + espacioTrasContenido;
 
         int altoResumenTemas = CalcularAltoTextoCurso(
             lblResumenTemasCurso,
@@ -1918,19 +1976,32 @@ public partial class frmPrincipal {
             y,
             anchoContenido,
             altoResumenTemas);
-        y = lblResumenTemasCurso.Bottom + EscalarDiseno(11);
+        y = lblResumenTemasCurso.Bottom + espacioTrasResumen;
 
         int altoSiguientePaso = CalcularAltoTextoCurso(lblSiguientePasoCurso, anchoContenido, 18);
         lblSiguientePasoCurso.SetBounds(margenHorizontal, y, anchoContenido, altoSiguientePaso);
-        y = lblSiguientePasoCurso.Bottom + EscalarDiseno(4);
+        y = lblSiguientePasoCurso.Bottom + espacioTrasSiguientePaso;
 
         int altoUltimaPractica = CalcularAltoTextoCurso(lblUltimaPracticaCurso, anchoContenido, 50);
         lblUltimaPracticaCurso.SetBounds(margenHorizontal, y, anchoContenido, altoUltimaPractica);
-        y = lblUltimaPracticaCurso.Bottom + EscalarDiseno(6);
+        y = lblUltimaPracticaCurso.Bottom + espacioTrasUltimaPractica;
 
         int altoBoton = EscalarDiseno(34);
-        btnContinuarAprendizaje.SetBounds(margenHorizontal, y, anchoContenido, altoBoton);
-        y = btnContinuarAprendizaje.Bottom + EscalarDiseno(10);
+
+        if (btnContinuarAprendizaje.Visible) {
+            btnContinuarAprendizaje.SetBounds(
+                margenHorizontal, y,
+                anchoContenido,
+                altoBoton);
+
+            y = btnContinuarAprendizaje.Bottom + espacioTrasContinuar;
+        } else {
+            btnContinuarAprendizaje.SetBounds(
+                margenHorizontal,
+                y,
+                anchoContenido,
+                0);
+        }
 
         int altoTituloRecomendacion = CalcularAltoTextoCurso(
             lblTituloRecomendacionCurso,
@@ -1941,7 +2012,7 @@ public partial class frmPrincipal {
             y,
             anchoContenido,
             altoTituloRecomendacion);
-        y = lblTituloRecomendacionCurso.Bottom + EscalarDiseno(4);
+        y = lblTituloRecomendacionCurso.Bottom + espacioTrasTituloRecomendacion;
 
         int altoRecomendacion = CalcularAltoTextoCurso(
             lblPracticaRecomendadaCurso,
@@ -1952,16 +2023,34 @@ public partial class frmPrincipal {
             y,
             anchoContenido,
             altoRecomendacion);
-        y = lblPracticaRecomendadaCurso.Bottom + EscalarDiseno(6);
+        y = lblPracticaRecomendadaCurso.Bottom + espacioTrasRecomendacion;
 
         btnVerPracticaRecomendadaCurso.SetBounds(margenHorizontal, y, anchoContenido, altoBoton);
-        y = btnVerPracticaRecomendadaCurso.Bottom + EscalarDiseno(5);
+        y = btnVerPracticaRecomendadaCurso.Bottom + espacioTrasVerPractica;
 
-        int altoAviso = CalcularAltoTextoCurso(lblAvisoProgresoCurso, anchoContenido, 29);
-        lblAvisoProgresoCurso.SetBounds(margenHorizontal, y, anchoContenido, altoAviso);
+        if (lblAvisoProgresoCurso.Visible) {
+            int altoAviso = CalcularAltoTextoCurso(
+                lblAvisoProgresoCurso,
+                anchoContenido,
+                29);
+
+            lblAvisoProgresoCurso.SetBounds(
+                margenHorizontal,
+                y,
+                anchoContenido,
+                altoAviso);
+
+            y = lblAvisoProgresoCurso.Bottom;
+        } else {
+            lblAvisoProgresoCurso.SetBounds(
+                margenHorizontal,
+                y,
+                anchoContenido,
+                0);
+        }
 
         ActualizarAnchoProgresoGeneral(ContarPracticasDisponiblesRealizadas());
-        return lblAvisoProgresoCurso.Bottom + EscalarDiseno(16);
+        return y + margenInferior;
     }
 
     private int CalcularAltoTextoCurso(Label label, int ancho, int altoMinimo) {
@@ -2083,7 +2172,7 @@ public partial class frmPrincipal {
         ActualizarPracticaRecomendada();
         lblAvisoProgresoCurso.Text = mensajeEstadoProgresoCurso;
         lblAvisoProgresoCurso.Visible = !string.IsNullOrWhiteSpace(mensajeEstadoProgresoCurso);
-        AjustarContenidoPerfilCurso();
+        AjustarContenidoPerfilCursoAlEspacioDisponible();
     }
 
     private int ContarPracticasDisponiblesRealizadas() {
@@ -3786,6 +3875,10 @@ public partial class frmPrincipal {
 
     private void RestablecerEstadosVisualesVistaActualCurso(
         bool aplicarHoverReal = false) {
+        if (!cursoInicializado) {
+            return;
+        }
+
         if (panelGradosVista.Visible) {
             RestablecerEstadosVisualesTarjetasGrados(aplicarHoverReal);
         } else if (panelCursoVista.Visible) {

@@ -6,6 +6,12 @@ using EndForge.Models;
 namespace EndForge.Services;
 
 public sealed class PreferenciasService {
+    private sealed class DocumentoPreferencias {
+        public int Version { get; set; }
+
+        public bool? MostrarTiemposOrientativos { get; set; }
+    }
+
     private readonly string carpetaDatos;
     private readonly JsonSerializerOptions opcionesJson = new() {
         PropertyNameCaseInsensitive = true,
@@ -49,16 +55,22 @@ public sealed class PreferenciasService {
         }
 
         try {
-            PreferenciasAplicacion? preferencias =
-                JsonSerializer.Deserialize<PreferenciasAplicacion>(contenido, opcionesJson);
+            DocumentoPreferencias? documento =
+                JsonSerializer.Deserialize<DocumentoPreferencias>(contenido, opcionesJson);
 
-            if (preferencias is null || preferencias.Version <= 0) {
+            if (documento is null || documento.Version <= 0) {
                 return CrearCarga(EstadoCargaPreferencias.ContenidoInvalido);
             }
 
-            if (preferencias.Version != 1) {
+            if (documento.Version != 1) {
                 return CrearCarga(EstadoCargaPreferencias.VersionNoCompatible);
             }
+
+            PreferenciasAplicacion preferencias = new() {
+                Version = documento.Version,
+                MostrarTiemposOrientativos =
+                    documento.MostrarTiemposOrientativos ?? true
+            };
 
             return CrearCarga(EstadoCargaPreferencias.Exitosa, preferencias);
         } catch (JsonException ex) {
@@ -96,7 +108,12 @@ public sealed class PreferenciasService {
                 Version = 1,
                 MostrarTiemposOrientativos = preferencias.MostrarTiemposOrientativos
             };
-            string contenido = JsonSerializer.Serialize(normalizadas, opcionesJson);
+            DocumentoPreferencias documento = new() {
+                Version = normalizadas.Version,
+                MostrarTiemposOrientativos =
+                    normalizadas.MostrarTiemposOrientativos
+            };
+            string contenido = JsonSerializer.Serialize(documento, opcionesJson);
             File.WriteAllText(rutaTemporal, contenido, new UTF8Encoding(false));
 
             if (File.Exists(RutaPreferencias)) {
