@@ -112,6 +112,7 @@ public partial class frmPrincipal {
         panelRecientesVista.Visible = false;
         panelConfiguracionVista.Visible = false;
         panelVistaNuevaPractica.Visible = false;
+        OcultarVistaEstadisticas();
     }
 
 #if DEBUG
@@ -161,7 +162,95 @@ public partial class frmPrincipal {
         panelSeleccionado = panel;
     }
 
+    private void NavegarVistaPrincipalConTransicion(
+        Panel vistaDestino,
+        Panel opcionMenu,
+        DistribucionPanelPrincipal distribucion,
+        Action? prepararContenido = null,
+        bool omitirTransicionDuranteInicializacion = false) {
+        if (navegacionCursoEnCurso || transicionVisualCursoActiva) {
+            return;
+        }
+
+        if (vistaDestino.Visible && panelSeleccionado == opcionMenu) {
+            prepararContenido?.Invoke();
+            return;
+        }
+
+        if (omitirTransicionDuranteInicializacion && inicializacionSecundariaEnCurso) {
+            PrepararYMostrarVistaPrincipal(
+                vistaDestino,
+                opcionMenu,
+                distribucion,
+                prepararContenido,
+                usarTransicion: false);
+            return;
+        }
+
+        if (!IniciarTransicionVisualCurso(vistaDestino)) {
+            return;
+        }
+
+        PrepararDestinoDespuesDeCubiertaTransicionCurso(
+            () => PrepararYMostrarVistaPrincipal(
+                vistaDestino,
+                opcionMenu,
+                distribucion,
+                prepararContenido,
+                usarTransicion: true));
+    }
+
+    private void PrepararYMostrarVistaPrincipal(
+        Panel vistaDestino,
+        Panel opcionMenu,
+        DistribucionPanelPrincipal distribucion,
+        Action? prepararContenido,
+        bool usarTransicion) {
+        panelPrincipal.SuspendLayout();
+
+        try {
+            PrepararNavegacionPrincipalDesdeRuta();
+            panelInicioVista.Visible = false;
+            panelRecientesVista.Visible = false;
+            panelConfiguracionVista.Visible = false;
+            panelVistaNuevaPractica.Visible = false;
+            OcultarVistaEstadisticas();
+            OcultarVistasCurso();
+
+            prepararContenido?.Invoke();
+            MostrarNavegacionPrincipal(distribucion, invalidarFondo: false);
+            SeleccionarPanelMenu(opcionMenu);
+
+            if (usarTransicion) {
+                AjustarCubiertaTransicionCurso();
+            }
+
+            vistaDestino.Visible = true;
+            vistaDestino.BringToFront();
+        } catch {
+            if (usarTransicion) {
+                CancelarTransicionVisualCurso();
+            }
+
+            throw;
+        } finally {
+            panelPrincipal.ResumeLayout(performLayout: false);
+        }
+
+        if (usarTransicion) {
+            fondoEndForge.Invalidate();
+            ConfirmarDestinoTransicionCurso(vistaDestino);
+        } else {
+            InvalidarFondoContinuo();
+        }
+    }
+
     private void panelNuevaPractica_Click(object? sender, EventArgs e) {
+        if (navegacionCursoEnCurso || transicionVisualCursoActiva) {
+            return;
+        }
+
+        OcultarVistaEstadisticas();
         PrepararNavegacionPrincipalDesdeRuta();
         MostrarNavegacionPrincipal(DistribucionPanelPrincipal.NuevaPractica);
         SeleccionarPanelMenu(panelNuevaPractica);
@@ -177,17 +266,10 @@ public partial class frmPrincipal {
     }
 
     private void PanelInicio_Click(object? sender, EventArgs e) {
-        PrepararNavegacionPrincipalDesdeRuta();
-        MostrarNavegacionPrincipal();
-        SeleccionarPanelMenu(panelInicio);
-
-        panelInicioVista.Visible = true;
-        panelRecientesVista.Visible = false;
-        panelConfiguracionVista.Visible = false;
-        panelVistaNuevaPractica.Visible = false;
-        OcultarVistasCurso();
-
-        panelInicioVista.BringToFront();
+        NavegarVistaPrincipalConTransicion(
+            panelInicioVista,
+            panelInicio,
+            DistribucionPanelPrincipal.Normal);
     }
 
     private void CardInicio_MouseEnter(object? sender, EventArgs e) {
@@ -207,11 +289,17 @@ public partial class frmPrincipal {
     }
 
     private void PanelAbrirPractica_Click(object? sender, EventArgs e) {
+        if (navegacionCursoEnCurso || transicionVisualCursoActiva) {
+            return;
+        }
+
         PrepararNavegacionPrincipalDesdeRuta();
         Panel panelAnterior = panelSeleccionado;
 
         if (modoCursoInmersivo) {
             MostrarCursoPrincipal();
+        } else if (panelAnterior == panelEstadisticas) {
+            MostrarNavegacionPrincipal(DistribucionPanelPrincipal.Estadisticas);
         } else {
             MostrarNavegacionPrincipal();
         }
@@ -235,6 +323,9 @@ public partial class frmPrincipal {
 
             if (panelAnterior == panelCurso) {
                 SeleccionarPanelMenu(panelCurso);
+            } else if (panelAnterior == panelEstadisticas) {
+                SeleccionarPanelMenu(panelEstadisticas);
+                panelEstadisticasVista.BringToFront();
             }
         }
     }
@@ -248,42 +339,34 @@ public partial class frmPrincipal {
     }
 
     private void PanelRecientes_Click(object? sender, EventArgs e) {
-        PrepararNavegacionPrincipalDesdeRuta();
-        MostrarNavegacionPrincipal();
-        SeleccionarPanelMenu(panelRecientes);
-
-        panelInicioVista.Visible = false;
-        panelRecientesVista.Visible = true;
-        panelConfiguracionVista.Visible = false;
-        panelVistaNuevaPractica.Visible = false;
-        OcultarVistasCurso();
-
-        panelRecientesVista.BringToFront();
-
-        CargarRecientes();
+        NavegarVistaPrincipalConTransicion(
+            panelRecientesVista,
+            panelRecientes,
+            DistribucionPanelPrincipal.Normal,
+            () => CargarRecientes());
     }
 
     private void PanelConfiguracion_Click(object? sender, EventArgs e) {
-        PrepararNavegacionPrincipalDesdeRuta();
-        MostrarNavegacionPrincipal();
-        SeleccionarPanelMenu(panelConfiguracion);
-
-        panelInicioVista.Visible = false;
-        panelRecientesVista.Visible = false;
-        panelConfiguracionVista.Visible = true;
-        panelVistaNuevaPractica.Visible = false;
-        OcultarVistasCurso();
-
-        panelConfiguracionVista.BringToFront();
-        MostrarAvisoPreferenciasSiCorresponde();
+        NavegarVistaPrincipalConTransicion(
+            panelConfiguracionVista,
+            panelConfiguracion,
+            DistribucionPanelPrincipal.Normal,
+            MostrarAvisoPreferenciasSiCorresponde,
+            omitirTransicionDuranteInicializacion: true);
     }
 
     private void PanelAcercaDe_Click(object? sender, EventArgs e) {
+        if (navegacionCursoEnCurso || transicionVisualCursoActiva) {
+            return;
+        }
+
         PrepararNavegacionPrincipalDesdeRuta();
         Panel panelAnterior = panelSeleccionado;
 
         if (modoCursoInmersivo) {
             MostrarCursoPrincipal();
+        } else if (panelAnterior == panelEstadisticas) {
+            MostrarNavegacionPrincipal(DistribucionPanelPrincipal.Estadisticas);
         } else {
             MostrarNavegacionPrincipal();
         }
@@ -304,6 +387,9 @@ public partial class frmPrincipal {
 
         if (panelAnterior == panelCurso) {
             SeleccionarPanelMenu(panelCurso);
+        } else if (panelAnterior == panelEstadisticas) {
+            SeleccionarPanelMenu(panelEstadisticas);
+            panelEstadisticasVista.BringToFront();
         }
     }
 }
