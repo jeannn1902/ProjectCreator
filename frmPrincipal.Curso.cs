@@ -2118,12 +2118,9 @@ public partial class frmPrincipal {
         TemaCurso[] temasDisponibles = cursoService.CargarTemas()
             .Where(tema => !tema.EsProximamente && tema.Practicas.Count > 0)
             .ToArray();
-        int temasIniciados = temasDisponibles.Count(tema => tema.Practicas.Any(practica => {
-            ProgresoPractica? progreso = ObtenerProgresoPractica(practica.Id);
-            return progreso is not null &&
-                (progreso.Estado != EstadoPracticaCurso.Pendiente ||
-                 !string.IsNullOrWhiteSpace(progreso.RutaProyecto));
-        }));
+        int temasIniciados = temasDisponibles.Count(tema =>
+            tema.Practicas.Any(practica =>
+                ObtenerEstadoPractica(practica.Id) != EstadoPracticaCurso.Pendiente));
         int temasCompletados = temasDisponibles.Count(tema =>
             tema.Practicas.All(practica =>
                 ObtenerEstadoPractica(practica.Id) == EstadoPracticaCurso.Realizada));
@@ -3663,12 +3660,9 @@ public partial class frmPrincipal {
             return EstadoPracticaCurso.Realizada;
         }
 
-        bool enProgreso = tema.Practicas.Any(practica => {
-            ProgresoPractica? progreso = ObtenerProgresoPractica(practica.Id);
-            return progreso is not null &&
-                (progreso.Estado != EstadoPracticaCurso.Pendiente ||
-                 !string.IsNullOrWhiteSpace(progreso.RutaProyecto));
-        });
+        bool enProgreso = tema.Practicas.Any(practica =>
+            ObtenerEstadoPractica(practica.Id) != EstadoPracticaCurso.Pendiente
+        );
 
         return enProgreso
             ? EstadoPracticaCurso.EnProgreso

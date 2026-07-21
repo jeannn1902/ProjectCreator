@@ -293,41 +293,30 @@ public partial class frmPrincipal {
             return;
         }
 
-        PrepararNavegacionPrincipalDesdeRuta();
         Panel panelAnterior = panelSeleccionado;
 
-        if (modoCursoInmersivo) {
-            MostrarCursoPrincipal();
-        } else if (panelAnterior == panelEstadisticas) {
-            MostrarNavegacionPrincipal(DistribucionPanelPrincipal.Estadisticas);
-        } else {
-            MostrarNavegacionPrincipal();
+        using FolderBrowserDialog carpeta = new() {
+            Description = "Selecciona la carpeta del proyecto"
+        };
+
+        DialogResult resultado = carpeta.ShowDialog(this);
+
+        if (resultado != DialogResult.OK) {
+            RestaurarColorPanel(panelAbrirPractica);
+            SeleccionarPanelMenu(panelAnterior);
+            return;
         }
 
-        using (FolderBrowserDialog carpeta = new FolderBrowserDialog()) {
-            carpeta.Description = "Selecciona la carpeta del proyecto";
+        bool aperturaExitosa = IntentarAbrirPractica(
+            carpeta.SelectedPath,
+            promoverReciente: true
+        );
 
-            if (carpeta.ShowDialog() != DialogResult.OK) {
-                RestaurarColorPanel(panelAbrirPractica);
-                return;
-            }
-
-            SeleccionarPanelMenu(panelAbrirPractica);
-            panelVistaNuevaPractica.Visible = false;
-
-            bool aperturaExitosa = IntentarAbrirPractica(carpeta.SelectedPath, promoverReciente: true);
-
-            if (!aperturaExitosa) {
-                RestaurarColorPanel(panelAbrirPractica);
-            }
-
-            if (panelAnterior == panelCurso) {
-                SeleccionarPanelMenu(panelCurso);
-            } else if (panelAnterior == panelEstadisticas) {
-                SeleccionarPanelMenu(panelEstadisticas);
-                panelEstadisticasVista.BringToFront();
-            }
+        if (!aperturaExitosa) {
+            RestaurarColorPanel(panelAbrirPractica);
         }
+
+        SeleccionarPanelMenu(panelAnterior);
     }
 
     private void RestaurarColorPanel(Panel panel) {
