@@ -145,6 +145,7 @@ public partial class frmPrincipal {
     private static readonly Color ColorMoradoClaroCurso = Color.FromArgb(202, 151, 247);
     private static readonly Color ColorTextoSecundarioCurso = Color.FromArgb(190, 181, 204);
     private const int DuracionTransicionVistaCursoMs = 235;
+    private const int EsperaMaximaPaintDestinoTransicionCursoMs = 75;
 
     private CursoService cursoService = null!;
     private ProgresoCursoService progresoCursoService = null!;
@@ -206,6 +207,7 @@ public partial class frmPrincipal {
     private bool retirandoCubiertaTransicionCurso;
     private bool cubiertaTransicionCursoPintada;
     private bool destinoTransicionCursoListo;
+    private bool confirmacionPaintDestinoTransicionCursoSolicitada;
     private bool preparacionDestinoTransicionCursoProgramada;
     private Task? tareaPreparacionCurso;
     private Action? preparacionDestinoTransicionCursoPendiente;
@@ -213,6 +215,8 @@ public partial class frmPrincipal {
     private System.Windows.Forms.Timer? timerTransicionCurso;
     private Control? destinoTransicionCurso;
     private TarjetaCursoInteractiva? tarjetaCursoConHover;
+    private long inicioEsperaPaintDestinoTransicionCurso;
+    private long idEsperaPaintDestinoTransicionCurso;
     private long inicioRetiroCubiertaTransicionCurso;
     private long secuenciaTransicionVisualCurso;
     private long idTransicionVisualCursoActiva;
@@ -794,13 +798,13 @@ public partial class frmPrincipal {
             }
 
             SeleccionarPanelMenu(panelCurso);
-            OcultarVistasPrincipalesFueraDelCurso();
 
             if (gradoSeleccionadoEnSesion) {
                 MostrarCursoPrincipal();
                 return;
             }
 
+            OcultarVistasPrincipalesFueraDelCurso();
             MostrarRutaAprendizajeInmersiva(reconstruirContenido: true);
         } finally {
             entradaCursoPendiente = false;
@@ -822,23 +826,13 @@ public partial class frmPrincipal {
             return;
         }
 
-        bool diferirPreparacionHastaCubierta =
-            panelGradosVista.Visible &&
-            WindowState == FormWindowState.Maximized;
-
         if (!IniciarTransicionVisualCurso(panelCursoVista)) {
             return;
         }
 
         RestablecerEstadosVisualesVistaActualCurso();
-
-        if (diferirPreparacionHastaCubierta) {
-            PrepararDestinoDespuesDeCubiertaTransicionCurso(
-                PrepararYMostrarCursoPrincipal);
-            return;
-        }
-
-        PrepararYMostrarCursoPrincipal();
+        PrepararDestinoDespuesDeCubiertaTransicionCurso(
+            PrepararYMostrarCursoPrincipal);
     }
 
     private void PrepararYMostrarCursoPrincipal() {
@@ -846,6 +840,7 @@ public partial class frmPrincipal {
 
         try {
             PrepararNavegacionPrincipalDesdeRuta();
+            OcultarVistasPrincipalesFueraDelCurso();
             MostrarNavegacionPrincipal(
                 DistribucionPanelPrincipal.Curso,
                 invalidarFondo: false);
@@ -902,10 +897,15 @@ public partial class frmPrincipal {
             return;
         }
 
+        RestablecerEstadosVisualesVistaActualCurso();
+        PrepararDestinoDespuesDeCubiertaTransicionCurso(
+            () => PrepararYMostrarPracticasTema(tema));
+    }
+
+    private void PrepararYMostrarPracticasTema(TemaCurso tema) {
         panelPrincipal.SuspendLayout();
 
         try {
-            RestablecerEstadosVisualesVistaActualCurso();
             temaCursoSeleccionado = tema;
             lblNumeroTemaCurso.Text = $"Tema {tema.Numero:00}";
             lblNombreTemaCurso.Text = tema.Nombre;
@@ -1047,12 +1047,21 @@ public partial class frmPrincipal {
             return false;
         }
 
+        if (timerRecalcularVista.Enabled) {
+            recalculoPendienteDuranteTransicion = true;
+        }
+
+        timerRecalcularVista.Stop();
+        timerTransicionCurso?.Stop();
+        inicioEsperaPaintDestinoTransicionCurso = 0;
+        idEsperaPaintDestinoTransicionCurso = 0;
         LimpiarHoverTarjetaCurso();
         navegacionCursoEnCurso = true;
         transicionVisualCursoActiva = true;
         retirandoCubiertaTransicionCurso = false;
         cubiertaTransicionCursoPintada = false;
         destinoTransicionCursoListo = false;
+        confirmacionPaintDestinoTransicionCursoSolicitada = false;
         preparacionDestinoTransicionCursoProgramada = false;
         preparacionDestinoTransicionCursoPendiente = null;
         idTransicionVisualCursoActiva = ++secuenciaTransicionVisualCurso;
@@ -1133,21 +1142,22 @@ public partial class frmPrincipal {
         AjustarCubiertaTransicionCurso();
         cubiertaTransicionCurso?.BringToFront();
         cubiertaTransicionCurso?.Invalidate();
+        confirmacionPaintDestinoTransicionCursoSolicitada = true;
         destino.Invalidate();
-        long idTransicion = idTransicionVisualCursoActiva;
+        inicioEsperaPaintDestinoTransicionCurso = Environment.TickCount64;
+        idEsperaPaintDestinoTransicionCurso = idTransicionVisualCursoActiva;
 
-        try {
-            BeginInvoke((Action)(() => {
-                MarcarDestinoTransicionCursoListo(idTransicion, destino);
-            }));
-        } catch (InvalidOperationException) when (
-            IsDisposed || Disposing || !IsHandleCreated) {
+        if (timerTransicionCurso is null) {
             CancelarTransicionVisualCurso();
+            return;
         }
+
+        timerTransicionCurso.Start();
     }
 
     private void DestinoTransicionCurso_Paint(object? sender, PaintEventArgs e) {
-        if (sender is Control destino) {
+        if (confirmacionPaintDestinoTransicionCursoSolicitada &&
+            sender is Control destino) {
             MarcarDestinoTransicionCursoListo(
                 idTransicionVisualCursoActiva,
                 destino);
@@ -1226,11 +1236,15 @@ public partial class frmPrincipal {
         if (!transicionVisualCursoActiva ||
             idTransicion != idTransicionVisualCursoActiva ||
             destinoTransicionCursoListo ||
+            !confirmacionPaintDestinoTransicionCursoSolicitada ||
             !ReferenceEquals(destinoTransicionCurso, destino)) {
             return;
         }
 
         destinoTransicionCursoListo = true;
+        confirmacionPaintDestinoTransicionCursoSolicitada = false;
+        inicioEsperaPaintDestinoTransicionCurso = 0;
+        idEsperaPaintDestinoTransicionCurso = 0;
         DesconectarEventoPaintDestinoTransicionCurso();
         IntentarIniciarRetiroCubiertaTransicionCurso();
     }
@@ -1262,10 +1276,25 @@ public partial class frmPrincipal {
 
     private void TimerTransicionCurso_Tick(object? sender, EventArgs e) {
         if (!transicionVisualCursoActiva ||
-            !retirandoCubiertaTransicionCurso ||
             cubiertaTransicionCurso is null ||
             cubiertaTransicionCurso.IsDisposed) {
             CancelarTransicionVisualCurso();
+            return;
+        }
+
+        if (!retirandoCubiertaTransicionCurso) {
+            if (!destinoTransicionCursoListo &&
+                inicioEsperaPaintDestinoTransicionCurso > 0 &&
+                idEsperaPaintDestinoTransicionCurso == idTransicionVisualCursoActiva &&
+                Environment.TickCount64 - inicioEsperaPaintDestinoTransicionCurso >=
+                    EsperaMaximaPaintDestinoTransicionCursoMs &&
+                destinoTransicionCurso is not null &&
+                !destinoTransicionCurso.IsDisposed) {
+                MarcarDestinoTransicionCursoListo(
+                    idEsperaPaintDestinoTransicionCurso,
+                    destinoTransicionCurso);
+            }
+
             return;
         }
 
@@ -1354,6 +1383,7 @@ public partial class frmPrincipal {
         if (!transicionVisualCursoActiva) {
             LimpiarHoverTarjetaCurso();
             navegacionCursoEnCurso = false;
+            AplicarRecalculoPendienteDespuesDeTransicionCurso();
             return;
         }
 
@@ -1372,10 +1402,14 @@ public partial class frmPrincipal {
         DesconectarDestinoTransicionCurso();
         cubiertaTransicionCursoPintada = false;
         destinoTransicionCursoListo = false;
+        confirmacionPaintDestinoTransicionCursoSolicitada = false;
         preparacionDestinoTransicionCursoProgramada = false;
         preparacionDestinoTransicionCursoPendiente = null;
+        inicioEsperaPaintDestinoTransicionCurso = 0;
+        idEsperaPaintDestinoTransicionCurso = 0;
         idTransicionVisualCursoActiva = 0;
         navegacionCursoEnCurso = false;
+        AplicarRecalculoPendienteDespuesDeTransicionCurso();
     }
 
     private void CancelarTransicionVisualCurso() {
@@ -1393,10 +1427,14 @@ public partial class frmPrincipal {
         DesconectarDestinoTransicionCurso();
         cubiertaTransicionCursoPintada = false;
         destinoTransicionCursoListo = false;
+        confirmacionPaintDestinoTransicionCursoSolicitada = false;
         preparacionDestinoTransicionCursoProgramada = false;
         preparacionDestinoTransicionCursoPendiente = null;
+        inicioEsperaPaintDestinoTransicionCurso = 0;
+        idEsperaPaintDestinoTransicionCurso = 0;
         idTransicionVisualCursoActiva = 0;
         navegacionCursoEnCurso = false;
+        AplicarRecalculoPendienteDespuesDeTransicionCurso();
     }
 
     private void DesconectarEventoPaintDestinoTransicionCurso() {
