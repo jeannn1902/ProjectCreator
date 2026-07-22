@@ -178,7 +178,8 @@ public sealed class CursoService {
                 "El programa muestra correctamente una de las tres clasificaciones.",
                 "Fácil",
                 "15–25 min",
-                new[] { "Condicionales 01" }),
+                new[] { "Condicionales 01" },
+                CrearGuiaClasificarNumero()),
             CrearPractica(
                 "condicionales-calificacion-aprobatoria",
                 "condicionales",
@@ -245,6 +246,113 @@ public sealed class CursoService {
                 "40–60 min",
                 new[] { "Condicionales 01–04", "Variables 02" })
         });
+    }
+
+    private static GuiaPractica CrearGuiaClasificarNumero() {
+        return new GuiaPractica {
+            QueVasAConstruir =
+                "Un programa que solicite un número y determine si es positivo, negativo o igual a cero.",
+            DatosNecesarios = Array.AsReadOnly(new[] {
+                new DatoGuiaPractica {
+                    Nombre = "Número",
+                    Tipo = "double",
+                    Descripcion = "Almacena el valor que escriba el usuario",
+                    Ejemplo = "-7.5"
+                }
+            }),
+            ExplicacionesConceptos = Array.AsReadOnly(new[] {
+                new ConceptoGuiaPractica {
+                    Nombre = "Comparación con cero",
+                    Explicacion = "Permite conocer de qué lado del cero se encuentra un número.",
+                    Fragmento = "numero > 0"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "Operador >",
+                    Explicacion = "Comprueba si el valor de la izquierda es mayor que el de la derecha.",
+                    Fragmento = "numero > 0"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "Operador <",
+                    Explicacion = "Comprueba si el valor de la izquierda es menor que el de la derecha.",
+                    Fragmento = "numero < 0"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "Igualdad",
+                    Explicacion = "El operador == comprueba si dos valores son iguales. El else final también puede representar el caso cero.",
+                    Fragmento = "numero == 0"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "if",
+                    Explicacion = "Ejecuta un bloque cuando su condición es verdadera.",
+                    Fragmento = "if (numero > 0)"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "else if",
+                    Explicacion = "Comprueba otra condición únicamente cuando la anterior no se cumplió.",
+                    Fragmento = "else if (numero < 0)"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "else",
+                    Explicacion = "Atiende el único caso restante sin necesitar otra comparación.",
+                    Fragmento = "else"
+                },
+                new ConceptoGuiaPractica {
+                    Nombre = "Caminos mutuamente excluyentes",
+                    Explicacion = "Significa que solo una clasificación puede elegirse durante cada ejecución.",
+                    Fragmento = ""
+                }
+            }),
+            PasosSugeridos = Array.AsReadOnly(new[] {
+                "Solicita un número.",
+                "Guárdalo en una variable double.",
+                "Comprueba si es mayor que cero.",
+                "En caso contrario, comprueba si es menor que cero.",
+                "Usa else para identificar el cero.",
+                "Muestra una sola clasificación."
+            }),
+            AdvertenciaEvaluacion =
+                "La evaluación automática para esta práctica se añadirá próximamente. " +
+                "Por ahora, revisa que el programa compile y clasifique correctamente valores positivos, negativos y cero.",
+            HerramientaUtil = new HerramientaGuiaPractica {
+                Nombre = "Cadena if, else if y else",
+                Descripcion =
+                    "Permite representar varias posibilidades que no pueden ocurrir al mismo tiempo.",
+                ParaQueSirve =
+                    "En esta práctica garantiza que el número reciba una sola clasificación: positivo, negativo o cero.",
+                Codigo =
+                    "double numero;" + Environment.NewLine + Environment.NewLine +
+                    "if (numero > 0) {" + Environment.NewLine +
+                    "    // Caso positivo" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "else if (numero < 0) {" + Environment.NewLine +
+                    "    // Caso negativo" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "else {" + Environment.NewLine +
+                    "    // Caso cero" + Environment.NewLine +
+                    "}",
+                AclaracionOpcional =
+                    "Esta estructura es una herramienta opcional: no es obligatorio escribirla exactamente así si la solución " +
+                    "produce una sola clasificación correcta. El fragmento no contiene la lectura ni la salida final."
+            },
+            EjemploEjecucion = new EjemploEjecucionPractica {
+                Entrada = "-7.5",
+                SalidaEsperada =
+                    "Número: -7.5" + Environment.NewLine +
+                    "Clasificación: Negativo" + Environment.NewLine + Environment.NewLine +
+                    "OTROS COMPORTAMIENTOS" + Environment.NewLine +
+                    "Entrada 4.25 → Clasificación: Positivo" + Environment.NewLine +
+                    "Entrada -2 → Clasificación: Negativo" + Environment.NewLine +
+                    "Entrada 0 → Clasificación: Cero"
+            },
+            ErroresComunes = Array.AsReadOnly(new[] {
+                "Usar >= 0 y clasificar el cero como positivo.",
+                "Usar varios if independientes y mostrar más de un mensaje.",
+                "Olvidar el caso cero.",
+                "Invertir los operadores > y <.",
+                "No mostrar la clasificación.",
+                "Usar int y perder los decimales."
+            })
+        };
     }
 
     private static IReadOnlyList<PracticaCurso> CrearPracticasCiclos() {
@@ -477,7 +585,8 @@ public sealed class CursoService {
         string resultadoEsperado,
         string dificultad,
         string duracionEstimada,
-        string[] requisitosPrevios) {
+        string[] requisitosPrevios,
+        GuiaPractica? guia = null) {
         return new PracticaCurso {
             Id = id,
             TemaId = temaId,
@@ -491,7 +600,8 @@ public sealed class CursoService {
             ResultadoEsperado = resultadoEsperado,
             Dificultad = dificultad,
             DuracionEstimada = duracionEstimada,
-            RequisitosPrevios = Array.AsReadOnly(requisitosPrevios)
+            RequisitosPrevios = Array.AsReadOnly(requisitosPrevios),
+            Guia = guia
         };
     }
 

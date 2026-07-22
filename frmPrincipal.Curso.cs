@@ -3628,11 +3628,6 @@ public partial class frmPrincipal {
             catalogoEvaluacionesService.ObtenerDefinicion(practica.Id);
 
         if (definicion is null) {
-            AgregarSeccionDetalle(
-                contenidoDetallePractica,
-                "Qué revisará EndForge",
-                "Evaluación automática próximamente para esta práctica.",
-                anchoContenido);
             return;
         }
 
