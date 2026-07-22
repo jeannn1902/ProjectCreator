@@ -83,13 +83,19 @@ public sealed class CatalogoEvaluacionesService {
                     "Ana\n20\n1.65\n1\n",
                     "Nombre: Ana\nEdad: 20\nEstatura: 1.65\nEstudiante: sí",
                     "Comprueba valores habituales y un estado de estudiante afirmativo.",
-                    new[] { "nombre", "ana", "edad", "estatura", "estudiante" },
+                    new[] { "nombre", "ana", "edad", "estatura" },
                     new[] {
                         CrearValor("Edad", 20D, 0D),
                         CrearValor("Estatura", 1.65D)
                     },
                     valoresBooleanos: new[] {
-                        CrearBooleano("Estudiante", true, "Estado de estudiante")
+                        CrearBooleano(
+                            "Estudiante",
+                            true,
+                            "Es estudiante",
+                            "Estado de estudiante",
+                            "Alumno",
+                            "Es alumno")
                     }),
                 CrearCaso(
                     "datos-personales-no-estudiante",
@@ -97,13 +103,19 @@ public sealed class CatalogoEvaluacionesService {
                     "Luis\n42\n1.80\n0\n",
                     "Nombre: Luis\nEdad: 42\nEstatura: 1.80\nEstudiante: no",
                     "Comprueba otro conjunto de datos y un estado negativo.",
-                    new[] { "nombre", "luis", "edad", "estatura", "estudiante" },
+                    new[] { "nombre", "luis", "edad", "estatura" },
                     new[] {
                         CrearValor("Edad", 42D, 0D),
                         CrearValor("Estatura", 1.8D)
                     },
                     valoresBooleanos: new[] {
-                        CrearBooleano("Estudiante", false, "Estado de estudiante")
+                        CrearBooleano(
+                            "Estudiante",
+                            false,
+                            "Es estudiante",
+                            "Estado de estudiante",
+                            "Alumno",
+                            "Es alumno")
                     }),
                 CrearCaso(
                     "datos-personales-valores-cero",
@@ -111,13 +123,19 @@ public sealed class CatalogoEvaluacionesService {
                     "Bebe\n0\n0.50\n0\n",
                     "Nombre: Bebe\nEdad: 0\nEstatura: 0.50\nEstudiante: no",
                     "Comprueba que los valores cero se conserven sin alterar los datos.",
-                    new[] { "nombre", "bebe", "edad", "estatura", "estudiante" },
+                    new[] { "nombre", "bebe", "edad", "estatura" },
                     new[] {
                         CrearValor("Edad", 0D, 0D),
                         CrearValor("Estatura", 0.5D)
                     },
                     valoresBooleanos: new[] {
-                        CrearBooleano("Estudiante", false, "Estado de estudiante")
+                        CrearBooleano(
+                            "Estudiante",
+                            false,
+                            "Es estudiante",
+                            "Estado de estudiante",
+                            "Alumno",
+                            "Es alumno")
                     })
             }),
             Criterios = rubrica
