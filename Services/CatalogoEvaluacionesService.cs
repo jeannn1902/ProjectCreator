@@ -8,6 +8,7 @@ public sealed class CatalogoEvaluacionesService {
     public const string ConversorTemperaturaId = "variables-conversor-temperatura";
     public const string PromedioCalificacionesId = "variables-promedio-calificaciones";
     public const string MiniReciboId = "variables-mini-recibo";
+    public const string ClasificarNumeroId = "condicionales-clasificar-numero";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -53,7 +54,8 @@ public sealed class CatalogoEvaluacionesService {
             CrearTicketCompra(rubrica),
             CrearConversorTemperatura(rubrica),
             CrearPromedioCalificaciones(rubrica),
-            CrearMiniRecibo(rubrica)
+            CrearMiniRecibo(rubrica),
+            CrearClasificarNumero(rubrica)
         });
     }
 
@@ -442,6 +444,71 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static DefinicionEvaluacionPractica CrearClasificarNumero(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = ClasificarNumeroId,
+            NombrePractica = "Número positivo, negativo o cero",
+            Objetivo = "Clasificar un número decimal según su relación con cero.",
+            Descripcion = "Se comprobará que el programa repita el valor recibido y muestre una sola clasificación válida: positivo, negativo o cero.",
+            ContratoEntrada = "1 línea: número decimal. Los valores mayores que cero son positivos, los menores que cero son negativos y el valor cero se clasifica como cero.",
+            CamposEntrada = Array.AsReadOnly(new[] { "Número decimal" }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Mostrar el número recibido con una etiqueta reconocible.",
+                "Clasificar correctamente valores positivos, negativos y cero.",
+                "Mostrar una sola clasificación sin resultados contradictorios."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCaso(
+                    "clasificar-numero-positivo",
+                    "Número positivo",
+                    "7.5\n",
+                    "Número: 7.5\nClasificación: Positivo",
+                    "Comprueba la clasificación de un número decimal mayor que cero.",
+                    Array.Empty<string>(),
+                    new[] { CrearNumeroClasificacion(7.5D) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] { CrearClasificacionEsperada("Positivo") }),
+                CrearCaso(
+                    "clasificar-numero-negativo",
+                    "Número negativo",
+                    "-3.2\n",
+                    "Número: -3.2\nClasificación: Negativo",
+                    "Comprueba la clasificación de un número decimal menor que cero.",
+                    Array.Empty<string>(),
+                    new[] { CrearNumeroClasificacion(-3.2D) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] { CrearClasificacionEsperada("Negativo") }),
+                CrearCaso(
+                    "clasificar-numero-cero",
+                    "Número igual a cero",
+                    "0\n",
+                    "Número: 0\nClasificación: Cero",
+                    "Comprueba que cero no se clasifique como positivo ni negativo.",
+                    Array.Empty<string>(),
+                    new[] { CrearNumeroClasificacion(0D) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] { CrearClasificacionEsperada("Cero") }),
+                CrearCaso(
+                    "clasificar-numero-decimal-negativo-oculto",
+                    "Número decimal negativo adicional",
+                    "-0.5\n",
+                    "Número: -0.5\nClasificación: Negativo",
+                    "Comprueba de forma adicional un valor negativo cercano a cero.",
+                    Array.Empty<string>(),
+                    new[] { CrearNumeroClasificacion(-0.5D) },
+                    puntos: 15,
+                    esVisible: false,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] { CrearClasificacionEsperada("Negativo") })
+            }),
+            Criterios = rubrica
+        };
+    }
+
     private static IReadOnlyList<CriterioEvaluacion> CrearRubrica() {
         return Array.AsReadOnly(new[] {
             new CriterioEvaluacion {
@@ -487,7 +554,8 @@ public sealed class CatalogoEvaluacionesService {
         int puntos = PuntosPorCaso,
         bool esVisible = true,
         ModoComparacionCaso modoComparacion = ModoComparacionCaso.Mixto,
-        ValorBooleanoEsperado[]? valoresBooleanos = null) {
+        ValorBooleanoEsperado[]? valoresBooleanos = null,
+        ValorTextualEsperado[]? valoresTextuales = null) {
         return new CasoPrueba {
             Id = id,
             Nombre = nombre,
@@ -503,7 +571,9 @@ public sealed class CatalogoEvaluacionesService {
                 gruposAlternativos ?? Array.Empty<GrupoTokensEsperados>()),
             ValoresNumericosEsperados = Array.AsReadOnly(valoresNumericos),
             ValoresBooleanosEsperados = Array.AsReadOnly(
-                valoresBooleanos ?? Array.Empty<ValorBooleanoEsperado>())
+                valoresBooleanos ?? Array.Empty<ValorBooleanoEsperado>()),
+            ValoresTextualesEsperados = Array.AsReadOnly(
+                valoresTextuales ?? Array.Empty<ValorTextualEsperado>())
         };
     }
 
@@ -554,14 +624,69 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static ValorNumericoEsperado CrearNumeroClasificacion(double valor) {
+        return CrearValorFlexible(
+            "Número",
+            valor,
+            "Numero",
+            "Valor",
+            "Valor ingresado",
+            "Dato");
+    }
+
+    private static ValorTextualEsperado CrearClasificacionEsperada(
+        string valorEsperado) {
+        return new ValorTextualEsperado {
+            Nombre = "Clasificación",
+            Valor = valorEsperado,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Clasificacion",
+                "Resultado",
+                "Tipo",
+                "Signo"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Positivo",
+                    "positivo",
+                    "número positivo",
+                    "numero positivo",
+                    "mayor que cero",
+                    "mayor a cero"),
+                CrearOpcionTextual(
+                    "Negativo",
+                    "negativo",
+                    "número negativo",
+                    "numero negativo",
+                    "menor que cero",
+                    "menor a cero"),
+                CrearOpcionTextual(
+                    "Cero",
+                    "cero",
+                    "igual a cero",
+                    "es cero",
+                    "neutro")
+            })
+        };
+    }
+
+    private static OpcionValorTextual CrearOpcionTextual(
+        string valor,
+        params string[] alternativas) {
+        return new OpcionValorTextual {
+            Valor = valor,
+            Alternativas = Array.AsReadOnly(alternativas)
+        };
+    }
+
     private static void ValidarDefiniciones(
         IReadOnlyList<DefinicionEvaluacionPractica> definiciones) {
-        if (definiciones.Count != 5 ||
+        if (definiciones.Count == 0 ||
             definiciones.Select(definicion => definicion.PracticaId)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Count() != definiciones.Count) {
             throw new InvalidOperationException(
-                "El catálogo debe contener cinco prácticas evaluables con identificadores únicos.");
+                "El catálogo debe contener prácticas evaluables con identificadores únicos.");
         }
 
         foreach (DefinicionEvaluacionPractica definicion in definiciones) {
@@ -587,7 +712,8 @@ public sealed class CatalogoEvaluacionesService {
 
     private static bool TieneReglasAplicables(CasoPrueba caso) {
         bool tieneTexto = caso.TokensObligatorios.Count > 0 ||
-            caso.GruposTokensAlternativos.Count > 0;
+            caso.GruposTokensAlternativos.Count > 0 ||
+            caso.ValoresTextualesEsperados.Count > 0;
         bool tieneValores = caso.ValoresNumericosEsperados.Count > 0 ||
             caso.ValoresBooleanosEsperados.Count > 0;
 

@@ -39,6 +39,9 @@ public sealed class CasoPrueba {
 
     public IReadOnlyList<ValorBooleanoEsperado> ValoresBooleanosEsperados { get; init; } =
         Array.Empty<ValorBooleanoEsperado>();
+
+    public IReadOnlyList<ValorTextualEsperado> ValoresTextualesEsperados { get; init; } =
+        Array.Empty<ValorTextualEsperado>();
 }
 
 public sealed class GrupoTokensEsperados {
@@ -74,4 +77,22 @@ public sealed class ValorBooleanoEsperado {
 
     public IReadOnlyList<string> RepresentacionesFalsas { get; init; } =
         Array.AsReadOnly(new[] { "no", "false", "falso", "0" });
+}
+
+public sealed class ValorTextualEsperado {
+    public string Nombre { get; init; } = "";
+
+    public string Valor { get; init; } = "";
+
+    public IReadOnlyList<string> EtiquetasAlternativas { get; init; } =
+        Array.Empty<string>();
+
+    public IReadOnlyList<OpcionValorTextual> Opciones { get; init; } =
+        Array.Empty<OpcionValorTextual>();
+}
+
+public sealed class OpcionValorTextual {
+    public string Valor { get; init; } = "";
+
+    public IReadOnlyList<string> Alternativas { get; init; } = Array.Empty<string>();
 }

@@ -18,6 +18,9 @@ public sealed class ResultadoComparacionSalida {
     public IReadOnlyList<ResultadoValorBooleanoComparado> ValoresBooleanos { get; init; } =
         Array.Empty<ResultadoValorBooleanoComparado>();
 
+    public IReadOnlyList<ResultadoValorTextualComparado> ValoresTextuales { get; init; } =
+        Array.Empty<ResultadoValorTextualComparado>();
+
     public IReadOnlyList<string> ReglasCumplidas { get; init; } = Array.Empty<string>();
 
     public IReadOnlyList<string> ReglasIncumplidas { get; init; } = Array.Empty<string>();
@@ -69,4 +72,24 @@ public sealed class ResultadoValorBooleanoComparado {
     public bool UsoEtiquetaAlternativa { get; init; }
 
     public IReadOnlyList<bool> ValoresEncontrados { get; init; } = Array.Empty<bool>();
+}
+
+public sealed class ResultadoValorTextualComparado {
+    public string Nombre { get; init; } = "";
+
+    public string ValorEsperado { get; init; } = "";
+
+    public string ValorObtenido { get; init; } = "";
+
+    public bool Coincide { get; init; }
+
+    public string EtiquetaEncontrada { get; init; } = "";
+
+    public string RepresentacionEncontrada { get; init; } = "";
+
+    public bool TieneContradiccion { get; init; }
+
+    public bool UsoEtiquetaAlternativa { get; init; }
+
+    public IReadOnlyList<string> ValoresEncontrados { get; init; } = Array.Empty<string>();
 }

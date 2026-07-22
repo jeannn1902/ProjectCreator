@@ -43,9 +43,17 @@ public sealed partial class ComparadorSalidaService {
                 .Select(valor => CompararValorBooleano(salida, valor, booleanosUtilizados))
                 .ToList()
             : new List<ResultadoValorBooleanoComparado>();
+        HashSet<PosicionNumero> textosUtilizados = new();
+        List<ResultadoValorTextualComparado> textosComparados = compararTexto
+            ? caso.ValoresTextualesEsperados
+                .Select(valor => CompararValorTextual(salida, valor, textosUtilizados))
+                .ToList()
+            : new List<ResultadoValorTextualComparado>();
 
         bool cumpleTexto =
-            tokensFaltantes.Count == 0 && gruposFaltantes.Count == 0;
+            tokensFaltantes.Count == 0 &&
+            gruposFaltantes.Count == 0 &&
+            textosComparados.All(valor => valor.Coincide);
         bool hayReglasValores =
             valoresComparados.Count > 0 || booleanosComparados.Count > 0;
         bool valoresCorrectos = caso.ModoComparacion switch {
@@ -59,14 +67,20 @@ public sealed partial class ComparadorSalidaService {
                 valoresComparados.All(valor => valor.Coincide) &&
                 booleanosComparados.All(valor => valor.Coincide)
         };
-        bool etiquetasPresentes = !compararValores ||
+        bool etiquetasValoresPresentes = !compararValores ||
             valoresComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada)) &&
             booleanosComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada));
-        bool cumpleEstructura = cumpleTexto && etiquetasPresentes;
+        bool etiquetasTextoPresentes = !compararTexto ||
+            textosComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada));
+        bool cumpleEstructura =
+            cumpleTexto && etiquetasValoresPresentes && etiquetasTextoPresentes;
         List<string> contradicciones = valoresComparados
             .Where(valor => valor.TieneContradiccion)
             .Select(valor => valor.Nombre)
             .Concat(booleanosComparados
+                .Where(valor => valor.TieneContradiccion)
+                .Select(valor => valor.Nombre))
+            .Concat(textosComparados
                 .Where(valor => valor.TieneContradiccion)
                 .Select(valor => valor.Nombre))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -75,6 +89,9 @@ public sealed partial class ComparadorSalidaService {
             .Where(valor => valor.UsoEtiquetaAlternativa)
             .Select(valor => $"{valor.Nombre}: {valor.EtiquetaEncontrada}")
             .Concat(booleanosComparados
+                .Where(valor => valor.UsoEtiquetaAlternativa)
+                .Select(valor => $"{valor.Nombre}: {valor.EtiquetaEncontrada}"))
+            .Concat(textosComparados
                 .Where(valor => valor.UsoEtiquetaAlternativa)
                 .Select(valor => $"{valor.Nombre}: {valor.EtiquetaEncontrada}"))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -86,7 +103,8 @@ public sealed partial class ComparadorSalidaService {
             tokensFaltantes,
             gruposFaltantes,
             valoresComparados,
-            booleanosComparados);
+            booleanosComparados,
+            textosComparados);
         List<string> reglasIncumplidas = CrearReglasIncumplidas(
             caso,
             compararTexto,
@@ -94,7 +112,8 @@ public sealed partial class ComparadorSalidaService {
             tokensFaltantes,
             gruposFaltantes,
             valoresComparados,
-            booleanosComparados);
+            booleanosComparados,
+            textosComparados);
         bool salidaLegible = EsLegible(
             salida,
             compararTexto
@@ -111,6 +130,7 @@ public sealed partial class ComparadorSalidaService {
             GruposAlternativosFaltantes = gruposFaltantes.AsReadOnly(),
             ValoresNumericos = valoresComparados.AsReadOnly(),
             ValoresBooleanos = booleanosComparados.AsReadOnly(),
+            ValoresTextuales = textosComparados.AsReadOnly(),
             ReglasCumplidas = reglasCumplidas.AsReadOnly(),
             ReglasIncumplidas = reglasIncumplidas.AsReadOnly(),
             ContradiccionesDetectadas = contradicciones.AsReadOnly(),
@@ -121,6 +141,7 @@ public sealed partial class ComparadorSalidaService {
                 cumpleEstructura,
                 valoresComparados,
                 booleanosComparados,
+                textosComparados,
                 contradicciones)
         };
     }
@@ -257,6 +278,82 @@ public sealed partial class ComparadorSalidaService {
             Nombre = esperado.Nombre,
             ValorEsperado = esperado.Valor,
             ValorObtenido = primerCandidato?.Valor,
+            Coincide = coincide,
+            EtiquetaEncontrada = primerCandidato?.Etiqueta ?? string.Empty,
+            RepresentacionEncontrada = primerCandidato?.Representacion ?? string.Empty,
+            TieneContradiccion = tieneContradiccion,
+            UsoEtiquetaAlternativa = primerCandidato is not null &&
+                EsEtiquetaAlternativa(primerCandidato.Etiqueta, esperado.EtiquetasAlternativas),
+            ValoresEncontrados = Array.AsReadOnly(
+                encontrados.Select(candidato => candidato.Valor).ToArray())
+        };
+    }
+
+    private static ResultadoValorTextualComparado CompararValorTextual(
+        string salida,
+        ValorTextualEsperado esperado,
+        HashSet<PosicionNumero> textosUtilizados) {
+        string[] lineas = SepararLineas(salida);
+        IReadOnlyList<string> etiquetas = CrearEtiquetasBusqueda(esperado);
+        Dictionary<PosicionNumero, CandidatoTexto> candidatos = new();
+
+        foreach (string etiqueta in etiquetas) {
+            string etiquetaNormalizada = NormalizarTexto(etiqueta);
+
+            if (string.IsNullOrWhiteSpace(etiquetaNormalizada)) {
+                continue;
+            }
+
+            for (int indiceLinea = 0; indiceLinea < lineas.Length; indiceLinea++) {
+                string lineaNormalizada = NormalizarLineaPreservandoIndices(
+                    lineas[indiceLinea]);
+
+                foreach (Match coincidenciaEtiqueta in CrearRegexToken(etiquetaNormalizada)
+                    .Matches(lineaNormalizada)
+                    .Cast<Match>()) {
+                    CandidatoTexto? candidato = ObtenerTextoAsociado(
+                        lineas,
+                        indiceLinea,
+                        coincidenciaEtiqueta,
+                        etiqueta,
+                        esperado);
+
+                    if (candidato is null) {
+                        continue;
+                    }
+
+                    PosicionNumero posicion = new(
+                        candidato.IndiceLinea,
+                        candidato.IndiceCaracter,
+                        candidato.Longitud);
+
+                    if (!textosUtilizados.Contains(posicion)) {
+                        candidatos.TryAdd(posicion, candidato);
+                    }
+                }
+            }
+        }
+
+        foreach (PosicionNumero posicion in candidatos.Keys) {
+            textosUtilizados.Add(posicion);
+        }
+
+        CandidatoTexto[] encontrados = candidatos.Values.ToArray();
+        bool tieneContradiccion = encontrados
+            .Select(candidato => candidato.Valor)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count() > 1;
+        bool coincide = encontrados.Length > 0 &&
+            !tieneContradiccion &&
+            encontrados.All(candidato => candidato.Valor.Equals(
+                esperado.Valor,
+                StringComparison.OrdinalIgnoreCase));
+        CandidatoTexto? primerCandidato = encontrados.FirstOrDefault();
+
+        return new ResultadoValorTextualComparado {
+            Nombre = esperado.Nombre,
+            ValorEsperado = esperado.Valor,
+            ValorObtenido = primerCandidato?.Valor ?? string.Empty,
             Coincide = coincide,
             EtiquetaEncontrada = primerCandidato?.Etiqueta ?? string.Empty,
             RepresentacionEncontrada = primerCandidato?.Representacion ?? string.Empty,
@@ -420,6 +517,102 @@ public sealed partial class ComparadorSalidaService {
             .ToArray();
     }
 
+    private static CandidatoTexto? ObtenerTextoAsociado(
+        string[] lineas,
+        int indiceLinea,
+        Match coincidenciaEtiqueta,
+        string etiqueta,
+        ValorTextualEsperado esperado) {
+        string linea = lineas[indiceLinea];
+        int inicioBusqueda = Math.Min(
+            coincidenciaEtiqueta.Index + coincidenciaEtiqueta.Length,
+            linea.Length);
+        CandidatoTexto? candidato = BuscarTextoAlInicio(
+            linea[inicioBusqueda..],
+            indiceLinea,
+            inicioBusqueda,
+            etiqueta,
+            esperado);
+
+        if (candidato is not null) {
+            return candidato;
+        }
+
+        for (int siguiente = indiceLinea + 1; siguiente < lineas.Length; siguiente++) {
+            if (string.IsNullOrWhiteSpace(lineas[siguiente])) {
+                continue;
+            }
+
+            return BuscarTextoAlInicio(
+                lineas[siguiente],
+                siguiente,
+                0,
+                etiqueta,
+                esperado);
+        }
+
+        return null;
+    }
+
+    private static CandidatoTexto? BuscarTextoAlInicio(
+        string segmento,
+        int indiceLinea,
+        int desplazamiento,
+        string etiqueta,
+        ValorTextualEsperado esperado) {
+        int caracteresIgnorados = 0;
+
+        while (caracteresIgnorados < segmento.Length &&
+            (char.IsWhiteSpace(segmento[caracteresIgnorados]) ||
+             segmento[caracteresIgnorados] is ':' or '=' or '-' or '–' or '—')) {
+            caracteresIgnorados++;
+        }
+
+        string valorNormalizado = NormalizarTexto(segmento[caracteresIgnorados..]);
+
+        foreach ((string representacion, string valor) in
+            CrearRepresentacionesTextuales(esperado)) {
+            string representacionNormalizada = NormalizarTexto(representacion);
+
+            if (representacionNormalizada.Length == 0 ||
+                !EmpiezaConToken(valorNormalizado, representacionNormalizada)) {
+                continue;
+            }
+
+            return new CandidatoTexto(
+                indiceLinea,
+                desplazamiento + caracteresIgnorados,
+                representacion.Length,
+                valor,
+                etiqueta,
+                representacion);
+        }
+
+        return null;
+    }
+
+    private static IReadOnlyList<(string Representacion, string Valor)>
+        CrearRepresentacionesTextuales(ValorTextualEsperado esperado) {
+        Dictionary<string, (string Representacion, string Valor)> representaciones =
+            new(StringComparer.Ordinal);
+
+        foreach (OpcionValorTextual opcion in esperado.Opciones) {
+            foreach (string representacion in opcion.Alternativas) {
+                string normalizada = NormalizarTexto(representacion);
+
+                if (normalizada.Length > 0) {
+                    representaciones.TryAdd(
+                        normalizada,
+                        (representacion, opcion.Valor));
+                }
+            }
+        }
+
+        return representaciones.Values
+            .OrderByDescending(elemento => elemento.Representacion.Length)
+            .ToArray();
+    }
+
     private static bool EmpiezaConToken(string texto, string token) {
         return texto.Equals(token, StringComparison.Ordinal) ||
             texto.StartsWith(token + " ", StringComparison.Ordinal) ||
@@ -442,6 +635,16 @@ public sealed partial class ComparadorSalidaService {
 
     private static IReadOnlyList<string> CrearEtiquetasBusqueda(
         ValorBooleanoEsperado esperado) {
+        return new[] { esperado.Nombre }
+            .Concat(esperado.EtiquetasAlternativas)
+            .Where(etiqueta => !string.IsNullOrWhiteSpace(etiqueta))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(etiqueta => etiqueta.Length)
+            .ToArray();
+    }
+
+    private static IReadOnlyList<string> CrearEtiquetasBusqueda(
+        ValorTextualEsperado esperado) {
         return new[] { esperado.Nombre }
             .Concat(esperado.EtiquetasAlternativas)
             .Where(etiqueta => !string.IsNullOrWhiteSpace(etiqueta))
@@ -682,7 +885,8 @@ public sealed partial class ComparadorSalidaService {
         IReadOnlyList<string> tokensFaltantes,
         IReadOnlyList<string> gruposFaltantes,
         IReadOnlyList<ResultadoValorNumericoComparado> valores,
-        IReadOnlyList<ResultadoValorBooleanoComparado> booleanos) {
+        IReadOnlyList<ResultadoValorBooleanoComparado> booleanos,
+        IReadOnlyList<ResultadoValorTextualComparado> textos) {
         List<string> reglas = new();
 
         if (compararTexto) {
@@ -696,6 +900,9 @@ public sealed partial class ComparadorSalidaService {
                     grupo.Nombre,
                     StringComparer.OrdinalIgnoreCase))
                 .Select(grupo => $"Alternativa textual: {grupo.Nombre}"));
+            reglas.AddRange(textos
+                .Where(valor => valor.Coincide && !valor.TieneContradiccion)
+                .Select(valor => $"Valor textual correcto: {valor.Nombre}"));
         }
 
         if (compararValores) {
@@ -717,7 +924,8 @@ public sealed partial class ComparadorSalidaService {
         IReadOnlyList<string> tokensFaltantes,
         IReadOnlyList<string> gruposFaltantes,
         IReadOnlyList<ResultadoValorNumericoComparado> valores,
-        IReadOnlyList<ResultadoValorBooleanoComparado> booleanos) {
+        IReadOnlyList<ResultadoValorBooleanoComparado> booleanos,
+        IReadOnlyList<ResultadoValorTextualComparado> textos) {
         List<string> reglas = new();
 
         if (compararTexto) {
@@ -725,6 +933,11 @@ public sealed partial class ComparadorSalidaService {
                 $"Falta el texto obligatorio: {token}"));
             reglas.AddRange(gruposFaltantes.Select(grupo =>
                 $"Falta una alternativa textual válida: {grupo}"));
+            reglas.AddRange(textos
+                .Where(valor => !valor.Coincide)
+                .Select(valor => valor.TieneContradiccion
+                    ? $"Valores textuales contradictorios: {valor.Nombre}"
+                    : $"Valor textual incorrecto o ausente: {valor.Nombre}"));
         }
 
         if (compararValores) {
@@ -755,6 +968,7 @@ public sealed partial class ComparadorSalidaService {
         bool cumpleEstructura,
         IReadOnlyList<ResultadoValorNumericoComparado> valores,
         IReadOnlyList<ResultadoValorBooleanoComparado> booleanos,
+        IReadOnlyList<ResultadoValorTextualComparado> textos,
         IReadOnlyList<string> contradicciones) {
         if (string.IsNullOrWhiteSpace(salida)) {
             return "El programa terminó sin mostrar una salida que pueda evaluarse.";
@@ -776,6 +990,9 @@ public sealed partial class ComparadorSalidaService {
             .Where(valor => !valor.Coincide)
             .Select(valor => valor.Nombre)
             .Concat(booleanos
+                .Where(valor => !valor.Coincide)
+                .Select(valor => valor.Nombre))
+            .Concat(textos
                 .Where(valor => !valor.Coincide)
                 .Select(valor => valor.Nombre))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -806,6 +1023,14 @@ public sealed partial class ComparadorSalidaService {
         int IndiceCaracter,
         int Longitud,
         bool Valor,
+        string Etiqueta,
+        string Representacion);
+
+    private sealed record CandidatoTexto(
+        int IndiceLinea,
+        int IndiceCaracter,
+        int Longitud,
+        string Valor,
         string Etiqueta,
         string Representacion);
 }

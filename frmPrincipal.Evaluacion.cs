@@ -243,7 +243,7 @@ public partial class frmPrincipal {
             VaciarYDisponerControles(contenidoEvaluacion);
             AgregarLabelFluido(
                 contenidoEvaluacion,
-                $"Ruta de aprendizaje › Grado 1 › Variables › {practicaCursoSeleccionada.Nombre} › Evaluación",
+                $"Ruta de aprendizaje › Grado 1 › {temaCursoSeleccionado?.Nombre ?? "Variables"} › {practicaCursoSeleccionada.Nombre} › Evaluación",
                 ancho,
                 TamanoFuenteCurso.MetadatoTarjetaPractica,
                 FontStyle.Regular,
