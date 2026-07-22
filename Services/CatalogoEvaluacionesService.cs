@@ -9,6 +9,7 @@ public sealed class CatalogoEvaluacionesService {
     public const string PromedioCalificacionesId = "variables-promedio-calificaciones";
     public const string MiniReciboId = "variables-mini-recibo";
     public const string ClasificarNumeroId = "condicionales-clasificar-numero";
+    public const string MayorDeEdadId = "condicionales-mayor-de-edad";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -55,7 +56,8 @@ public sealed class CatalogoEvaluacionesService {
             CrearConversorTemperatura(rubrica),
             CrearPromedioCalificaciones(rubrica),
             CrearMiniRecibo(rubrica),
-            CrearClasificarNumero(rubrica)
+            CrearClasificarNumero(rubrica),
+            CrearMayorDeEdad(rubrica)
         });
     }
 
@@ -509,6 +511,82 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static DefinicionEvaluacionPractica CrearMayorDeEdad(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = MayorDeEdadId,
+            NombrePractica = "Mayor de edad",
+            Objetivo = "Clasificar una edad válida y detectar valores fuera del rango permitido.",
+            Descripcion = "Se comprobará que el programa repita la edad recibida y la clasifique como mayor de edad, menor de edad o edad inválida.",
+            ContratoEntrada = "1 línea: edad entera. El rango válido es de 0 a 120; desde 18 se considera mayor de edad y los valores fuera del rango son inválidos.",
+            CamposEntrada = Array.AsReadOnly(new[] { "Edad entera" }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Mostrar la edad recibida con una etiqueta reconocible.",
+                "Clasificar las edades válidas usando el límite de 18 años.",
+                "Rechazar edades negativas o mayores que 120.",
+                "Mostrar una sola clasificación sin resultados contradictorios."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCaso(
+                    "mayor-edad-limite-adulto",
+                    "Límite de mayoría de edad",
+                    "18\n",
+                    "Edad: 18\nClasificación: Mayor de edad",
+                    "Comprueba que el límite de 18 años se clasifique como mayor de edad.",
+                    Array.Empty<string>(),
+                    new[] { CrearEdadEsperada(18) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] {
+                        CrearClasificacionEdadEsperada("Mayor de edad")
+                    }),
+                CrearCaso(
+                    "mayor-edad-menor",
+                    "Edad menor al límite",
+                    "17\n",
+                    "Edad: 17\nClasificación: Menor de edad",
+                    "Comprueba una edad válida inmediatamente menor que 18.",
+                    Array.Empty<string>(),
+                    new[] { CrearEdadEsperada(17) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] {
+                        CrearClasificacionEdadEsperada(
+                            "Menor de edad",
+                            permitirAdolescente: true)
+                    }),
+                CrearCaso(
+                    "mayor-edad-negativa",
+                    "Edad negativa inválida",
+                    "-1\n",
+                    "Edad: -1\nClasificación: Edad inválida",
+                    "Comprueba que una edad negativa se rechace como inválida.",
+                    Array.Empty<string>(),
+                    new[] { CrearEdadEsperada(-1) },
+                    puntos: 15,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] {
+                        CrearClasificacionEdadEsperada("Edad inválida")
+                    }),
+                CrearCaso(
+                    "mayor-edad-superior-oculto",
+                    "Edad superior al rango",
+                    "121\n",
+                    "Edad: 121\nClasificación: Edad inválida",
+                    "Comprueba de forma adicional una edad superior a 120.",
+                    Array.Empty<string>(),
+                    new[] { CrearEdadEsperada(121) },
+                    puntos: 15,
+                    esVisible: false,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] {
+                        CrearClasificacionEdadEsperada("Edad inválida")
+                    })
+            }),
+            Criterios = rubrica
+        };
+    }
+
     private static IReadOnlyList<CriterioEvaluacion> CrearRubrica() {
         return Array.AsReadOnly(new[] {
             new CriterioEvaluacion {
@@ -666,6 +744,61 @@ public sealed class CatalogoEvaluacionesService {
                     "igual a cero",
                     "es cero",
                     "neutro")
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearEdadEsperada(int edad) {
+        return new ValorNumericoEsperado {
+            Nombre = "Edad",
+            Valor = edad,
+            Tolerancia = 0D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Años",
+                "Edad ingresada",
+                "Valor ingresado"
+            })
+        };
+    }
+
+    private static ValorTextualEsperado CrearClasificacionEdadEsperada(
+        string valorEsperado,
+        bool permitirAdolescente = false) {
+        List<string> alternativasMenor = new() {
+            "menor de edad",
+            "no es mayor de edad"
+        };
+
+        if (permitirAdolescente) {
+            alternativasMenor.Add("adolescente");
+        }
+
+        return new ValorTextualEsperado {
+            Nombre = "Clasificación",
+            Valor = valorEsperado,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Clasificacion",
+                "Resultado",
+                "Estado",
+                "Condición"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Mayor de edad",
+                    "mayor de edad",
+                    "adulto",
+                    "es mayor",
+                    "puede considerarse adulto"),
+                CrearOpcionTextual(
+                    "Menor de edad",
+                    alternativasMenor.ToArray()),
+                CrearOpcionTextual(
+                    "Edad inválida",
+                    "edad inválida",
+                    "edad no válida",
+                    "valor inválido",
+                    "fuera de rango",
+                    "rango inválido")
             })
         };
     }
