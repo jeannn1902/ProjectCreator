@@ -62,6 +62,9 @@ public sealed class ValorNumericoEsperado {
 
     public IReadOnlyList<string> EtiquetasAlternativas { get; init; } =
         Array.Empty<string>();
+
+    public IReadOnlyList<double> ValoresEquivalentes { get; init; } =
+        Array.Empty<double>();
 }
 
 public sealed class ValorBooleanoEsperado {
@@ -83,6 +86,8 @@ public sealed class ValorTextualEsperado {
     public string Nombre { get; init; } = "";
 
     public string Valor { get; init; } = "";
+
+    public bool EsOpcional { get; init; }
 
     public IReadOnlyList<string> EtiquetasAlternativas { get; init; } =
         Array.Empty<string>();

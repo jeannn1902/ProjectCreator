@@ -79,6 +79,8 @@ public sealed class ResultadoValorTextualComparado {
 
     public string ValorEsperado { get; init; } = "";
 
+    public bool EsOpcional { get; init; }
+
     public string ValorObtenido { get; init; } = "";
 
     public bool Coincide { get; init; }

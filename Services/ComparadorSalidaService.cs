@@ -71,7 +71,9 @@ public sealed partial class ComparadorSalidaService {
             valoresComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada)) &&
             booleanosComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada));
         bool etiquetasTextoPresentes = !compararTexto ||
-            textosComparados.All(valor => !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada));
+            textosComparados.All(valor =>
+                valor.EsOpcional ||
+                !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada));
         bool cumpleEstructura =
             cumpleTexto && etiquetasValoresPresentes && etiquetasTextoPresentes;
         List<string> contradicciones = valoresComparados
@@ -194,16 +196,15 @@ public sealed partial class ComparadorSalidaService {
 
         CandidatoNumero[] encontrados = candidatos.Values.ToArray();
         bool tieneContradiccion = encontrados.Any(candidato =>
-            encontrados.Any(otro => !SonEquivalentes(
+            encontrados.Any(otro => !SonRepresentacionesNumericasEquivalentes(
                 candidato.Valor,
                 otro.Valor,
-                esperado.Tolerancia)));
+                esperado)));
         bool coincide = encontrados.Length > 0 &&
             !tieneContradiccion &&
-            encontrados.All(candidato => SonEquivalentes(
+            encontrados.All(candidato => CoincideValorNumericoEsperado(
                 candidato.Valor,
-                esperado.Valor,
-                esperado.Tolerancia));
+                esperado));
         CandidatoNumero? primerCandidato = encontrados.FirstOrDefault();
 
         return CrearResultadoValor(
@@ -343,16 +344,18 @@ public sealed partial class ComparadorSalidaService {
             .Select(candidato => candidato.Valor)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Count() > 1;
-        bool coincide = encontrados.Length > 0 &&
-            !tieneContradiccion &&
-            encontrados.All(candidato => candidato.Valor.Equals(
-                esperado.Valor,
-                StringComparison.OrdinalIgnoreCase));
+        bool coincide = encontrados.Length == 0
+            ? esperado.EsOpcional
+            : !tieneContradiccion &&
+                encontrados.All(candidato => candidato.Valor.Equals(
+                    esperado.Valor,
+                    StringComparison.OrdinalIgnoreCase));
         CandidatoTexto? primerCandidato = encontrados.FirstOrDefault();
 
         return new ResultadoValorTextualComparado {
             Nombre = esperado.Nombre,
             ValorEsperado = esperado.Valor,
+            EsOpcional = esperado.EsOpcional,
             ValorObtenido = primerCandidato?.Valor ?? string.Empty,
             Coincide = coincide,
             EtiquetaEncontrada = primerCandidato?.Etiqueta ?? string.Empty,
@@ -689,6 +692,23 @@ public sealed partial class ComparadorSalidaService {
             string.Equals(alternativa, etiqueta, StringComparison.OrdinalIgnoreCase));
     }
 
+    private static bool CoincideValorNumericoEsperado(
+        double obtenido,
+        ValorNumericoEsperado esperado) {
+        return SonEquivalentes(obtenido, esperado.Valor, esperado.Tolerancia) ||
+            esperado.ValoresEquivalentes.Any(valor =>
+                SonEquivalentes(obtenido, valor, esperado.Tolerancia));
+    }
+
+    private static bool SonRepresentacionesNumericasEquivalentes(
+        double primero,
+        double segundo,
+        ValorNumericoEsperado esperado) {
+        return SonEquivalentes(primero, segundo, esperado.Tolerancia) ||
+            CoincideValorNumericoEsperado(primero, esperado) &&
+            CoincideValorNumericoEsperado(segundo, esperado);
+    }
+
     private static bool SonEquivalentes(double obtenido, double esperado, double tolerancia) {
         return double.IsFinite(obtenido) &&
             double.IsFinite(esperado) &&
@@ -696,7 +716,13 @@ public sealed partial class ComparadorSalidaService {
     }
 
     private static bool IntentarConvertirNumero(string texto, out double valor) {
-        string normalizado = texto.Trim().Replace(',', '.');
+        string normalizado = texto.Trim();
+
+        if (normalizado.StartsWith('$')) {
+            normalizado = normalizado[1..].TrimStart();
+        }
+
+        normalizado = normalizado.Replace(',', '.');
         return double.TryParse(
             normalizado,
             NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
@@ -908,7 +934,11 @@ public sealed partial class ComparadorSalidaService {
                     StringComparer.OrdinalIgnoreCase))
                 .Select(grupo => $"Alternativa textual: {grupo.Nombre}"));
             reglas.AddRange(textos
-                .Where(valor => valor.Coincide && !valor.TieneContradiccion)
+                .Where(valor =>
+                    valor.Coincide &&
+                    !valor.TieneContradiccion &&
+                    (!valor.EsOpcional ||
+                     !string.IsNullOrWhiteSpace(valor.EtiquetaEncontrada)))
                 .Select(valor => $"Valor textual correcto: {valor.Nombre}"));
         }
 
@@ -1010,7 +1040,7 @@ public sealed partial class ComparadorSalidaService {
             : "La salida todavía necesita algunos ajustes.";
     }
 
-    [GeneratedRegex(@"^\s*[-+]?(?:\d+(?:[.,]\d+)?|[.,]\d+)(?![\p{L}\p{N}_])", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^\s*\$?\s*[-+]?(?:\d+(?:[.,]\d+)?|[.,]\d+)(?![\p{L}\p{N}_])", RegexOptions.CultureInvariant)]
     private static partial Regex RegexNumeroInicial();
 
     private readonly record struct PosicionNumero(

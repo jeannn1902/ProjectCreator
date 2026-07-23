@@ -1,4 +1,5 @@
 using EndForge.Models;
+using System.Globalization;
 
 namespace EndForge.Services;
 
@@ -12,6 +13,7 @@ public sealed class CatalogoEvaluacionesService {
     public const string MayorDeEdadId = "condicionales-mayor-de-edad";
     public const string CalificacionAprobatoriaId =
         "condicionales-calificacion-aprobatoria";
+    public const string DescuentoCompraId = "condicionales-descuento-compra";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -60,7 +62,8 @@ public sealed class CatalogoEvaluacionesService {
             CrearMiniRecibo(rubrica),
             CrearClasificarNumero(rubrica),
             CrearMayorDeEdad(rubrica),
-            CrearCalificacionAprobatoria(rubrica)
+            CrearCalificacionAprobatoria(rubrica),
+            CrearDescuentoCompra(rubrica)
         });
     }
 
@@ -678,6 +681,75 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static DefinicionEvaluacionPractica CrearDescuentoCompra(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = DescuentoCompraId,
+            NombrePractica = "Descuento según total de compra",
+            Objetivo = "Aplicar un porcentaje de descuento según el total original de una compra.",
+            Descripcion = "Se comprobarán el total original, el porcentaje aplicado, el importe descontado y el total final; los totales negativos deben rechazarse.",
+            ContratoEntrada = "1 línea: total decimal de la compra. Menos de 500 aplica 0 %; desde 500, 5 %; desde 1000, 10 %; y desde 2000, 15 %. Un total negativo es inválido.",
+            CamposEntrada = Array.AsReadOnly(new[] { "Total decimal de la compra" }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Mostrar el total original con una etiqueta inequívoca.",
+                "Mostrar el porcentaje aplicado, el descuento y el total final.",
+                "Calcular el descuento multiplicando el total original por la tasa correspondiente.",
+                "Rechazar totales negativos sin exigir cálculos de descuento."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoDescuento(
+                    "descuento-sin-descuento",
+                    "Compra sin descuento",
+                    400D,
+                    0D,
+                    0D,
+                    400D,
+                    esVisible: true),
+                CrearCasoDescuento(
+                    "descuento-cinco-por-ciento",
+                    "Descuento del cinco por ciento",
+                    500D,
+                    5D,
+                    25D,
+                    475D,
+                    esVisible: true),
+                CrearCasoDescuento(
+                    "descuento-diez-por-ciento",
+                    "Descuento del diez por ciento",
+                    1500D,
+                    10D,
+                    150D,
+                    1350D,
+                    esVisible: true),
+                CrearCasoDescuento(
+                    "descuento-quince-por-ciento",
+                    "Descuento del quince por ciento",
+                    2000D,
+                    15D,
+                    300D,
+                    1700D,
+                    esVisible: true),
+                CrearCaso(
+                    "descuento-total-negativo-oculto",
+                    "Total negativo inválido",
+                    "-100\n",
+                    "Total de compra: -100\nEstado: Total inválido",
+                    "Comprueba de forma adicional que un total negativo se rechace.",
+                    Array.Empty<string>(),
+                    new[] { CrearTotalOriginalEsperado(-100D) },
+                    puntos: 12,
+                    esVisible: false,
+                    modoComparacion: ModoComparacionCaso.Mixto,
+                    valoresTextuales: new[] {
+                        CrearEstadoTotalEsperado(
+                            invalido: true,
+                            opcional: false)
+                    })
+            }),
+            Criterios = rubrica
+        };
+    }
+
     private static IReadOnlyList<CriterioEvaluacion> CrearRubrica() {
         return Array.AsReadOnly(new[] {
             new CriterioEvaluacion {
@@ -951,6 +1023,137 @@ public sealed class CatalogoEvaluacionesService {
                     "valor inválido")
             })
         };
+    }
+
+    private static CasoPrueba CrearCasoDescuento(
+        string id,
+        string nombre,
+        double totalOriginal,
+        double porcentaje,
+        double descuento,
+        double totalFinal,
+        bool esVisible) {
+        string totalTexto = FormatearNumeroCatalogo(totalOriginal);
+        string porcentajeTexto = FormatearNumeroCatalogo(porcentaje);
+        string descuentoTexto = FormatearNumeroCatalogo(descuento);
+        string totalFinalTexto = FormatearNumeroCatalogo(totalFinal);
+
+        return CrearCaso(
+            id,
+            nombre,
+            totalTexto + "\n",
+            $"Total original: {totalTexto}\n" +
+            $"Porcentaje: {porcentajeTexto}%\n" +
+            $"Descuento: {descuentoTexto}\n" +
+            $"Total final: {totalFinalTexto}",
+            "Comprueba el porcentaje, el importe descontado y el total final para este rango de compra.",
+            Array.Empty<string>(),
+            new[] {
+                CrearTotalOriginalEsperado(totalOriginal),
+                CrearPorcentajeDescuentoEsperado(porcentaje),
+                CrearImporteDescuentoEsperado(descuento),
+                CrearTotalFinalEsperado(totalFinal)
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoTotalEsperado(
+                    invalido: false,
+                    opcional: true)
+            });
+    }
+
+    private static ValorNumericoEsperado CrearTotalOriginalEsperado(double total) {
+        return new ValorNumericoEsperado {
+            Nombre = "Total original",
+            Valor = total,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Total de compra",
+                "Compra",
+                "Importe original",
+                "Subtotal"
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearPorcentajeDescuentoEsperado(
+        double porcentaje) {
+        return new ValorNumericoEsperado {
+            Nombre = "Porcentaje",
+            Valor = porcentaje,
+            Tolerancia = 0.0001D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Descuento aplicado",
+                "Porcentaje de descuento",
+                "Tasa de descuento"
+            }),
+            ValoresEquivalentes = Array.AsReadOnly(new[] { porcentaje / 100D })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearImporteDescuentoEsperado(
+        double descuento) {
+        return new ValorNumericoEsperado {
+            Nombre = "Descuento",
+            Valor = descuento,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Importe descontado",
+                "Cantidad descontada",
+                "Ahorro"
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearTotalFinalEsperado(double totalFinal) {
+        return new ValorNumericoEsperado {
+            Nombre = "Total final",
+            Valor = totalFinal,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Total a pagar",
+                "Importe final",
+                "Pago final",
+                "Resultado final"
+            })
+        };
+    }
+
+    private static ValorTextualEsperado CrearEstadoTotalEsperado(
+        bool invalido,
+        bool opcional) {
+        return new ValorTextualEsperado {
+            Nombre = "Validación del total",
+            Valor = invalido ? "Total inválido" : "Total válido",
+            EsOpcional = opcional,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Resultado",
+                "Estado",
+                "Validación",
+                "Condición"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Total válido",
+                    "total válido",
+                    "compra válida",
+                    "importe válido"),
+                CrearOpcionTextual(
+                    "Total inválido",
+                    "total inválido",
+                    "compra inválida",
+                    "importe inválido",
+                    "valor negativo",
+                    "fuera de rango",
+                    "valor no válido")
+            })
+        };
+    }
+
+    private static string FormatearNumeroCatalogo(double valor) {
+        return valor.ToString("0.##", CultureInfo.InvariantCulture);
     }
 
     private static OpcionValorTextual CrearOpcionTextual(
