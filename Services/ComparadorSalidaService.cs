@@ -1436,6 +1436,45 @@ public sealed partial class ComparadorSalidaService {
             }
         }
 
+        if (esperado.PermitirSinEtiqueta) {
+            foreach ((string representacion, string valor) in
+                CrearRepresentacionesTextuales(esperado)) {
+                string representacionNormalizada =
+                    NormalizarTexto(representacion);
+
+                if (representacionNormalizada.Length == 0) {
+                    continue;
+                }
+
+                for (int indiceLinea = 0; indiceLinea < lineas.Length; indiceLinea++) {
+                    string lineaNormalizada = NormalizarLineaPreservandoIndices(
+                        lineas[indiceLinea]);
+
+                    foreach (Match coincidencia in
+                        CrearRegexToken(representacionNormalizada)
+                            .Matches(lineaNormalizada)
+                            .Cast<Match>()) {
+                        PosicionNumero posicion = new(
+                            indiceLinea,
+                            coincidencia.Index,
+                            coincidencia.Length);
+
+                        if (!textosUtilizados.Contains(posicion)) {
+                            candidatos.TryAdd(
+                                posicion,
+                                new CandidatoTexto(
+                                    indiceLinea,
+                                    coincidencia.Index,
+                                    coincidencia.Length,
+                                    valor,
+                                    string.Empty,
+                                    representacion));
+                        }
+                    }
+                }
+            }
+        }
+
         foreach (PosicionNumero posicion in candidatos.Keys) {
             textosUtilizados.Add(posicion);
         }

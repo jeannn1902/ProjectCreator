@@ -17,6 +17,7 @@ public sealed class CatalogoEvaluacionesService {
     public const string MenuOperacionesId = "condicionales-menu-operaciones";
     public const string ContarUnoADiezId = "ciclos-contar-uno-a-diez";
     public const string TablaMultiplicarId = "ciclos-tabla-multiplicar";
+    public const string SumaAcumuladaId = "ciclos-suma-acumulada";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -69,7 +70,8 @@ public sealed class CatalogoEvaluacionesService {
             CrearDescuentoCompra(rubrica),
             CrearMenuOperaciones(rubrica),
             CrearContarUnoADiez(rubrica),
-            CrearTablaMultiplicar(rubrica)
+            CrearTablaMultiplicar(rubrica),
+            CrearSumaAcumulada(rubrica)
         });
     }
 
@@ -967,6 +969,61 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static DefinicionEvaluacionPractica CrearSumaAcumulada(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = SumaAcumuladaId,
+            NombrePractica = "Suma acumulada",
+            Objetivo = "Leer una cantidad válida de valores decimales y mostrar su suma total.",
+            Descripcion = "Se comprobará la suma de todos los valores indicados y el rechazo de cantidades fuera del rango de 0 a 100.",
+            ContratoEntrada = "La primera línea contiene una cantidad entera. Si está entre 0 y 100, siguen exactamente esa cantidad de valores decimales.",
+            CamposEntrada = Array.AsReadOnly(new[] {
+                "Cantidad entera de valores",
+                "Valores decimales que deben acumularse"
+            }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Aceptar cantidades desde 0 hasta 100.",
+                "Leer exactamente la cantidad indicada de valores.",
+                "Iniciar la suma en cero y acumular únicamente los valores leídos.",
+                "Rechazar cantidades negativas o mayores que 100 sin calcular una suma."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoSumaAcumuladaValida(
+                    "suma-acumulada-decimales",
+                    "Suma de tres valores",
+                    "3\n5.5\n2\n-1\n",
+                    3,
+                    6.5D,
+                    esVisible: true),
+                CrearCasoSumaAcumuladaValida(
+                    "suma-acumulada-cero-valores",
+                    "Cantidad igual a cero",
+                    "0\n",
+                    0,
+                    0D,
+                    esVisible: true),
+                CrearCasoSumaAcumuladaValida(
+                    "suma-acumulada-mixta",
+                    "Suma con valores positivos, negativos y cero",
+                    "4\n-2\n3.5\n0\n1.5\n",
+                    4,
+                    3D,
+                    esVisible: true),
+                CrearCasoSumaAcumuladaInvalida(
+                    "suma-acumulada-cantidad-negativa",
+                    "Cantidad negativa",
+                    -1,
+                    esVisible: true),
+                CrearCasoSumaAcumuladaInvalida(
+                    "suma-acumulada-cantidad-mayor-cien-oculta",
+                    "Cantidad mayor que cien",
+                    101,
+                    esVisible: false)
+            }),
+            Criterios = rubrica
+        };
+    }
+
     private static IReadOnlyList<CriterioEvaluacion> CrearRubrica() {
         return Array.AsReadOnly(new[] {
             new CriterioEvaluacion {
@@ -1621,6 +1678,137 @@ public sealed class CatalogoEvaluacionesService {
                         "="
                     })
                 }
+            })
+        };
+    }
+
+    private static CasoPrueba CrearCasoSumaAcumuladaValida(
+        string id,
+        string nombre,
+        string entrada,
+        int cantidad,
+        double suma,
+        bool esVisible) {
+        return CrearCaso(
+            id,
+            nombre,
+            entrada,
+            $"Suma total: {FormatearNumeroCatalogo(suma)}",
+            "Comprueba que se acumulen únicamente los valores indicados.",
+            Array.Empty<string>(),
+            new[] {
+                CrearCantidadValoresEsperada(cantidad),
+                CrearSumaAcumuladaEsperada(suma)
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCantidadEsperado(
+                    invalida: false,
+                    opcional: true)
+            });
+    }
+
+    private static CasoPrueba CrearCasoSumaAcumuladaInvalida(
+        string id,
+        string nombre,
+        int cantidad,
+        bool esVisible) {
+        return CrearCaso(
+            id,
+            nombre,
+            cantidad.ToString(CultureInfo.InvariantCulture) + "\n",
+            "Cantidad inválida",
+            "Comprueba que una cantidad fuera del rango de 0 a 100 se rechace sin calcular una suma.",
+            Array.Empty<string>(),
+            new[] {
+                CrearCantidadValoresEsperada(cantidad),
+                CrearSumaAcumuladaProhibida()
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCantidadEsperado(
+                    invalida: true,
+                    opcional: false)
+            });
+    }
+
+    private static ValorNumericoEsperado CrearCantidadValoresEsperada(
+        int cantidad) {
+        return new ValorNumericoEsperado {
+            Nombre = "Cantidad",
+            Valor = cantidad,
+            Tolerancia = 0D,
+            EsOpcional = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Número de valores",
+                "Numero de valores",
+                "Total de valores",
+                "Elementos"
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearSumaAcumuladaEsperada(double suma) {
+        return new ValorNumericoEsperado {
+            Nombre = "Suma total",
+            Valor = suma,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Total",
+                "Resultado",
+                "Acumulado",
+                "Suma acumulada"
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearSumaAcumuladaProhibida() {
+        return new ValorNumericoEsperado {
+            Nombre = "Suma total",
+            DebeEstarAusente = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Total",
+                "Resultado",
+                "Acumulado",
+                "Suma acumulada"
+            })
+        };
+    }
+
+    private static ValorTextualEsperado CrearEstadoCantidadEsperado(
+        bool invalida,
+        bool opcional) {
+        return new ValorTextualEsperado {
+            Nombre = "Resultado",
+            Valor = invalida ? "Cantidad inválida" : "Cantidad válida",
+            EsOpcional = opcional,
+            PermitirSinEtiqueta = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Estado",
+                "Validación",
+                "Validacion",
+                "Condición",
+                "Condicion"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Cantidad válida",
+                    "cantidad válida",
+                    "cantidad dentro de rango",
+                    "entrada válida"),
+                CrearOpcionTextual(
+                    "Cantidad inválida",
+                    "cantidad inválida",
+                    "cantidad no válida",
+                    "número de valores inválido",
+                    "numero de valores invalido",
+                    "fuera de rango",
+                    "valor inválido",
+                    "entrada inválida")
             })
         };
     }

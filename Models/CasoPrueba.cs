@@ -106,6 +106,8 @@ public sealed class ValorTextualEsperado {
 
     public bool EsOpcional { get; init; }
 
+    public bool PermitirSinEtiqueta { get; init; }
+
     public IReadOnlyList<string> EtiquetasAlternativas { get; init; } =
         Array.Empty<string>();
 
