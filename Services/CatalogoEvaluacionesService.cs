@@ -18,6 +18,7 @@ public sealed class CatalogoEvaluacionesService {
     public const string ContarUnoADiezId = "ciclos-contar-uno-a-diez";
     public const string TablaMultiplicarId = "ciclos-tabla-multiplicar";
     public const string SumaAcumuladaId = "ciclos-suma-acumulada";
+    public const string AdivinaNumeroId = "ciclos-adivina-numero";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -71,7 +72,8 @@ public sealed class CatalogoEvaluacionesService {
             CrearMenuOperaciones(rubrica),
             CrearContarUnoADiez(rubrica),
             CrearTablaMultiplicar(rubrica),
-            CrearSumaAcumulada(rubrica)
+            CrearSumaAcumulada(rubrica),
+            CrearAdivinaNumero(rubrica)
         });
     }
 
@@ -1024,6 +1026,73 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static DefinicionEvaluacionPractica CrearAdivinaNumero(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = AdivinaNumeroId,
+            NombrePractica = "Adivina el número",
+            Objetivo = "Guiar cada intento hasta encontrar el número secreto 7 y mostrar cuántos intentos se realizaron.",
+            Descripcion = "Se comprobarán las pistas, los intentos inválidos, el acierto, el orden de los eventos y el total final.",
+            ContratoEntrada = "Cada línea contiene un intento entero. Los valores válidos están entre 1 y 10; el programa termina al recibir el número secreto 7.",
+            CamposEntrada = Array.AsReadOnly(new[] {
+                "Secuencia de intentos enteros"
+            }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Indicar que el número secreto es mayor cuando el intento es menor que 7.",
+                "Indicar que el número secreto es menor cuando el intento es mayor que 7.",
+                "Contar los intentos fuera del rango de 1 a 10 y mostrarlos como inválidos.",
+                "Contar el intento ganador, mostrar el total y terminar sin procesar entradas posteriores."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoAdivinaNumero(
+                    "adivina-numero-pistas-opuestas",
+                    "Pistas mayor y menor",
+                    "3\n9\n7\n",
+                    3,
+                    true,
+                    "El número secreto es mayor",
+                    "El número secreto es menor",
+                    "Correcto"),
+                CrearCasoAdivinaNumero(
+                    "adivina-numero-primer-intento",
+                    "Acierto en el primer intento",
+                    "7\n",
+                    1,
+                    true,
+                    "Correcto"),
+                CrearCasoAdivinaNumero(
+                    "adivina-numero-intento-cero",
+                    "Intento inválido antes de acertar",
+                    "0\n5\n7\n",
+                    3,
+                    true,
+                    "Intento inválido",
+                    "El número secreto es mayor",
+                    "Correcto"),
+                CrearCasoAdivinaNumero(
+                    "adivina-numero-dos-pistas-menor",
+                    "Dos intentos mayores que el secreto",
+                    "10\n8\n7\n",
+                    3,
+                    true,
+                    "El número secreto es menor",
+                    "El número secreto es menor",
+                    "Correcto"),
+                CrearCasoAdivinaNumero(
+                    "adivina-numero-entrada-posterior-oculta",
+                    "Terminación después del acierto",
+                    "2\n11\n6\n7\n9\n",
+                    4,
+                    false,
+                    "El número secreto es mayor",
+                    "Intento inválido",
+                    "El número secreto es mayor",
+                    "Correcto")
+            }),
+            Criterios = rubrica
+        };
+    }
+
     private static IReadOnlyList<CriterioEvaluacion> CrearRubrica() {
         return Array.AsReadOnly(new[] {
             new CriterioEvaluacion {
@@ -1813,6 +1882,127 @@ public sealed class CatalogoEvaluacionesService {
         };
     }
 
+    private static CasoPrueba CrearCasoAdivinaNumero(
+        string id,
+        string nombre,
+        string entrada,
+        int totalIntentos,
+        bool esVisible,
+        params string[] eventos) {
+        string salidaEsperada = string.Join(
+            Environment.NewLine,
+            eventos.Concat(new[] { $"Intentos: {totalIntentos}" }));
+
+        return CrearCaso(
+            id,
+            nombre,
+            entrada,
+            salidaEsperada,
+            "Comprueba las respuestas en el orden de los intentos y el total contabilizado hasta el acierto.",
+            Array.Empty<string>(),
+            new[] {
+                CrearTotalIntentosEsperado(totalIntentos)
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            secuencias: new[] {
+                CrearSecuenciaEventosAdivinaNumero(eventos)
+            });
+    }
+
+    private static ValorNumericoEsperado CrearTotalIntentosEsperado(
+        int totalIntentos) {
+        return new ValorNumericoEsperado {
+            Nombre = "Intentos",
+            Valor = totalIntentos,
+            Tolerancia = 0D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Número de intentos",
+                "Numero de intentos",
+                "Total de intentos",
+                "Cantidad de intentos"
+            })
+        };
+    }
+
+    private static SecuenciaEsperada CrearSecuenciaEventosAdivinaNumero(
+        IReadOnlyList<string> eventos) {
+        return new SecuenciaEsperada {
+            Nombre = "Respuestas a los intentos",
+            Tipo = TipoSecuenciaEsperada.Textual,
+            AlternativasTextualesEsperadas = Array.AsReadOnly(
+                eventos.Select(CrearEventoAdivinaNumero).ToArray()),
+            OrdenObligatorio = true,
+            CantidadExacta = eventos.Count,
+            PermitirDuplicados = true,
+            PermitirElementosAdicionales = false,
+            PermitirTextoAdicional = true,
+            RequerirEventosEnLineasIndependientes = true
+        };
+    }
+
+    private static ElementoTextualSecuenciaEsperado CrearEventoAdivinaNumero(
+        string evento) {
+        return evento switch {
+            "El número secreto es mayor" =>
+                new ElementoTextualSecuenciaEsperado {
+                    Valor = evento,
+                    Alternativas = Array.AsReadOnly(new[] {
+                        "El numero secreto es mayor",
+                        "Es mayor",
+                        "Debes intentar un número mayor",
+                        "Intenta con un número mayor",
+                        "Muy bajo"
+                    })
+                },
+            "El número secreto es menor" =>
+                new ElementoTextualSecuenciaEsperado {
+                    Valor = evento,
+                    Alternativas = Array.AsReadOnly(new[] {
+                        "El numero secreto es menor",
+                        "Es menor",
+                        "Debes intentar un número menor",
+                        "Intenta con un número menor",
+                        "Muy alto"
+                    })
+                },
+            "Intento inválido" =>
+                new ElementoTextualSecuenciaEsperado {
+                    Valor = evento,
+                    Alternativas = Array.AsReadOnly(new[] {
+                        "Intento invalido",
+                        "Número fuera de rango",
+                        "Numero fuera de rango",
+                        "Valor inválido",
+                        "Entrada inválida"
+                    })
+                },
+            "Correcto" =>
+                new ElementoTextualSecuenciaEsperado {
+                    Valor = evento,
+                    Alternativas = Array.AsReadOnly(new[] {
+                        "Adivinaste",
+                        "Número encontrado",
+                        "Numero encontrado",
+                        "Acertaste",
+                        "Es el número secreto",
+                        "Es el numero secreto"
+                    }),
+                    EtiquetasNumericasPosteriores = Array.AsReadOnly(new[] {
+                        "Intentos",
+                        "Número de intentos",
+                        "Numero de intentos",
+                        "Total de intentos",
+                        "Cantidad de intentos"
+                    })
+                },
+            _ => throw new ArgumentException(
+                "El evento del juego no está definido.",
+                nameof(evento))
+        };
+    }
+
     private static OpcionValorTextual CrearOpcionTextual(
         string valor,
         params string[] alternativas) {
@@ -1898,7 +2088,9 @@ public sealed class CatalogoEvaluacionesService {
             TipoSecuenciaEsperada.Textual =>
                 secuencia.AlternativasTextualesEsperadas.Count == 0 ||
                 secuencia.AlternativasTextualesEsperadas.Any(elemento =>
-                    string.IsNullOrWhiteSpace(elemento.Valor)),
+                    string.IsNullOrWhiteSpace(elemento.Valor) ||
+                    elemento.EtiquetasNumericasPosteriores.Any(
+                        string.IsNullOrWhiteSpace)),
             _ => true
         };
     }

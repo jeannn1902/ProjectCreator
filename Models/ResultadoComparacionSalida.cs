@@ -123,6 +123,13 @@ public sealed class ResultadoSecuenciaComparada {
 
     public bool OrdenCorrecto { get; init; }
 
+    public bool EventosEnLineasIndependientes { get; init; } = true;
+
+    public IReadOnlyList<string> AsociacionesNumericasPosterioresFaltantes {
+        get;
+        init;
+    } = Array.Empty<string>();
+
     public IReadOnlyList<string> ElementosFaltantes { get; init; } =
         Array.Empty<string>();
 

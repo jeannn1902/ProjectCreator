@@ -147,12 +147,17 @@ public sealed class SecuenciaEsperada {
         Array.AsReadOnly(new[] { " ", "\t", "\r", "\n", ",", ";" });
 
     public bool PermitirTextoAdicional { get; init; } = true;
+
+    public bool RequerirEventosEnLineasIndependientes { get; init; }
 }
 
 public sealed class ElementoTextualSecuenciaEsperado {
     public string Valor { get; init; } = "";
 
     public IReadOnlyList<string> Alternativas { get; init; } =
+        Array.Empty<string>();
+
+    public IReadOnlyList<string> EtiquetasNumericasPosteriores { get; init; } =
         Array.Empty<string>();
 }
 

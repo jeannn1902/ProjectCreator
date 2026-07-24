@@ -323,6 +323,14 @@ public sealed partial class ComparadorSalidaService {
                 .Where(grupo => grupo.Count() > 1)
                 .Select(grupo => grupo.Key)
                 .ToArray();
+        bool eventosEnLineasIndependientes =
+            !esperada.RequerirEventosEnLineasIndependientes ||
+            EstanEventosEnLineasIndependientes(salida, candidatos);
+        IReadOnlyList<string> asociacionesNumericasFaltantes =
+            EncontrarAsociacionesNumericasPosterioresFaltantes(
+                salida,
+                esperada,
+                candidatos);
         List<string> elementosAdicionales = adicionales.ToList();
         bool tieneTextoAdicional = !esperada.PermitirTextoAdicional &&
             ContieneTextoAdicional(salida, candidatos.Select(candidato =>
@@ -339,15 +347,21 @@ public sealed partial class ComparadorSalidaService {
             (esperada.PermitirElementosAdicionales ||
              elementosAdicionales.Count == 0) &&
             (esperada.PermitirDuplicados || duplicados.Count == 0) &&
+            eventosEnLineasIndependientes &&
+            asociacionesNumericasFaltantes.Count == 0 &&
             !tieneTextoAdicional;
-        string mensaje = CrearMensajeSecuencia(
-            coincide,
-            cantidadCorrecta,
-            ordenCorrecto,
-            faltantes.Count,
-            elementosAdicionales.Count,
-            duplicados.Count,
-            primerIndiceDiferente);
+        string mensaje = !eventosEnLineasIndependientes
+            ? "Muestra una respuesta independiente por cada intento."
+            : asociacionesNumericasFaltantes.Count > 0
+                ? "Muestra el total de intentos después de confirmar el acierto."
+                : CrearMensajeSecuencia(
+                    coincide,
+                    cantidadCorrecta,
+                    ordenCorrecto,
+                    faltantes.Count,
+                    elementosAdicionales.Count,
+                    duplicados.Count,
+                    primerIndiceDiferente);
 
         return new ResultadoSecuenciaComparada {
             Nombre = esperada.Nombre,
@@ -357,6 +371,9 @@ public sealed partial class ComparadorSalidaService {
             CantidadEncontrada = encontrados.Length,
             CantidadCorrecta = cantidadCorrecta,
             OrdenCorrecto = ordenCorrecto,
+            EventosEnLineasIndependientes = eventosEnLineasIndependientes,
+            AsociacionesNumericasPosterioresFaltantes =
+                asociacionesNumericasFaltantes,
             ElementosFaltantes = faltantes,
             ElementosAdicionales = elementosAdicionales.AsReadOnly(),
             DuplicadosInesperados = duplicados,
@@ -910,6 +927,111 @@ public sealed partial class ComparadorSalidaService {
         }
 
         return seleccionados;
+    }
+
+    private static bool EstanEventosEnLineasIndependientes(
+        string salida,
+        IReadOnlyList<CandidatoSecuenciaTextual> candidatos) {
+        HashSet<int> lineasUtilizadas = new();
+
+        foreach (CandidatoSecuenciaTextual candidato in candidatos) {
+            int indiceLinea = ObtenerIndiceLinea(salida, candidato.Indice);
+
+            if (!lineasUtilizadas.Add(indiceLinea)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int ObtenerIndiceLinea(string texto, int indiceCaracter) {
+        int linea = 0;
+        int limite = Math.Min(indiceCaracter, texto.Length);
+
+        for (int indice = 0; indice < limite; indice++) {
+            if (texto[indice] == '\r') {
+                linea++;
+
+                if (indice + 1 < limite && texto[indice + 1] == '\n') {
+                    indice++;
+                }
+            } else if (texto[indice] == '\n') {
+                linea++;
+            }
+        }
+
+        return linea;
+    }
+
+    private static IReadOnlyList<string>
+        EncontrarAsociacionesNumericasPosterioresFaltantes(
+            string salida,
+            SecuenciaEsperada esperada,
+            IReadOnlyList<CandidatoSecuenciaTextual> candidatos) {
+        List<string> faltantes = new();
+
+        for (int indice = 0;
+            indice < esperada.AlternativasTextualesEsperadas.Count;
+            indice++) {
+            ElementoTextualSecuenciaEsperado evento =
+                esperada.AlternativasTextualesEsperadas[indice];
+
+            if (evento.EtiquetasNumericasPosteriores.Count == 0) {
+                continue;
+            }
+
+            bool eventoEncontrado =
+                indice < candidatos.Count &&
+                candidatos[indice].Valor.Equals(
+                    evento.Valor,
+                    StringComparison.OrdinalIgnoreCase);
+            bool tieneNumeroPosterior = eventoEncontrado &&
+                ExisteNumeroEtiquetadoDesde(
+                    salida,
+                    candidatos[indice].Indice + candidatos[indice].Longitud,
+                    evento.EtiquetasNumericasPosteriores);
+
+            if (!tieneNumeroPosterior) {
+                faltantes.Add(evento.Valor);
+            }
+        }
+
+        return faltantes.AsReadOnly();
+    }
+
+    private static bool ExisteNumeroEtiquetadoDesde(
+        string salida,
+        int indiceInicial,
+        IReadOnlyList<string> etiquetas) {
+        string segmento = NormalizarLineaPreservandoIndices(
+            salida[Math.Min(indiceInicial, salida.Length)..]);
+
+        foreach (string etiqueta in etiquetas
+            .Where(etiqueta => !string.IsNullOrWhiteSpace(etiqueta))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(etiqueta => etiqueta.Length)) {
+            string etiquetaNormalizada = NormalizarTexto(etiqueta);
+
+            foreach (Match coincidencia in CrearRegexToken(etiquetaNormalizada)
+                .Matches(segmento)
+                .Cast<Match>()) {
+                string despuesEtiqueta =
+                    segmento[(coincidencia.Index + coincidencia.Length)..]
+                        .TrimStart();
+
+                if (despuesEtiqueta.StartsWith(':') ||
+                    despuesEtiqueta.StartsWith('=')) {
+                    despuesEtiqueta = despuesEtiqueta[1..].TrimStart();
+                }
+
+                if (RegexNumeroInicial().IsMatch(despuesEtiqueta)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static bool CoincideOrdenNumerico(
