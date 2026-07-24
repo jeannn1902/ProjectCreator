@@ -20,6 +20,13 @@ public sealed class CatalogoEvaluacionesService {
     public const string SumaAcumuladaId = "ciclos-suma-acumulada";
     public const string AdivinaNumeroId = "ciclos-adivina-numero";
     public const string MenuRepetitivoId = "ciclos-menu-repetitivo";
+    public const string SaludoPersonalizadoId =
+        "funciones-saludo-personalizado";
+    public const string SumarDosNumerosId = "funciones-sumar-dos-numeros";
+    public const string NumeroParId = "funciones-numero-par";
+    public const string CalcularPromedioId = "funciones-calcular-promedio";
+    public const string CalculadoraModularId =
+        "funciones-calculadora-modular";
 
     private const int PuntosCompilacion = 20;
     private const int PuntosCasosPrueba = 60;
@@ -75,7 +82,12 @@ public sealed class CatalogoEvaluacionesService {
             CrearTablaMultiplicar(rubrica),
             CrearSumaAcumulada(rubrica),
             CrearAdivinaNumero(rubrica),
-            CrearMenuRepetitivo(rubrica)
+            CrearMenuRepetitivo(rubrica),
+            CrearSaludoPersonalizado(rubrica),
+            CrearSumarDosNumeros(rubrica),
+            CrearNumeroPar(rubrica),
+            CrearCalcularPromedio(rubrica),
+            CrearCalculadoraModular(rubrica)
         });
     }
 
@@ -1155,6 +1167,684 @@ public sealed class CatalogoEvaluacionesService {
                     "Hasta luego")
             }),
             Criterios = rubrica
+        };
+    }
+
+    private static DefinicionEvaluacionPractica CrearSaludoPersonalizado(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = SaludoPersonalizadoId,
+            NombrePractica = "Saludo personalizado",
+            Objetivo = "Leer un nombre completo y utilizarlo dentro de un saludo.",
+            Descripcion = "Se comprobará que el saludo incluya el nombre completo y que una entrada vacía se rechace.",
+            ContratoEntrada = "La entrada contiene una línea de texto con el nombre completo; una línea vacía representa un nombre inválido.",
+            CamposEntrada = Array.AsReadOnly(new[] { "Nombre completo" }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Aceptar nombres con espacios.",
+                "Mostrar un saludo reconocido que incluya el nombre completo.",
+                "Rechazar una entrada vacía.",
+                "No mostrar simultáneamente un saludo válido y un error de nombre."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoSaludoValido(
+                    "saludo-personalizado-ana",
+                    "Nombre con apellido",
+                    "Ana López"),
+                CrearCasoSaludoValido(
+                    "saludo-personalizado-jean",
+                    "Segundo nombre válido",
+                    "Jean Pérez"),
+                CrearCasoSaludoValido(
+                    "saludo-personalizado-maria",
+                    "Nombre completo largo",
+                    "María Fernanda Ruiz"),
+                CrearCasoSaludoInvalido(),
+                CrearCasoSaludoValido(
+                    "saludo-personalizado-luis-oculto",
+                    "Nombre adicional",
+                    "Luis Ángel Hernández",
+                    esVisible: false)
+            }),
+            Criterios = rubrica
+        };
+    }
+
+    private static DefinicionEvaluacionPractica CrearSumarDosNumeros(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = SumarDosNumerosId,
+            NombrePractica = "Sumar dos números",
+            Objetivo = "Leer dos valores decimales y mostrar su suma.",
+            Descripcion = "Se comprobará el resultado con valores positivos, negativos, cero y decimales.",
+            ContratoEntrada = "Dos líneas, cada una con un valor decimal.",
+            CamposEntrada = Array.AsReadOnly(new[] {
+                "Primer número decimal",
+                "Segundo número decimal"
+            }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Sumar ambos operandos.",
+                "Conservar la parte decimal del resultado.",
+                "Mostrar el resultado con una etiqueta reconocida."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoSumaFuncion(
+                    "sumar-dos-numeros-mixtos",
+                    "Suma con signo",
+                    5.5D,
+                    -2D,
+                    3.5D),
+                CrearCasoSumaFuncion(
+                    "sumar-dos-numeros-ceros",
+                    "Suma de ceros",
+                    0D,
+                    0D,
+                    0D),
+                CrearCasoSumaFuncion(
+                    "sumar-dos-numeros-negativos",
+                    "Suma de negativos",
+                    -4D,
+                    -6.5D,
+                    -10.5D),
+                CrearCasoSumaFuncion(
+                    "sumar-dos-numeros-decimales",
+                    "Suma decimal exacta",
+                    2.25D,
+                    3.75D,
+                    6D),
+                CrearCasoSumaFuncion(
+                    "sumar-dos-numeros-oculto",
+                    "Suma adicional",
+                    100.1D,
+                    -0.1D,
+                    100D,
+                    esVisible: false)
+            }),
+            Criterios = rubrica
+        };
+    }
+
+    private static DefinicionEvaluacionPractica CrearNumeroPar(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = NumeroParId,
+            NombrePractica = "Determinar número par",
+            Objetivo = "Clasificar un número entero como par o impar.",
+            Descripcion = "Se comprobarán cero, valores positivos, negativos y un caso oculto.",
+            ContratoEntrada = "Una línea con un número entero; cero se considera par.",
+            CamposEntrada = Array.AsReadOnly(new[] { "Número entero" }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Clasificar cero como par.",
+                "Aceptar enteros negativos.",
+                "Mostrar una sola clasificación válida."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoNumeroPar(
+                    "numero-par-cero",
+                    "Cero",
+                    0,
+                    "Par"),
+                CrearCasoNumeroPar(
+                    "numero-par-positivo-impar",
+                    "Positivo impar",
+                    7,
+                    "Impar"),
+                CrearCasoNumeroPar(
+                    "numero-par-negativo-par",
+                    "Negativo par",
+                    -8,
+                    "Par"),
+                CrearCasoNumeroPar(
+                    "numero-par-negativo-impar",
+                    "Negativo impar",
+                    -3,
+                    "Impar"),
+                CrearCasoNumeroPar(
+                    "numero-par-grande-oculto",
+                    "Entero adicional",
+                    1024,
+                    "Par",
+                    esVisible: false)
+            }),
+            Criterios = rubrica
+        };
+    }
+
+    private static DefinicionEvaluacionPractica CrearCalcularPromedio(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = CalcularPromedioId,
+            NombrePractica = "Calcular promedio",
+            Objetivo = "Calcular el promedio de tres calificaciones válidas.",
+            Descripcion = "Se comprobará el promedio decimal y el rechazo de calificaciones fuera del rango de 0 a 10.",
+            ContratoEntrada = "Tres líneas con calificaciones decimales. Todas deben estar entre 0 y 10.",
+            CamposEntrada = Array.AsReadOnly(new[] {
+                "Primera calificación",
+                "Segunda calificación",
+                "Tercera calificación"
+            }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Validar las tres calificaciones.",
+                "Dividir la suma entre 3.0.",
+                "Mostrar el promedio cuando todas sean válidas.",
+                "No mostrar un promedio numérico cuando alguna sea inválida."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoPromedioValido(
+                    "promedio-calificaciones-decimal",
+                    "Promedio con decimales",
+                    8D,
+                    9.5D,
+                    7D,
+                    24.5D / 3D),
+                CrearCasoPromedioValido(
+                    "promedio-calificaciones-diez",
+                    "Calificaciones máximas",
+                    10D,
+                    10D,
+                    10D,
+                    10D),
+                CrearCasoPromedioValido(
+                    "promedio-calificaciones-mixto",
+                    "Promedio con cero",
+                    0D,
+                    6D,
+                    9D,
+                    5D),
+                CrearCasoPromedioInvalido(
+                    "promedio-calificacion-negativa",
+                    "Calificación negativa",
+                    -1D,
+                    8D,
+                    9D,
+                    esVisible: true),
+                CrearCasoPromedioInvalido(
+                    "promedio-calificacion-mayor-diez-oculta",
+                    "Calificación mayor que diez",
+                    8D,
+                    11D,
+                    7D,
+                    esVisible: false)
+            }),
+            Criterios = rubrica
+        };
+    }
+
+    private static DefinicionEvaluacionPractica CrearCalculadoraModular(
+        IReadOnlyList<CriterioEvaluacion> rubrica) {
+        return new DefinicionEvaluacionPractica {
+            PracticaId = CalculadoraModularId,
+            NombrePractica = "Calculadora modular",
+            Objetivo = "Ejecutar una operación aritmética seleccionada en un menú de una sola ejecución.",
+            Descripcion = "Se comprobarán suma, resta, multiplicación, división entre cero y una opción inválida.",
+            ContratoEntrada = "La primera línea contiene la opción; las opciones válidas reciben después dos operandos decimales.",
+            CamposEntrada = Array.AsReadOnly(new[] {
+                "Opción entera",
+                "Primer operando decimal",
+                "Segundo operando decimal"
+            }),
+            ValidacionesRequeridas = Array.AsReadOnly(new[] {
+                "Ejecutar la operación seleccionada.",
+                "Mantener resultados decimales.",
+                "Rechazar la división entre cero sin mostrar resultado.",
+                "Rechazar opciones fuera del menú sin pedir operandos."
+            }),
+            CasosPrueba = Array.AsReadOnly(new[] {
+                CrearCasoCalculadoraValida(
+                    "calculadora-modular-suma",
+                    "Suma",
+                    1,
+                    5.5D,
+                    2D,
+                    7.5D),
+                CrearCasoCalculadoraValida(
+                    "calculadora-modular-resta",
+                    "Resta",
+                    2,
+                    10D,
+                    3.5D,
+                    6.5D),
+                CrearCasoCalculadoraValida(
+                    "calculadora-modular-multiplicacion",
+                    "Multiplicación",
+                    3,
+                    -4D,
+                    2.5D,
+                    -10D),
+                CrearCasoCalculadoraDivisionCero(),
+                CrearCasoCalculadoraOpcionInvalida()
+            }),
+            Criterios = rubrica
+        };
+    }
+
+    private static CasoPrueba CrearCasoSaludoValido(
+        string id,
+        string nombre,
+        string nombreCompleto,
+        bool esVisible = true) {
+        return CrearCaso(
+            id,
+            nombre,
+            nombreCompleto + "\n",
+            $"Hola, {nombreCompleto}.",
+            "Comprueba que aparezcan un saludo reconocido y el nombre completo.",
+            Array.Empty<string>(),
+            Array.Empty<ValorNumericoEsperado>(),
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            secuencias: new[] {
+                CrearSecuenciaSaludo(nombreCompleto)
+            });
+    }
+
+    private static CasoPrueba CrearCasoSaludoInvalido() {
+        return CrearCaso(
+            "saludo-personalizado-vacio",
+            "Nombre vacío",
+            string.Empty,
+            "Nombre inválido",
+            "Comprueba que una entrada vacía se rechace sin mostrar un saludo válido.",
+            Array.Empty<string>(),
+            Array.Empty<ValorNumericoEsperado>(),
+            puntos: 12,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            secuencias: new[] {
+                CrearSecuenciaSaludo(null)
+            });
+    }
+
+    private static SecuenciaEsperada CrearSecuenciaSaludo(
+        string? nombreCompleto) {
+        ElementoTextualSecuenciaEsperado saludo = CrearEventoSaludo();
+        ElementoTextualSecuenciaEsperado nombreInvalido =
+            CrearEventoNombreInvalido();
+        ElementoTextualSecuenciaEsperado[] esperados =
+            string.IsNullOrEmpty(nombreCompleto)
+                ? new[] { nombreInvalido }
+                : new[] {
+                    saludo,
+                    new ElementoTextualSecuenciaEsperado {
+                        Valor = nombreCompleto
+                    }
+                };
+        ElementoTextualSecuenciaEsperado[] reconocibles =
+            string.IsNullOrEmpty(nombreCompleto)
+                ? new[] { saludo }
+                : new[] { nombreInvalido };
+
+        return new SecuenciaEsperada {
+            Nombre = "Saludo y nombre",
+            Tipo = TipoSecuenciaEsperada.Textual,
+            AlternativasTextualesEsperadas = Array.AsReadOnly(esperados),
+            EventosTextualesReconocibles = Array.AsReadOnly(reconocibles),
+            OrdenObligatorio = false,
+            CantidadExacta = esperados.Length,
+            PermitirDuplicados = false,
+            PermitirElementosAdicionales = false,
+            PermitirTextoAdicional = true
+        };
+    }
+
+    private static ElementoTextualSecuenciaEsperado CrearEventoSaludo() {
+        return new ElementoTextualSecuenciaEsperado {
+            Valor = "Hola",
+            Alternativas = Array.AsReadOnly(new[] {
+                "Bienvenido",
+                "Bienvenida",
+                "Saludos",
+                "Buen día",
+                "Buenas"
+            })
+        };
+    }
+
+    private static ElementoTextualSecuenciaEsperado CrearEventoNombreInvalido() {
+        return new ElementoTextualSecuenciaEsperado {
+            Valor = "Nombre inválido",
+            Alternativas = Array.AsReadOnly(new[] {
+                "Nombre no válido",
+                "Entrada inválida",
+                "Debes escribir un nombre",
+                "Nombre vacío"
+            })
+        };
+    }
+
+    private static CasoPrueba CrearCasoSumaFuncion(
+        string id,
+        string nombre,
+        double primerNumero,
+        double segundoNumero,
+        double resultado,
+        bool esVisible = true) {
+        return CrearCaso(
+            id,
+            nombre,
+            $"{FormatearNumeroCatalogo(primerNumero)}\n" +
+            $"{FormatearNumeroCatalogo(segundoNumero)}\n",
+            $"Resultado: {FormatearNumeroCatalogo(resultado)}",
+            "Comprueba la suma decimal de los dos valores recibidos.",
+            Array.Empty<string>(),
+            new[] {
+                CrearResultadoSumaEsperado(resultado)
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Valores);
+    }
+
+    private static ValorNumericoEsperado CrearResultadoSumaEsperado(
+        double resultado) {
+        return new ValorNumericoEsperado {
+            Nombre = "Resultado",
+            Valor = resultado,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Suma",
+                "Total",
+                "Respuesta",
+                "Valor obtenido"
+            })
+        };
+    }
+
+    private static CasoPrueba CrearCasoNumeroPar(
+        string id,
+        string nombre,
+        int numero,
+        string clasificacion,
+        bool esVisible = true) {
+        return CrearCaso(
+            id,
+            nombre,
+            numero.ToString(CultureInfo.InvariantCulture) + "\n",
+            $"Número: {numero}\nClasificación: {clasificacion}",
+            "Comprueba la paridad sin exigir una estructura concreta de la función.",
+            Array.Empty<string>(),
+            new[] {
+                CrearNumeroParEsperado(numero)
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearParidadEsperada(clasificacion)
+            });
+    }
+
+    private static ValorNumericoEsperado CrearNumeroParEsperado(int numero) {
+        return new ValorNumericoEsperado {
+            Nombre = "Número",
+            Valor = numero,
+            Tolerancia = 0D,
+            EsOpcional = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Numero",
+                "Valor",
+                "Entrada"
+            })
+        };
+    }
+
+    private static ValorTextualEsperado CrearParidadEsperada(
+        string clasificacion) {
+        return new ValorTextualEsperado {
+            Nombre = "Clasificación",
+            Valor = clasificacion,
+            PermitirSinEtiqueta = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Clasificacion",
+                "Resultado",
+                "Tipo",
+                "Estado"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Par",
+                    "par",
+                    "número par",
+                    "numero par",
+                    "es par"),
+                CrearOpcionTextual(
+                    "Impar",
+                    "impar",
+                    "número impar",
+                    "numero impar",
+                    "es impar")
+            })
+        };
+    }
+
+    private static CasoPrueba CrearCasoPromedioValido(
+        string id,
+        string nombre,
+        double primera,
+        double segunda,
+        double tercera,
+        double promedio) {
+        return CrearCaso(
+            id,
+            nombre,
+            CrearEntradaTresCalificaciones(primera, segunda, tercera),
+            $"Promedio: {FormatearNumeroCatalogo(promedio)}",
+            "Comprueba el promedio de tres calificaciones válidas.",
+            Array.Empty<string>(),
+            new[] {
+                CrearPromedioEsperado(promedio)
+            },
+            puntos: 12,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCalificacionesEsperado(
+                    invalida: false,
+                    opcional: true)
+            });
+    }
+
+    private static CasoPrueba CrearCasoPromedioInvalido(
+        string id,
+        string nombre,
+        double primera,
+        double segunda,
+        double tercera,
+        bool esVisible) {
+        return CrearCaso(
+            id,
+            nombre,
+            CrearEntradaTresCalificaciones(primera, segunda, tercera),
+            "Calificación inválida",
+            "Comprueba que no se muestre un promedio cuando alguna calificación esté fuera de rango.",
+            Array.Empty<string>(),
+            new[] {
+                CrearPromedioProhibido()
+            },
+            puntos: 12,
+            esVisible: esVisible,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCalificacionesEsperado(
+                    invalida: true,
+                    opcional: false)
+            });
+    }
+
+    private static string CrearEntradaTresCalificaciones(
+        double primera,
+        double segunda,
+        double tercera) {
+        return $"{FormatearNumeroCatalogo(primera)}\n" +
+            $"{FormatearNumeroCatalogo(segunda)}\n" +
+            $"{FormatearNumeroCatalogo(tercera)}\n";
+    }
+
+    private static ValorNumericoEsperado CrearPromedioEsperado(double promedio) {
+        return new ValorNumericoEsperado {
+            Nombre = "Promedio",
+            Valor = promedio,
+            Tolerancia = 0.01D,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Media",
+                "Resultado",
+                "Calificación final",
+                "Nota final"
+            })
+        };
+    }
+
+    private static ValorNumericoEsperado CrearPromedioProhibido() {
+        return new ValorNumericoEsperado {
+            Nombre = "Promedio",
+            DebeEstarAusente = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Media",
+                "Resultado",
+                "Calificación final",
+                "Nota final"
+            })
+        };
+    }
+
+    private static ValorTextualEsperado CrearEstadoCalificacionesEsperado(
+        bool invalida,
+        bool opcional) {
+        return new ValorTextualEsperado {
+            Nombre = "Estado de las calificaciones",
+            Valor = invalida
+                ? "Calificación inválida"
+                : "Calificación válida",
+            EsOpcional = opcional,
+            PermitirSinEtiqueta = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Estado",
+                "Validación",
+                "Validacion",
+                "Condición",
+                "Condicion"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Calificación válida",
+                    "calificación válida",
+                    "calificaciones válidas",
+                    "entrada válida"),
+                CrearOpcionTextual(
+                    "Calificación inválida",
+                    "calificación inválida",
+                    "calificación no válida",
+                    "nota inválida",
+                    "fuera de rango",
+                    "entrada inválida")
+            })
+        };
+    }
+
+    private static CasoPrueba CrearCasoCalculadoraValida(
+        string id,
+        string nombre,
+        int opcion,
+        double primerOperando,
+        double segundoOperando,
+        double resultado) {
+        return CrearCaso(
+            id,
+            nombre,
+            $"{opcion}\n" +
+            $"{FormatearNumeroCatalogo(primerOperando)}\n" +
+            $"{FormatearNumeroCatalogo(segundoOperando)}\n",
+            $"Resultado: {FormatearNumeroCatalogo(resultado)}",
+            "Comprueba el resultado de la operación seleccionada.",
+            Array.Empty<string>(),
+            new[] {
+                CrearOpcionMenuEsperada(opcion, opcional: true),
+                CrearResultadoOperacionEsperado(resultado)
+            },
+            puntos: 12,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCalculadoraEsperado(
+                    "Operación válida",
+                    opcional: true)
+            });
+    }
+
+    private static CasoPrueba CrearCasoCalculadoraDivisionCero() {
+        return CrearCaso(
+            "calculadora-modular-division-cero",
+            "División entre cero",
+            "4\n9\n0\n",
+            "No se puede dividir entre cero",
+            "Comprueba que la división entre cero muestre un error y no un resultado.",
+            Array.Empty<string>(),
+            new[] {
+                CrearOpcionMenuEsperada(4, opcional: true),
+                CrearResultadoOperacionProhibido()
+            },
+            puntos: 12,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCalculadoraEsperado(
+                    "División entre cero",
+                    opcional: false)
+            });
+    }
+
+    private static CasoPrueba CrearCasoCalculadoraOpcionInvalida() {
+        return CrearCaso(
+            "calculadora-modular-opcion-invalida-oculta",
+            "Opción inválida",
+            "9\n",
+            "Opción inválida",
+            "Comprueba que una opción fuera del menú se rechace sin mostrar un resultado.",
+            Array.Empty<string>(),
+            new[] {
+                CrearOpcionMenuEsperada(9, opcional: true),
+                CrearResultadoOperacionProhibido()
+            },
+            puntos: 12,
+            esVisible: false,
+            modoComparacion: ModoComparacionCaso.Mixto,
+            valoresTextuales: new[] {
+                CrearEstadoCalculadoraEsperado(
+                    "Opción inválida",
+                    opcional: false)
+            });
+    }
+
+    private static ValorTextualEsperado CrearEstadoCalculadoraEsperado(
+        string estado,
+        bool opcional) {
+        return new ValorTextualEsperado {
+            Nombre = "Estado de la operación",
+            Valor = estado,
+            EsOpcional = opcional,
+            PermitirSinEtiqueta = true,
+            EtiquetasAlternativas = Array.AsReadOnly(new[] {
+                "Estado",
+                "Error",
+                "Validación",
+                "Validacion",
+                "Mensaje"
+            }),
+            Opciones = Array.AsReadOnly(new[] {
+                CrearOpcionTextual(
+                    "Operación válida",
+                    "operación válida",
+                    "operación realizada",
+                    "cálculo realizado"),
+                CrearOpcionTextual(
+                    "División entre cero",
+                    "no se puede dividir entre cero",
+                    "división entre cero",
+                    "divisor inválido",
+                    "divisor igual a cero"),
+                CrearOpcionTextual(
+                    "Opción inválida",
+                    "opción inválida",
+                    "opción no válida",
+                    "operación inválida",
+                    "fuera del menú")
+            })
         };
     }
 
